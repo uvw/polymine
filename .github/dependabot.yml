@@ -1,0 +1,39 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    # A dependency joins the first group that matches it, so the narrow groups
+    # come first and each gets a pull request of its own.
+    groups:
+      # A rand update can move every seeded mine layout (AGENTS.md).
+      rand:
+        patterns: ["rand", "rand_*"]
+      # Pinned to exact versions; a new one can change the generated bindings.
+      specta:
+        patterns: ["specta", "specta-*", "tauri-specta"]
+      # Must keep the npm @tauri-apps packages' major and minor version, which
+      # scripts/check-versions.mjs checks.
+      tauri:
+        patterns: ["tauri", "tauri-*"]
+        exclude-patterns: ["tauri-specta"]
+      cargo:
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # svelte-check supports TypeScript up to 6.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+    groups:
+      tauri:
+        patterns: ["@tauri-apps/*"]
+      npm:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
