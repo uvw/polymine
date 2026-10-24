@@ -1,0 +1,28 @@
+# Third-party notices for the Rust crates that ship, read by cargo-about.
+# `npm run notices` runs it; see scripts/notices.mjs.
+
+# The same licenses deny.toml allows.
+accepted = [
+  "MIT",
+  "MIT-0",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "0BSD",
+  "Zlib",
+  "CC0-1.0",
+  "Unlicense",
+  "Unicode-3.0",
+  "ISC",
+  "MPL-2.0",
+]
+# Only the shipping targets, and only crates compiled into the app or the CLI.
+targets = ["x86_64-pc-windows-msvc", "aarch64-apple-darwin", "x86_64-apple-darwin"]
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
+# Our own crates are not third-party.
+private = { ignore = true }
+# License texts come only from the crate sources, so every machine renders the
+# same file.
+no-clearly-defined = true

@@ -1,0 +1,21 @@
+# Add only Prettier rules that .editorconfig can't express, so each formatting
+# rule has one home. Prettier reads indentation and width from .editorconfig:
+# indent_size becomes tabWidth and max_line_length becomes printWidth, which is
+# 100 for code and 80 for Markdown.
+
+# Svelte components need the plugin and its parser.
+plugins:
+  - prettier-plugin-svelte
+
+overrides:
+  - files: "*.svelte"
+    options:
+      parser: svelte
+  # Hard-wrap Markdown prose at the width above. Scoped to Markdown because
+  # YAML reads proseWrap too and would fold long plain scalars in workflows.
+  # Code blocks stay as written: they quote real files at their own width, and
+  # the theme tests check that the guide quotes Graphite's theme.css verbatim.
+  - files: "*.md"
+    options:
+      proseWrap: always
+      embeddedLanguageFormatting: "off"

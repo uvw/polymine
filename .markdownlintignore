@@ -1,0 +1,14 @@
+# Paths excluded from the Markdown style rules. Editors read this file; the
+# lint:md script in package.json repeats it as "#" globs, since
+# markdownlint-cli2 doesn't read it. Add a path only when the Markdown there is
+# vendored or generated, and say which.
+
+# Installed packages and build output: vendored and generated.
+node_modules/
+target/
+
+# Vendored license text, copied verbatim into the third-party notices.
+scripts/notices/
+
+# Agent worktrees: copies of this checkout.
+.claude/worktrees/
