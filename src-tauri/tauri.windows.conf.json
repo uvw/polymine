@@ -1,0 +1,28 @@
+{
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "create": false,
+        "title": "Polymine",
+        "width": 1100,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "transparent": true,
+        "visible": false,
+        "decorations": false,
+        "shadow": true
+      }
+    ]
+  },
+  "bundle": {
+    "targets": ["nsis"],
+    "windows": {
+      "nsis": {
+        "installerHooks": "./windows/hooks.nsh"
+      }
+    }
+  }
+}
