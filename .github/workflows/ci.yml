@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The release workflow runs these checks on the tagged commit before it builds.
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Every commit on main keeps its own result; only superseded PR pushes cancel.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  web:
+    name: Web UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-versions.mjs
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run lint:md
+      - run: npm run check
+      - run: npm run coverage
+      - run: npm run build
+
+  rust:
+    name: Rust (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Installs the toolchain and components rust-toolchain.toml pins.
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # The app crate embeds the built UI at compile time.
+      - run: npm ci && npm run build
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --workspace --locked
+      - name: CLI smoke test against a running app
+        run: cargo build -p polymine -p polymine-cli --locked && node scripts/cli-smoke.mjs
+      - name: TypeScript bindings are up to date
+        if: success() || failure()
+        shell: bash
+        run: git diff --exit-code -- ui/src/lib/bindings
+
+  notices:
+    name: Third-party notices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The same cargo-about version as the committed file, checked against the
+      # release's published SHA-256.
+      - name: Install cargo-about
+        env:
+          VERSION: 0.8.4
+          SHA256: c7381aa0cdc41fc0ee662cec8daa260da7817ad8ddea04cd4ddad425460adf14
+        run: |
+          name="cargo-about-$VERSION-x86_64-unknown-linux-musl"
+          curl -fsSL -o cargo-about.tar.gz \
+            "https://github.com/EmbarkStudios/cargo-about/releases/download/$VERSION/$name.tar.gz"
+          echo "$SHA256  cargo-about.tar.gz" | sha256sum -c -
+          tar -xzf cargo-about.tar.gz --strip-components=1 -C "$HOME/.cargo/bin" "$name/cargo-about"
+          rm cargo-about.tar.gz
+      - run: cargo fetch --locked
+      - run: npm run notices
+      - name: Third-party notices are up to date
+        run: git diff --exit-code -- ui/src/lib/notices
+
+  licenses:
+    name: Dependency licenses and advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          command: check

@@ -1,0 +1,160 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for the draft release, for example v0.1.0. GitHub creates it from this commit when the release is published.
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+
+jobs:
+  # No release from a commit that hasn't passed CI.
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  # The build jobs finish at different times, so the release is created once up
+  # front. Letting each build job create it races and can leave duplicate drafts.
+  create-release:
+    name: Create draft release
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release-id: ${{ steps.create.outputs.id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Check that the tag matches every version
+        run: node scripts/check-versions.mjs "$RELEASE_TAG"
+      - name: Create draft release
+        id: create
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BODY: |
+            ## Downloads
+
+            - **macOS, Apple silicon (M1 and later):** `Polymine_<version>_aarch64.dmg`
+            - **macOS, Intel:** `Polymine_<version>_x64.dmg`
+            - **Windows:** `Polymine_<version>_x64-setup.exe`
+            - **Windows, portable:** `Polymine_<version>_x64_portable.zip`. Unzip anywhere and run `Polymine.exe`; settings and games stay in the `data` folder beside it.
+
+            ## Opening an unsigned build
+
+            These builds are not signed or notarized yet, so both systems warn on first launch.
+
+            **macOS:** open the `.dmg` and drag Polymine to Applications. macOS then blocks the first launch. Use one of these:
+
+            1. Try to open the app once, then go to **System Settings > Privacy & Security** and click **Open Anyway**.
+            2. In Terminal, run `xattr -dr com.apple.quarantine /Applications/Polymine.app`.
+            3. On macOS 14 or earlier, Control-click (or right-click) Polymine in Applications, choose **Open**, then **Open** again.
+
+            **Windows:** SmartScreen may show "Windows protected your PC". Click **More info**, then **Run anyway**.
+
+            ## Command line
+
+            `polymine-cli` comes with the app: next to `Polymine.exe` in the install folder on Windows, and at `/Applications/Polymine.app/Contents/MacOS/polymine-cli` on macOS. Run `polymine-cli skill` for the guide coding agents use.
+        run: |
+          id=$(gh api --method POST "repos/$GITHUB_REPOSITORY/releases" \
+            -f tag_name="$RELEASE_TAG" \
+            -f target_commitish="$GITHUB_SHA" \
+            -f name="Polymine $RELEASE_TAG" \
+            -f body="$RELEASE_BODY" \
+            -F draft=true \
+            -F prerelease=false \
+            --jq .id)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: create-release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS Apple silicon
+            os: macos-latest
+            target: aarch64-apple-darwin
+          - name: macOS Intel
+            os: macos-latest
+            target: x86_64-apple-darwin
+          - name: Windows x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Installs the toolchain rust-toolchain.toml pins, plus the build target.
+      - run: rustup toolchain install --target ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          # Both macOS builds run on the same runner image, so the target keeps
+          # their caches apart.
+          key: ${{ matrix.target }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Tauri bundles polymine-cli beside the app as a sidecar, which it finds
+      # by the target triple in the file name.
+      - name: Build polymine-cli for the bundle
+        shell: bash
+        run: |
+          cargo build --release --locked -p polymine-cli --target ${{ matrix.target }}
+          ext=""; [ "$RUNNER_OS" = "Windows" ] && ext=".exe"
+          mkdir -p src-tauri/binaries
+          cp "target/${{ matrix.target }}/release/polymine-cli$ext" \
+            "src-tauri/binaries/polymine-cli-${{ matrix.target }}$ext"
+      # The Tauri CLI runs `npm run build` itself through `beforeBuildCommand`.
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No certificates exist yet. The `-` identity ad-hoc signs the macOS
+          # bundle: Apple silicon refuses to launch a downloaded app with no
+          # signature at all, and calls it damaged instead of offering Open.
+          # Windows ignores it.
+          APPLE_SIGNING_IDENTITY: "-"
+        with:
+          releaseId: ${{ needs.create-release.outputs.release-id }}
+          args: --target ${{ matrix.target }} --config src-tauri/tauri.bundle-cli.conf.json -- --locked
+      # A portable copy: no installer, and the `portable` marker keeps its data
+      # in a `data` folder beside the executable.
+      - name: Upload the portable Windows ZIP
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = (Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json).version
+          $release = "target/${{ matrix.target }}/release"
+          $stage = New-Item -ItemType Directory -Path "portable/Polymine"
+          Copy-Item "$release/polymine.exe" "$stage/Polymine.exe"
+          Copy-Item "$release/polymine-cli.exe" "$stage/polymine-cli.exe"
+          Set-Content "$stage/portable" "Polymine keeps its settings, games and logs in the data folder here."
+          $zip = "Polymine_${version}_x64_portable.zip"
+          Compress-Archive -Path $stage -DestinationPath $zip
+          gh release upload "$env:RELEASE_TAG" $zip --repo "$env:GITHUB_REPOSITORY"
