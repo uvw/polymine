@@ -1,0 +1,663 @@
+import { render, screen, within } from "@testing-library/svelte";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SaveInfo } from "../lib/bindings";
+import { emptyStats, settings, snapshot } from "../test/fixtures";
+
+const api = vi.hoisted(() => ({
+  getStats: vi.fn(),
+  newGame: vi.fn(),
+  getSettings: vi.fn(),
+  tilingPreviews: vi.fn(() => Promise.resolve([])),
+  onExternalChange: vi.fn(() => Promise.resolve(() => {})),
+  updateSettings: vi.fn(),
+  listThemes: vi.fn(() => Promise.resolve({ folder: null, themes: [], skipped: [] })),
+  readTheme: vi.fn(),
+  openThemesFolder: vi.fn(() => Promise.resolve(null)),
+  listSaves: vi.fn((): Promise<SaveInfo[]> => Promise.resolve([])),
+  deleteSave: vi.fn(() => Promise.resolve(null)),
+}));
+vi.mock("../lib/api", () => ({ api, hasShell: () => true }));
+vi.mock("@tauri-apps/api/app", () => ({ getVersion: () => Promise.resolve("1.2.3") }));
+
+const { game } = await import("../lib/game.svelte");
+const { themeEntry } = await import("../lib/themes/entry");
+const { default: AboutDialog } = await import("./AboutDialog.svelte");
+const { default: CustomLevelDialog } = await import("./CustomLevelDialog.svelte");
+const { default: SavesDialog } = await import("./SavesDialog.svelte");
+const { default: SettingsDialog } = await import("./SettingsDialog.svelte");
+const { default: StatsDialog } = await import("./StatsDialog.svelte");
+
+beforeEach(() => {
+  vi.restoreAllMocks();
+  game.settings = settings();
+  game.snapshot = snapshot();
+});
+
+describe("CustomLevelDialog", () => {
+  it("starts with the saved custom size and starts a game with the edited one", async () => {
+    const user = userEvent.setup();
+    const newGame = vi.spyOn(game, "newGame").mockResolvedValue(undefined);
+    render(CustomLevelDialog, { props: { open: true } });
+    const [cols, rows, mines] = screen.getAllByRole("spinbutton") as [
+      HTMLInputElement,
+      HTMLInputElement,
+      HTMLInputElement,
+    ];
+    expect(cols.value).toBe("16");
+    await vi.waitFor(() => expect(cols).toHaveFocus());
+    await user.clear(mines);
+    await user.type(mines, "30");
+    await user.click(screen.getByRole("button", { name: "Start" }));
+    expect(newGame).toHaveBeenCalledWith("square", "custom", { cols: 16, rows: 16, mines: 30 });
+    expect(rows).toBeDefined();
+  });
+
+  it("flags each invalid field and blocks Start", async () => {
+    const user = userEvent.setup();
+    render(CustomLevelDialog, { props: { open: true } });
+    const [cols, , mines] = screen.getAllByRole("spinbutton") as [
+      HTMLElement,
+      HTMLElement,
+      HTMLElement,
+    ];
+    await user.clear(cols);
+    await user.type(cols, "1");
+    expect(cols).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Use 3 to 200.")).toBeInTheDocument();
+    // Mines aren't judged while the size itself is wrong.
+    expect(mines).toHaveAttribute("aria-invalid", "false");
+    expect(screen.getByRole("button", { name: "Start" })).toBeDisabled();
+
+    await user.clear(cols);
+    await user.type(cols, "4");
+    await user.clear(mines);
+    await user.type(mines, "64");
+    expect(screen.getByText("Use 1 to 63 mines on this board.")).toBeInTheDocument();
+  });
+
+  it("closes on Cancel", async () => {
+    const user = userEvent.setup();
+    render(CustomLevelDialog, { props: { open: true } });
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Start" })).not.toBeInTheDocument(),
+    );
+  });
+});
+
+describe("SettingsDialog", () => {
+  const open = () => render(SettingsDialog, { props: { open: true } });
+  /** Opens Settings and waits for its first tab to take the focus, as it does a tick later. */
+  const openSettled = async () => {
+    open();
+    await vi.waitFor(() => expect(screen.getByRole("tab", { name: "General" })).toHaveFocus());
+  };
+  const done = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  };
+  const openAppearance = async (user: ReturnType<typeof userEvent.setup>) => {
+    open();
+    await user.click(screen.getByRole("tab", { name: "Appearance" }));
+  };
+
+  it("applies each change as it's made, the name once the field is left", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    open();
+    await user.click(screen.getByRole("switch", { name: "Pause when Polymine loses focus" }));
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ pauseOnFocusLoss: false })),
+    );
+    await user.click(screen.getByRole("tab", { name: "Appearance" }));
+    await user.click(screen.getByRole("radio", { name: /Midnight/ }));
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ theme: "midnight" })),
+    );
+    await user.click(screen.getByRole("tab", { name: "General" }));
+    const name = screen.getByRole("textbox", { name: "Name" });
+    expect(name).toHaveAccessibleDescription("Your name in the champions table.");
+    await user.clear(name);
+    await user.type(name, "bob");
+    expect(update).not.toHaveBeenCalledWith(expect.objectContaining({ playerName: "bob" }));
+    await user.tab();
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ playerName: "bob" })),
+    );
+  });
+
+  it("groups settings into sections a keyboard can move through", async () => {
+    const user = userEvent.setup();
+    open();
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual(["General", "Appearance", "Bot"]);
+    await vi.waitFor(() => expect(tabs[0]).toHaveFocus());
+    expect(screen.getByRole("tabpanel")).toHaveAccessibleName("General");
+    await user.keyboard("{ArrowDown}");
+    expect(screen.getByRole("tab", { name: "Appearance" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "Appearance" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("tabpanel", { name: "Appearance" })).toBeInTheDocument();
+    await user.keyboard("{ArrowUp}{ArrowUp}");
+    expect(screen.getByRole("tab", { name: "Bot" })).toHaveFocus();
+    await user.keyboard("{Home}");
+    expect(screen.getByRole("tab", { name: "General" })).toHaveFocus();
+    await user.keyboard("{End}{ArrowDown}");
+    expect(screen.getByRole("tab", { name: "General" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("tab", { name: "General" })).toHaveFocus();
+    expect(screen.getAllByRole("tab").filter((tab) => tab.tabIndex === 0)).toHaveLength(1);
+  });
+
+  it("puts the player, the rules, and the window options under General", () => {
+    open();
+    expect(screen.getByRole("tabpanel")).toHaveAccessibleName("General");
+    expect(screen.getByRole("combobox", { name: "Player" })).toHaveValue("ann");
+    expect(screen.getByRole("textbox", { name: "Name" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Language" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 4 }).map((h) => h.textContent)).toEqual([
+      "Rules",
+      "Window",
+    ]);
+    expect(
+      screen.getByRole("switch", { name: "Hide the toolbar until the pointer reaches the top" }),
+    ).toBeInTheDocument();
+  });
+
+  it("reopens on the section it was closed on", async () => {
+    const user = userEvent.setup();
+    const view = open();
+    await user.click(screen.getByRole("tab", { name: "Bot" }));
+    await view.rerender({ open: false });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await view.rerender({ open: true });
+    await vi.waitFor(() => expect(screen.getByRole("tab", { name: "Bot" })).toHaveFocus());
+    expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Bot");
+  });
+
+  it("describes rule switches with their help text", () => {
+    open();
+    const smartClick = screen.getByRole("switch", { name: "Smart click" });
+    expect(smartClick).toBeChecked();
+    expect(smartClick).toHaveAccessibleDescription(
+      "Clicking a number flags its certain mines, then opens the rest.",
+    );
+  });
+
+  it("shows a theme's name, description, and author in a flyout on hover", async () => {
+    const user = userEvent.setup();
+    await openAppearance(user);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    const pride = screen.getByRole("radio", { name: "Pride" }).closest("label") as HTMLElement;
+    await user.hover(pride);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    const tip = await vi.waitFor(() => screen.getByRole("tooltip"));
+    expect(tip).toHaveTextContent("Pride Colors instead of numbers, cool to hot By Polymine");
+    await user.hover(tip);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(tip).toBeVisible();
+    await user.unhover(tip);
+    await vi.waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+  });
+
+  it("shows the flyout on keyboard focus, and Escape closes it before the dialog", async () => {
+    const user = userEvent.setup();
+    await openAppearance(user);
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Signature" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Open themes folder" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("radio", { name: "Graphite" })).toHaveFocus();
+    expect(screen.getByRole("tooltip")).toHaveTextContent(/^Graphite/);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tooltip")).not.toHaveTextContent(/^Graphite/);
+    await user.tab({ shift: true });
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("keeps each theme's description as its radio's accessible description", async () => {
+    await openAppearance(userEvent.setup());
+    const pride = screen.getByRole("radio", { name: "Pride" });
+    expect(pride).toHaveAccessibleDescription("Colors instead of numbers, cool to hot");
+    const described = document.getElementById(pride.getAttribute("aria-describedby") ?? "");
+    expect(described?.closest("[role=tooltip]")).not.toBeNull();
+    expect(screen.queryByText(/Matches light or dark mode/)).not.toBeVisible();
+  });
+
+  it("splits the themes into tabs and opens on the one holding the chosen theme", async () => {
+    const user = userEvent.setup();
+    game.settings = { ...settings(), theme: "dracula" };
+    await openAppearance(user);
+    const groups = screen.getByRole("tablist", { name: "Theme groups" });
+    const [own, editors] = within(groups).getAllByRole("tab");
+    expect(
+      within(groups)
+        .getAllByRole("tab")
+        .map((tab) => tab.textContent?.trim()),
+    ).toEqual(["Signature", "Code"]);
+    expect(editors).toHaveAttribute("aria-selected", "true");
+    const panel = screen.getByRole("tabpanel", { name: "Code" });
+    expect(within(panel).getByRole("radio", { name: "Dracula" })).toBeChecked();
+    expect(within(panel).queryByRole("radio", { name: "Frost" })).not.toBeInTheDocument();
+    editors?.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(own).toHaveFocus();
+    expect(own).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("radio", { name: "Frost" })).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: "Dracula" })).not.toBeInTheDocument();
+    await user.keyboard("{End}");
+    expect(editors).toHaveFocus();
+    await user.keyboard("{Home}{ArrowLeft}");
+    expect(editors).toHaveFocus();
+  });
+
+  it("lists player themes on a tab of their own, with their own preview and author", async () => {
+    const user = userEvent.setup();
+    const css =
+      "/* Name: Dusk\n Author: Ann\n Description: Evening colors\n Version: 1\n Format: 1 */ :root {}";
+    game.library.user = [themeEntry("dusk", css, false, { preview: "data:image/png;base64,AA==" })];
+    game.library.skipped = [{ id: "bad", reason: "it has no theme.css" }];
+    const reload = vi.spyOn(game, "reloadThemes").mockResolvedValue(undefined);
+    const openFolder = vi.spyOn(game, "openThemesFolder").mockResolvedValue(undefined);
+    await openAppearance(user);
+    expect(reload).toHaveBeenCalled();
+    expect(screen.queryByRole("radio", { name: "Dusk" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: "Custom" }));
+    const dusk = screen.getByRole("radio", { name: "Dusk" });
+    expect(screen.getAllByRole("radio")).toEqual([dusk]);
+    expect(dusk).toHaveAccessibleDescription("Evening colors");
+    expect(document.querySelector("img.preview")).toHaveAttribute(
+      "src",
+      "data:image/png;base64,AA==",
+    );
+    await user.hover(dusk.closest("label") as HTMLElement);
+    expect(await vi.waitFor(() => screen.getByRole("tooltip"))).toHaveTextContent(
+      "Dusk Evening colors By Ann",
+    );
+    await user.click(screen.getByRole("button", { name: "Open themes folder" }));
+    expect(openFolder).toHaveBeenCalled();
+    expect(screen.getByRole("list", { name: "Themes that didn't load" })).toHaveTextContent(
+      "bad didn't load: it has no theme.css",
+    );
+    game.library.user = [];
+    game.library.skipped = [];
+  });
+
+  it("shows no player tab without player themes", async () => {
+    await openAppearance(userEvent.setup());
+    expect(screen.queryByRole("tab", { name: "Custom" })).not.toBeInTheDocument();
+  });
+
+  it("saves the color filter and shows it in the theme previews", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openAppearance(user);
+    const one = () =>
+      [
+        ...(screen
+          .getByRole("radio", { name: "Midnight" })
+          .closest("label")
+          ?.querySelectorAll("i") ?? []),
+      ].find((cell) => cell.textContent === "1")?.style.color;
+    const plain = one();
+    const filter = screen.getByRole("combobox", { name: "Color filter" });
+    expect(filter).toHaveValue("off");
+    expect(filter).toHaveAccessibleDescription("Shifts board colors for color-blind players.");
+    expect(screen.getByRole("option", { name: "Tritanopia (blue-yellow)" })).toBeInTheDocument();
+    await user.selectOptions(filter, "deuteranopia");
+    expect(one()).not.toBe(plain);
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ colorFilter: "deuteranopia" }),
+      ),
+    );
+  });
+
+  it("enables the idle time only when an idle action is chosen", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    open();
+    await user.click(screen.getByRole("tab", { name: "Bot" }));
+    const idleTime = screen.getByRole("slider", { name: "Idle time" });
+    expect(idleTime).toBeDisabled();
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "When you're idle" }),
+      "autoplay",
+    );
+    expect(idleTime).toBeEnabled();
+    expect(screen.getByText("30 s")).toBeInTheDocument();
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ assistant: expect.objectContaining({ idleAction: "autoplay" }) }),
+      ),
+    );
+  });
+
+  it("saves the language at once", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    open();
+    const select = screen.getByRole("combobox", { name: "Language" });
+    expect(select).toHaveValue("system");
+    await user.selectOptions(select, "en");
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ language: "en" }));
+  });
+
+  it("adds, renames, switches, and removes players", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openSettled();
+    const picker = screen.getByRole("combobox", { name: "Player" });
+    const name = screen.getByRole("textbox", { name: "Name" });
+    expect(screen.getByRole("button", { name: "Remove" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(picker).toHaveValue("Player 2");
+    expect(name).toHaveFocus();
+    // The placeholder name is selected, so typing replaces it.
+    await user.keyboard("bob");
+    await user.tab();
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ playerName: "bob", profiles: ["ann", "bob"] }),
+      ),
+    );
+
+    await user.selectOptions(picker, "ann");
+    expect(name).toHaveValue("ann");
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ playerName: "ann" })),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ playerName: "bob", profiles: ["bob"] }),
+      ),
+    );
+  });
+
+  it("merges a player renamed to another player's name", async () => {
+    const user = userEvent.setup();
+    game.settings = settings({ playerName: "bob", profiles: ["ann", "bob"] });
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openSettled();
+    const name = screen.getByRole("textbox", { name: "Name" });
+    await user.clear(name);
+    await user.type(name, "ann");
+    await user.tab();
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(
+        expect.objectContaining({ playerName: "ann", profiles: ["ann"] }),
+      ),
+    );
+  });
+
+  it("saves a typed name when Done is clicked without leaving the field", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openSettled();
+    const name = screen.getByRole("textbox", { name: "Name" });
+    await user.clear(name);
+    await user.type(name, "bob");
+    await done(user);
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ playerName: "bob" }));
+  });
+
+  it("saves a change made just before closing", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    open();
+    await user.click(screen.getByRole("switch", { name: "Pause when Polymine loses focus" }));
+    await done(user);
+    expect(update).toHaveBeenCalledOnce();
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ pauseOnFocusLoss: false }));
+  });
+
+  it("saves nothing when only opened and closed", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings");
+    open();
+    await done(user);
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe("SavesDialog", () => {
+  const saved = (name: string, extra: Partial<SaveInfo> = {}): SaveInfo => ({
+    name,
+    tiling: "hexagon",
+    level: "amateur",
+    cols: 16,
+    rows: 16,
+    mines: 40,
+    elapsedMs: 187_000,
+    savedAt: Date.UTC(2026, 10, 4, 12),
+    ...extra,
+  });
+  const open = () => render(SavesDialog, { props: { open: true } });
+
+  beforeEach(() => {
+    game.status = "playing";
+    api.listSaves.mockResolvedValue([]);
+    game.previews = [{ tiling: "hexagon", polygons: [[{ x: 0, y: 0 }]], complexity: 2 }];
+  });
+
+  it("lists the saves with a thumbnail and what each one holds, and says loading assists", async () => {
+    api.listSaves.mockResolvedValue([
+      saved("Corner"),
+      saved("Big", { tiling: "square", level: "custom", cols: 30, rows: 20, mines: 99 }),
+    ]);
+    open();
+    const list = await screen.findByRole("list", { name: "Saved games" });
+    const [corner, big] = within(list).getAllByRole("listitem") as [HTMLElement, HTMLElement];
+    expect(corner).toHaveTextContent("Corner");
+    expect(corner).toHaveTextContent("Hexagons · Amateur");
+    expect(corner).toHaveTextContent("3 m 07 s played");
+    expect(corner.querySelector("svg")).not.toBeNull();
+    expect(big).toHaveTextContent("Custom 30 × 20, 99 mines");
+    expect(big.querySelector("svg")).toBeNull();
+    expect(screen.getByText(/counts as assisted/)).toBeInTheDocument();
+  });
+
+  it("saves the game in play under the typed name, then lists it", async () => {
+    const user = userEvent.setup();
+    const saveAs = vi.spyOn(game, "saveAs").mockResolvedValue(saved("Corner"));
+    open();
+    expect(await screen.findByText("No saves yet.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Name" })).toHaveFocus();
+    const save = screen.getByRole("button", { name: "Save" });
+    expect(save).toBeDisabled();
+    api.listSaves.mockResolvedValue([saved("Corner")]);
+    await user.type(screen.getByRole("textbox", { name: "Name" }), "  Corner {Enter}");
+    expect(saveAs).toHaveBeenCalledWith("Corner");
+    expect(await screen.findByRole("button", { name: "Load Corner" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Name" })).toHaveValue("");
+  });
+
+  it("explains a name the shell would refuse and offers to replace a taken one", async () => {
+    const user = userEvent.setup();
+    api.listSaves.mockResolvedValue([saved("Corner")]);
+    open();
+    await screen.findByRole("button", { name: "Load Corner" });
+    const name = screen.getByRole("textbox", { name: "Name" });
+    await user.type(name, "a/b");
+    expect(name).toHaveAttribute("aria-invalid", "true");
+    expect(name).toHaveAccessibleDescription('Leave out < > : " / \\ | ? and *.');
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await user.clear(name);
+    await user.type(name, "corner");
+    expect(name).toHaveAccessibleDescription("Replaces the save named Corner.");
+    expect(screen.getByRole("button", { name: "Replace" })).toBeEnabled();
+  });
+
+  it("shows why a save failed inside the dialog", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(game, "saveAs").mockImplementation(() => {
+      game.error = "Something went wrong: disk full";
+      return Promise.resolve(undefined);
+    });
+    open();
+    await user.type(await screen.findByRole("textbox", { name: "Name" }), "Corner{Enter}");
+    expect(await screen.findByRole("alert")).toHaveTextContent("disk full");
+  });
+
+  it("only saves a game in play", async () => {
+    game.status = "won";
+    open();
+    const name = await screen.findByRole("textbox", { name: "Name" });
+    expect(name).toBeDisabled();
+    expect(name).toHaveAccessibleDescription("Only a game in play can be saved.");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  it("loads a save and closes", async () => {
+    const user = userEvent.setup();
+    const loadSave = vi.spyOn(game, "loadSave").mockResolvedValue(undefined);
+    api.listSaves.mockResolvedValue([saved("Corner")]);
+    open();
+    await user.click(await screen.findByRole("button", { name: "Load Corner" }));
+    expect(loadSave).toHaveBeenCalledWith("Corner");
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Saves" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("deletes a save on the second press, and keeps it on Keep", async () => {
+    const user = userEvent.setup();
+    api.listSaves.mockResolvedValue([saved("Corner")]);
+    open();
+    await user.click(await screen.findByRole("button", { name: "Delete Corner" }));
+    const confirm = screen.getByRole("group", { name: "Delete Corner?" });
+    const keep = within(confirm).getByRole("button", { name: "Keep" });
+    expect(keep).toHaveFocus();
+    await user.click(keep);
+    expect(api.deleteSave).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Delete Corner" }));
+    api.listSaves.mockResolvedValue([]);
+    await user.click(
+      within(screen.getByRole("group", { name: "Delete Corner?" })).getByRole("button", {
+        name: "Delete",
+      }),
+    );
+    expect(api.deleteSave).toHaveBeenCalledWith("Corner");
+    expect(await screen.findByText("No saves yet.")).toBeInTheDocument();
+  });
+});
+
+describe("StatsDialog", () => {
+  it("loads stats for the current tiling and level, and refetches on change", async () => {
+    const user = userEvent.setup();
+    api.getStats.mockResolvedValue({
+      players: [
+        {
+          player: "ann",
+          games: 4,
+          wins: 1,
+          avgOpenedPercent: 50,
+          avgDurationMs: 9000,
+          avgClicks: 12.5,
+        },
+      ],
+      champions: [{ player: "ann", durationMs: 8000, clicks: 10, finishedAt: 1_700_000_000_000 }],
+    });
+    render(StatsDialog, { props: { open: true } });
+    await vi.waitFor(() => expect(api.getStats).toHaveBeenCalledWith("square", "beginner", "ann"));
+    expect(await screen.findByText("8.00 s")).toBeInTheDocument();
+    expect(screen.getByText("25%")).toBeInTheDocument();
+    expect(screen.getByText("12.5")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Tiling" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Hexagons" }));
+    await vi.waitFor(() =>
+      expect(api.getStats).toHaveBeenLastCalledWith("hexagon", "beginner", "ann"),
+    );
+    await user.click(screen.getByRole("radio", { name: "All players" }));
+    await vi.waitFor(() =>
+      expect(api.getStats).toHaveBeenLastCalledWith("hexagon", "beginner", null),
+    );
+    expect(screen.getByRole("radiogroup", { name: "Whose stats" })).toBeInTheDocument();
+  });
+
+  it("reports a stats request that fails", async () => {
+    const report = vi.spyOn(game, "reportError").mockImplementation(() => {});
+    api.getStats.mockRejectedValue(new Error("history is locked"));
+    render(StatsDialog, { props: { open: true } });
+    await vi.waitFor(() => expect(report).toHaveBeenCalledWith(new Error("history is locked")));
+  });
+
+  it("explains an empty table", async () => {
+    api.getStats.mockResolvedValue(emptyStats);
+    render(StatsDialog, { props: { open: true } });
+    expect(await screen.findByText(/No ranked games here yet/)).toBeInTheDocument();
+  });
+
+  it("says when nobody has won yet", async () => {
+    api.getStats.mockResolvedValue({
+      players: [
+        {
+          player: "ann",
+          games: 1,
+          wins: 0,
+          avgOpenedPercent: 10,
+          avgDurationMs: 100,
+          avgClicks: 1,
+        },
+      ],
+      champions: [],
+    });
+    render(StatsDialog, { props: { open: true } });
+    expect(await screen.findByText("No wins yet. Be the first.")).toBeInTheDocument();
+  });
+
+  it("opens custom games on the beginner tab", async () => {
+    api.getStats.mockResolvedValue(emptyStats);
+    game.snapshot = snapshot(3, 3, { config: { ...snapshot().config, level: "custom" } });
+    render(StatsDialog, { props: { open: true } });
+    await vi.waitFor(() => expect(api.getStats).toHaveBeenCalledWith("square", "beginner", "ann"));
+  });
+});
+
+describe("AboutDialog", () => {
+  it("shows the version", async () => {
+    render(AboutDialog, { props: { open: true } });
+    expect(await screen.findByText("Version 1.2.3")).toBeInTheDocument();
+  });
+});
+
+describe("Modal", () => {
+  it("closes on Escape", async () => {
+    const user = userEvent.setup();
+    render(AboutDialog, { props: { open: true } });
+    const dialog = document.querySelector("dialog") as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("cancel", { cancelable: true }));
+    await vi.waitFor(() => expect(dialog.open).toBe(false));
+    expect(user).toBeDefined();
+  });
+
+  it("stays open when opened again during its close fade", async () => {
+    const view = render(AboutDialog, { props: { open: true } });
+    const dialog = document.querySelector("dialog") as HTMLDialogElement;
+    await view.rerender({ open: false });
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    await view.rerender({ open: true });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(dialog.open).toBe(true);
+    expect(dialog).not.toHaveClass("closing");
+  });
+
+  it("names each open dialog by its own title", () => {
+    render(AboutDialog, { props: { open: true } });
+    render(CustomLevelDialog, { props: { open: true } });
+    expect(screen.getByRole("dialog", { name: "About" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Custom level" })).toBeInTheDocument();
+  });
+});
