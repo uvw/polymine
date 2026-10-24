@@ -1,0 +1,13 @@
+dist
+coverage
+target
+src-tauri/gen
+ui/src/lib/bindings
+package-lock.json
+Cargo.lock
+
+# Vendored license text, copied verbatim into the third-party notices
+scripts/notices
+
+# Generated icon concept sheets
+docs/icons/concepts

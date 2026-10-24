@@ -1,0 +1,56 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/polymine-core",
+  "crates/polymine-ipc",
+  "crates/polymine-net",
+  "crates/polymine-cli",
+  "src-tauri",
+]
+
+[workspace.package]
+publish = false
+version = "0.0.2"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/uvw/polymine"
+authors = ["Max Kostovetski"]
+
+[workspace.dependencies]
+polymine-core = { path = "crates/polymine-core" }
+polymine-ipc = { path = "crates/polymine-ipc" }
+polymine-net = { path = "crates/polymine-net" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rand = "0.10"
+rand_chacha = "0.10"
+specta = { version = "=2.0.0-rc.26", features = ["derive"] }
+proptest = "1"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Names such as GameConfig, GameError, and InstanceName read better where
+# they're used than config::Config would.
+module_name_repetitions = "allow"
+# It would put #[must_use] on about 90 getters and constructors for no gain.
+must_use_candidate = "allow"
+# Fallible functions return a crate error type whose variants list what fails.
+missing_errors_doc = "allow"
+# Only test helpers and app startup panic, and only on a broken setup.
+missing_panics_doc = "allow"
+# Board sides stop at 200 cells and neighbor counts fit a u8, so index and
+# count casts can't truncate. A seed keeps the clock's low 64 bits on purpose.
+cast_possible_truncation = "allow"
+# Counts and durations become f64 for rates and odds, far below 2^52.
+cast_precision_loss = "allow"
+# Geometry rounds coordinates that are non-negative by construction to u32.
+cast_sign_loss = "allow"
+# Grid sizes and counts become i32 for signed offsets, far below i32::MAX.
+cast_possible_wrap = "allow"
+# Geometry uses math names: points a, b, c, and d, and coordinates x and y.
+many_single_char_names = "allow"

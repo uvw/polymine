@@ -1,0 +1,46 @@
+# markdownlint configuration: https://github.com/DavidAnson/markdownlint
+# Keep the defaults, then tune rules to match the repository's Markdown style.
+# Prettier owns wrapping and whitespace; these rules check what it can't.
+default: true
+
+# 80-column prose lines, the width Prettier wraps to (.editorconfig). Code
+# blocks, tables, and headings may run long. Stern mode still flags a long line
+# that has a space to break at, so only an unbreakable URL or path gets through.
+MD013:
+  line_length: 80
+  heading_line_length: 120
+  code_blocks: false
+  tables: false
+  headings: false
+  stern: true
+
+# Enforce one consistent table style.
+MD055:
+  style: consistent
+
+# Allow list numbering that continues after an interrupting paragraph or code
+# block (5, then 6 and 7), as the step lists in the docs do.
+MD029: false
+
+# Lock the marker styles Prettier emits, so the linter and the formatter agree.
+# Run Prettier first, then markdownlint.
+MD004:
+  style: dash # unordered lists use "-"
+MD035:
+  style: "---" # thematic breaks use "---"
+MD046:
+  style: fenced # code blocks are fenced, not indented
+MD048:
+  style: backtick # code fences use backticks
+MD049:
+  style: underscore # _emphasis_
+MD050:
+  style: asterisk # **strong**
+
+# CLAUDE.md is a one-line import of AGENTS.md, not a document with a heading.
+MD041: false
+
+# A heading may repeat under a different parent section, but not beside a
+# sibling with the same text.
+MD024:
+  siblings_only: true

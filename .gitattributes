@@ -1,0 +1,33 @@
+# Normalize line endings on checkin and check out LF everywhere, so builds and
+# Prettier agree on Windows too. Git still decides text or binary by content.
+* text=auto eol=lf
+
+# Scripts that must keep a specific line ending regardless of platform.
+# NSIS reads the installer hooks fine with LF, so they keep the LF they have.
+*.sh text eol=lf
+*.nsh text eol=lf
+*.ps1 text eol=crlf
+
+# Force LF for cross-platform source and config.
+*.rs text eol=lf
+*.toml text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.svelte text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.svg text eol=lf
+
+# Binary assets. Never normalize or diff them as text.
+*.png binary
+*.ico binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

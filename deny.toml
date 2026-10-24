@@ -1,0 +1,43 @@
+# Dependency policy, checked in CI by cargo-deny.
+
+[graph]
+all-features = true
+# Only the shipping targets. Linux-only crates (zbus, glib) never reach a build.
+targets = ["x86_64-pc-windows-msvc", "aarch64-apple-darwin", "x86_64-apple-darwin"]
+
+[advisories]
+# Vulnerabilities fail the check anywhere in the graph; unmaintained notices
+# only for crates this workspace depends on directly.
+unmaintained = "workspace"
+yanked = "warn"
+
+[licenses]
+confidence-threshold = 0.9
+allow = [
+  "MIT",
+  "MIT-0",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "0BSD",
+  "Zlib",
+  "CC0-1.0",
+  "Unlicense",
+  "Unicode-3.0",
+  # A permissive license equivalent to MIT. rustls's certificate checks
+  # (rustls-webpki, untrusted) and the ring crypto provider use it.
+  "ISC",
+  # File-level copyleft. option-ext ships through dirs; using it unmodified
+  # keeps Polymine's own code under MIT or Apache.
+  "MPL-2.0",
+]
+
+[bans]
+multiple-versions = "allow"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
