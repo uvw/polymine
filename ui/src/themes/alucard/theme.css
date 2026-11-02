@@ -1,0 +1,113 @@
+/*
+ * Name: Alucard
+ * Author: Dracula Theme, adapted by Polymine
+ * Description: Dracula's official light theme: deep candy colors on warm cream, with a bat for a mine
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://draculatheme.com/spec
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* Alucard Classic, from the Dracula spec and dracula/dracula-theme. */
+  --alucard-bg: #fffbeb;
+  --alucard-fg: #1f1f1f;
+  --alucard-comment: #6c664b;
+  --alucard-cyan: #036a96;
+  --alucard-green: #14710a;
+  --alucard-orange: #a34d14;
+  --alucard-pink: #a3144d;
+  --alucard-purple: #644ac9;
+  --alucard-red: #cb3a2a;
+  --alucard-yellow: #846e15;
+  --alucard-bright-blue: #7862d0;
+  --alucard-bright-magenta: #bf185a;
+  --alucard-floating: #efeddc;
+  --alucard-bg-lighter: #ece9df;
+  --alucard-bg-light: #dedccf;
+
+  /* Window chrome. */
+  --text: var(--alucard-fg);
+  --text-dim: var(--alucard-comment);
+  --accent: var(--alucard-purple);
+  --accent-hover: color-mix(in srgb, var(--alucard-purple), var(--alucard-fg) 15%);
+  --on-accent: var(--alucard-bg);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--alucard-red);
+  --warning: var(--alucard-orange);
+  --window: var(--alucard-bg-lighter);
+  --window-image:
+    radial-gradient(1100px 640px at 50% -12%, rgb(100 74 201 / 8%), transparent 62%),
+    radial-gradient(800px 520px at 105% 110%, rgb(163 20 77 / 6%), transparent 60%);
+  --control: var(--alucard-bg);
+  --control-hover: var(--alucard-floating);
+  --control-pressed: var(--alucard-bg-light);
+  --subtle-hover: rgb(31 31 31 / 8%);
+  --subtle-pressed: rgb(31 31 31 / 5%);
+  --stroke: rgb(31 31 31 / 12%);
+  --stroke-strong: rgb(108 102 75 / 60%);
+  --divider: var(--alucard-bg-light);
+  --surface: var(--alucard-bg);
+  --layer: rgb(236 233 223 / 94%);
+  --shadow: 0 16px 40px rgb(31 31 31 / 16%), 0 2px 6px rgb(31 31 31 / 10%);
+  --accent-image: linear-gradient(135deg, #644ac9, #a3144d);
+
+  /*
+   * Flat closed tiles in the lighter panel color sit a shade below the cream
+   * background, as Alucard's panels do. Their edge is the next panel color
+   * down.
+   */
+  --board-plate: var(--alucard-bg);
+  --board-gap: 3px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.3;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--alucard-bg-lighter);
+  --cell-closed-hover: color-mix(in srgb, #dedccf, var(--system-accent, #dedccf) 25%);
+  --cell-closed-pressed: var(--alucard-floating);
+  --cell-closed-edge: var(--alucard-bg-light);
+  --cell-open: var(--alucard-bg);
+  --cell-open-edge: var(--alucard-bg-lighter);
+  --cell-exploded: var(--alucard-red);
+
+  --flag: var(--alucard-pink);
+  --flag-outline: var(--alucard-fg);
+  --flag-pole: var(--alucard-fg);
+  --question: var(--alucard-yellow);
+  --mine: var(--alucard-fg);
+  --mine-spark: var(--alucard-pink);
+  --mine-spikes: 8;
+  --hint: var(--alucard-cyan);
+  --focus: var(--alucard-fg);
+  --win: var(--alucard-green);
+
+  /*
+   * Counts follow the syntax tokens in Dracula's order: pink keywords, purple
+   * constants, cyan types, green functions, yellow strings, orange numbers,
+   * red, then the comment color and the foreground. Counts 10 to 12 take the
+   * bright ANSI colors. Three move in OKLab lightness only, keeping hue and
+   * chroma. Green #14710a to #0f6e04 and orange #a34d14 to #964100 stay apart
+   * from yellow and red under color blindness. Bright cyan #047fb4 to #0076aa
+   * reaches 4.5:1 on the open cell.
+   */
+  --number-1: var(--alucard-pink);
+  --number-2: var(--alucard-purple);
+  --number-3: var(--alucard-cyan);
+  --number-4: #0f6e04;
+  --number-5: var(--alucard-yellow);
+  --number-6: #964100;
+  --number-7: var(--alucard-red);
+  --number-8: var(--alucard-comment);
+  --number-9: var(--alucard-fg);
+  --number-10: var(--alucard-bright-magenta);
+  --number-11: var(--alucard-bright-blue);
+  --number-12: #0076aa;
+}

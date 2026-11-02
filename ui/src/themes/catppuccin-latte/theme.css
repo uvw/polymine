@@ -1,0 +1,118 @@
+/*
+ * Name: Catppuccin Latte
+ * Author: Catppuccin, adapted by Polymine
+ * Description: Catppuccin's light flavor: soft pillows, mauve accents, and paw-print flags
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/catppuccin/palette
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The Latte flavor, from palette.json 1.8.0. */
+  --latte-blue: #1e66f5;
+  --latte-lavender: #7287fd;
+  --latte-sky: #04a5e5;
+  --latte-teal: #179299;
+  --latte-green: #40a02b;
+  --latte-yellow: #df8e1d;
+  --latte-peach: #fe640b;
+  --latte-red: #d20f39;
+  --latte-pink: #ea76cb;
+  --latte-mauve: #8839ef;
+  --latte-text: #4c4f69;
+  --latte-subtext-1: #5c5f77;
+  --latte-subtext-0: #6c6f85;
+  --latte-overlay-2: #7c7f93;
+  --latte-overlay-1: #8c8fa1;
+  --latte-overlay-0: #9ca0b0;
+  --latte-surface-2: #acb0be;
+  --latte-surface-1: #bcc0cc;
+  --latte-surface-0: #ccd0da;
+  --latte-base: #eff1f5;
+  --latte-mantle: #e6e9ef;
+  --latte-crust: #dce0e8;
+
+  /* Window chrome. */
+  --text: var(--latte-text);
+  --text-dim: var(--latte-subtext-0);
+  --accent: var(--latte-mauve);
+  --accent-hover: color-mix(in srgb, var(--latte-mauve), var(--latte-text) 15%);
+  --on-accent: var(--latte-base);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--latte-red);
+  --warning: var(--latte-peach);
+  --window: var(--latte-mantle);
+  --window-image:
+    radial-gradient(900px 520px at 0% -10%, rgb(234 118 203 / 10%), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgb(114 135 253 / 10%), transparent 60%);
+  --control: var(--latte-base);
+  --control-hover: var(--latte-surface-0);
+  --control-pressed: var(--latte-surface-1);
+  --subtle-hover: rgb(76 79 105 / 10%);
+  --subtle-pressed: rgb(76 79 105 / 6%);
+  --stroke: rgb(76 79 105 / 14%);
+  --stroke-strong: rgb(76 79 105 / 26%);
+  --divider: rgb(76 79 105 / 12%);
+  --surface: var(--latte-base);
+  --layer: rgb(230 233 239 / 94%);
+  --shadow: 0 16px 40px rgb(76 79 105 / 18%), 0 2px 6px rgb(76 79 105 / 10%);
+
+  /*
+   * Flat, round crust tiles sit a shade below the base, as Latte's panels do.
+   * Their edge is surface 0.
+   */
+  --board-plate: var(--latte-base);
+  --board-gap: 3px;
+  --board-font: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0.42;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--latte-crust);
+  --cell-closed-hover: color-mix(in srgb, #ccd0da, var(--system-accent, #ccd0da) 25%);
+  --cell-closed-pressed: var(--latte-mantle);
+  --cell-closed-edge: var(--latte-surface-0);
+  --cell-open: var(--latte-base);
+  --cell-open-edge: var(--latte-crust);
+  --cell-exploded: var(--latte-red);
+
+  --flag: var(--latte-mauve);
+  --flag-outline: var(--latte-base);
+  --flag-pole: var(--latte-text);
+  --question: #a45800;
+  --mine: var(--latte-text);
+  --mine-spark: var(--latte-pink);
+  --mine-spikes: 6;
+  --hint: var(--latte-blue);
+  --focus: var(--latte-text);
+  --win: var(--latte-green);
+
+  /*
+   * Counts follow the style guide's syntax colors: mauve keywords, blue
+   * properties and functions, yellow types, green strings, sky operators,
+   * peach numbers, red builtins, then the text color. Latte's pastel accents
+   * miss 4.5:1 on its base, so eight move in OKLab lightness only, keeping hue
+   * and chroma: green #40a02b to #187f00, peach #fe640b to #cd3400, teal
+   * #179299 to #007a82, pink #ea76cb to #b14296, yellow #df8e1d to #a45800,
+   * lavender #7287fd to #5263d5, sky #04a5e5 to #0069a6, and blue #1e66f5 to
+   * #1b63f1. Red #d20f39 to #b0001e and mauve #8839ef to #7e2ae3 go darker to
+   * stay apart from peach and blue under color blindness.
+   */
+  --number-1: #7e2ae3;
+  --number-2: #1b63f1;
+  --number-3: #a45800;
+  --number-4: #187f00;
+  --number-5: #0069a6;
+  --number-6: #cd3400;
+  --number-7: #b0001e;
+  --number-8: var(--latte-text);
+  --number-9: #007a82;
+  --number-10: #b14296;
+  --number-11: #5263d5;
+  --number-12: var(--latte-subtext-1);
+}

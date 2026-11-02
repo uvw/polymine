@@ -1,0 +1,59 @@
+/*
+ * Name: Charcoal
+ * Author: Polymine
+ * Description: Flat, with pastel numbers
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: digits;
+
+  /*
+   * A flat charcoal board with hairline gaps and pastel numbers, after the
+   * owner's FastMines skin. Closed cells sit well above open ones, unlike the
+   * original, and the pastels are spread so no two numbers share a hue.
+   */
+  --board-plate: color-mix(in srgb, #1c1c1e, var(--system-accent, #1c1c1e) 12%);
+  --board-gap: 1px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 600;
+
+  --cell-rounding: 0.06;
+  --cell-bevel: 0.05;
+  --cell-sheen: rgb(255 255 255 / 6%);
+  --cell-closed: #75787f;
+  --cell-closed-hover: color-mix(in srgb, #82858c, var(--system-accent, #82858c) 35%);
+  --cell-closed-pressed: #5c5f65;
+  --cell-closed-edge: color-mix(in srgb, #8a8d93, var(--system-accent, #8a8d93) 30%);
+  --cell-open: #2c2c2e;
+  --cell-open-edge: #232325;
+  --cell-exploded: #c94a4a;
+
+  --flag: #ff8f87;
+  --flag-outline: #1c1c1e;
+  --flag-pole: #e5e5e7;
+  --question: #f5d76e;
+  --mine: #0b0b0c;
+  --mine-spark: #0b0b0c;
+  --mine-spikes: 8;
+  /* The mine is all black, so the app icon's lit spike tip takes the flag's coral. */
+  --icon-spark: var(--flag);
+  --hint: #9d9dff;
+  --focus: #ffffff;
+  --win: #8fe39a;
+
+  --number-1: #9d9dff;
+  --number-2: #8fe39a;
+  --number-3: #ff8f87;
+  --number-4: #f2b880;
+  --number-5: #74c7ec;
+  --number-6: #d4d4d8;
+  --number-7: #e3a6ff;
+  --number-8: #f5f5f7;
+  --number-9: #fff09a;
+  --number-10: #80ddc6;
+  --number-11: #fcb7c7;
+  --number-12: #c4e88c;
+}

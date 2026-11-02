@@ -1,0 +1,104 @@
+/*
+ * Name: Glass
+ * Author: Polymine
+ * Description: Clear glass tiles over a blurred window, with a glare and a rim light
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast, number-readability
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: frosted;
+  --number-style: digits;
+
+  --ink: #0b1020;
+
+  /*
+   * Frost's see-through cells with Glossy's light. The glare and the rim
+   * draw at their own opacity over a 10% cell, so they read as light on the
+   * glass. A shade would fade with the cell, so there is none.
+   */
+  --board-plate: light-dark(
+    color-mix(in srgb, #2c3446, var(--system-accent, #2c3446) 20%),
+    color-mix(in srgb, #0c0e14, var(--system-accent, #0c0e14) 14%)
+  );
+  --board-plate-opacity: 12%;
+  --board-gap: 3px;
+  --board-font:
+    ui-rounded, "Segoe UI Variable Display", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  /*
+   * The frosted material is light in light mode and dark in dark mode, so
+   * open cells and digits follow it. Light-mode closed cells stay white to
+   * keep 1.4:1 against the open color through the color filter. Only dark
+   * mode tints the glass, and the rim carries the accent in both.
+   */
+  --cell-rounding: 0.32;
+  --cell-bevel: 0.05;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: light-dark(
+    #ffffff,
+    color-mix(in srgb, #e2eaf8, var(--system-accent, #e2eaf8) 45%)
+  );
+  --cell-closed-hover: color-mix(in srgb, #ffffff, var(--system-accent, #ffffff) 30%);
+  --cell-closed-pressed: #c9d2e2;
+  --cell-closed-edge: light-dark(
+    color-mix(in srgb, #2c3446, var(--system-accent, #2c3446) 25%),
+    color-mix(in srgb, #ffffff, var(--system-accent, #ffffff) 25%)
+  );
+  --cell-closed-opacity: 10%;
+  --cell-open: light-dark(#cbd3df, #0b0d12);
+  --cell-open-edge: light-dark(#2c3446, #ffffff);
+  --cell-open-opacity: 5%;
+  --cell-exploded: #d64545;
+
+  /*
+   * A bright, bowed glare from just left of the top, and a rim in the
+   * accent along the lower edges, where tinted glass looks deepest.
+   */
+  --cell-light-angle: -15deg;
+  --cell-gloss: #ffffff;
+  --cell-gloss-opacity: 85%;
+  --cell-gloss-fade: 6%;
+  --cell-gloss-extent: 0.42;
+  --cell-gloss-shape: arc;
+  --cell-glint-opacity: 45%;
+  --cell-rim: color-mix(in srgb, #ffffff, var(--system-accent, #ffffff) 55%);
+  --cell-rim-opacity: 90%;
+  --cell-rim-width: 1.5px;
+  --cell-rim-angle: 160deg;
+
+  --flag: #ff7043;
+  --flag-outline: var(--ink);
+  --flag-pole: light-dark(var(--ink), #e6e8ee);
+  --question: #f0e442;
+  --question-outline: var(--ink);
+  --mine: #0e0f12;
+  --mine-spark: light-dark(#c2410c, #f07848);
+  --mine-spikes: 6;
+  --hint: light-dark(#0b57d0, #8fd3ff);
+  --focus: light-dark(var(--ink), #ffffff);
+  --win: #2fc79c;
+
+  --number-shadow: light-dark(#ffffff, #000000);
+  --number-shadow-opacity: 60%;
+
+  /*
+   * Glossy's light-mode digits, deepened where they missed 4.5:1 on this
+   * open color, with a darker 9 that stays apart from 5 under
+   * deuteranopia. Dark mode keeps Frost's.
+   */
+  --number-1: light-dark(#2241e6, #8fd3ff);
+  --number-2: light-dark(#336400, #7ff0c4);
+  --number-3: light-dark(#90001a, #ffb38a);
+  --number-4: light-dark(#8c04c7, #f3a6e4);
+  --number-5: light-dark(#b50000, #ffd27a);
+  --number-6: light-dark(#004b41, #fff38a);
+  --number-7: light-dark(#9e266a, #ff9fb2);
+  --number-8: light-dark(#50567d, #ffffff);
+  --number-9: light-dark(#6e3200, #cad6fe);
+  --number-10: light-dark(#524ab2, #a8f3e6);
+  --number-11: light-dark(#3f2e30, #dac0f7);
+  --number-12: light-dark(#004384, #ffd7c1);
+}

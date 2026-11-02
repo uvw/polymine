@@ -1,0 +1,66 @@
+/*
+ * Name: Pride
+ * Author: Polymine
+ * Description: Colors instead of numbers, cool to hot
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: colors;
+
+  /*
+   * Dusky indigo tiles, a near-black floor, then the rainbow: three layers
+   * that never share a brightness.
+   */
+  --board-plate: color-mix(in srgb, #08090c, var(--system-accent, #08090c) 12%);
+  --board-gap: 2px;
+  --board-font:
+    "Segoe UI Variable Display", "Segoe UI", -apple-system, ui-rounded, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.22;
+  --cell-bevel: 0.1;
+  --cell-sheen: rgb(255 255 255 / 10%);
+  --cell-closed: #3b3458;
+  --cell-closed-hover: color-mix(in srgb, #4a4270, var(--system-accent, #4a4270) 35%);
+  --cell-closed-pressed: #2f2a47;
+  --cell-closed-edge: color-mix(in srgb, #6a5f9c, var(--system-accent, #6a5f9c) 30%);
+  --cell-open: #0d0f13;
+  --cell-open-edge: #1b1e25;
+  --cell-exploded: #d64545;
+
+  --flag: #ffffff;
+  --flag-outline: #08090c;
+  --flag-pole: #e6e8ee;
+  --question: #f0e442;
+  --mine: #0e0f12;
+  --mine-spark: #f07848;
+  --mine-spikes: 4;
+  --hint: #56b4e9;
+  --focus: #ffffff;
+  --win: #2fc79c;
+
+  /*
+   * Cyan, blue, green, yellow, orange, red, fuchsia, then white hot for 8:
+   * more mines, hotter colors. From 9 the colors start again as rings, so a
+   * ringed cyan is 9 and a ringed red is 14.
+   */
+  --number-1: #01d0ff;
+  --number-2: #2f5efa;
+  --number-3: #37c07d;
+  --number-4: #ffd400;
+  --number-5: #f98f19;
+  --number-6: #ff0e10;
+  --number-7: #ff3ec3;
+  --number-8: #ffffff;
+  --number-9: var(--number-1);
+  --number-10: var(--number-2);
+  --number-11: var(--number-3);
+  --number-12: var(--number-4);
+  --number-13: var(--number-5);
+  --number-14: var(--number-6);
+  --number-ring-from: 9;
+}

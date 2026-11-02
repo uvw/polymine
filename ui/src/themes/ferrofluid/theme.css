@@ -1,0 +1,88 @@
+/*
+ * Name: Ferrofluid
+ * Author: Polymine
+ * Description: Black liquid that reaches for the pointer
+ * Version: 0.1.0
+ * Format: 1
+ * Relaxed: cell-contrast, pane-contrast, number-separation, number-readability
+ */
+:root {
+  /*
+   * An experiment, listed only in development builds. Closed cells are a pool
+   * of calm black fluid drawn by the ferrofluid effect, which throws up
+   * spikes toward the pointer or the keyboard focus. Open cells are drained
+   * plates with their numbers lit from beneath, and a flag is a tall spike
+   * with a glowing tip.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+  --board-effects: ferrofluid;
+
+  --text: #e6e7eb;
+  --text-dim: #8b8e98;
+  --accent: #7c8cff;
+  --accent-hover: #98a5ff;
+  --on-accent: #05060a;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #ff5d6c;
+  --warning: #ffcf66;
+  --window: #030304;
+  --window-image: radial-gradient(1100px 650px at 50% 0%, rgb(124 140 255 / 7%), transparent 65%);
+  --control: #15161b;
+  --control-hover: #1d1f26;
+  --control-pressed: #101115;
+  --subtle-hover: rgb(255 255 255 / 6%);
+  --subtle-pressed: rgb(255 255 255 / 4%);
+  --stroke: rgb(255 255 255 / 8%);
+  --stroke-strong: rgb(255 255 255 / 16%);
+  --divider: rgb(255 255 255 / 8%);
+  --surface: #0c0d10;
+  --layer: rgb(12 13 16 / 88%);
+  --shadow: 0 18px 50px rgb(0 0 0 / 60%), 0 2px 8px rgb(0 0 0 / 40%);
+
+  --board-plate: none;
+  --board-gap: 3px;
+  --board-font: "Segoe UI Variable Display", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  /*
+   * The effect reads the closed color as the fluid's own, the gloss as its
+   * highlights, and the rim as the light at its edges.
+   */
+  --cell-rounding: 0.18;
+  --cell-closed: #06070a;
+  --cell-closed-hover: #06070a;
+  --cell-closed-pressed: #06070a;
+  --cell-closed-edge: #06070a;
+  --cell-open: #0d0e12;
+  --cell-open-edge: #17191f;
+  --cell-exploded: #5a0d14;
+  --cell-light-angle: 320deg;
+  --cell-gloss: #f4f6ff;
+  --cell-rim: #5d6cff;
+
+  --flag: #ff4d2e;
+  --flag-outline: #06070a;
+  --flag-pole: #d8dae2;
+  --question: #ffd166;
+  --mine: #000000;
+  --mine-spark: #ff4d2e;
+  --mine-spikes: 8;
+  --hint: #7c8cff;
+  --focus: #ffffff;
+  --win: #4dffb8;
+
+  --number-1: #5ab8ff;
+  --number-2: #4dffb8;
+  --number-3: #ff5d6c;
+  --number-4: #c38bff;
+  --number-5: #ffb347;
+  --number-6: #2de2e6;
+  --number-7: #ff7ad9;
+  --number-8: #f0f2f8;
+  --number-9: #ffa3a3;
+  --number-10: #9ec9ff;
+  --number-11: #fff08a;
+  --number-12: #a8ffd6;
+}

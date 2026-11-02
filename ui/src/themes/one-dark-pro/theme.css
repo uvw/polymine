@@ -1,0 +1,122 @@
+/*
+ * Name: One Dark Pro
+ * Author: Binaryify, adapted by Polymine
+ * Description: One Dark Pro's Flat look with its Vivid syntax colors and a breakpoint for a flag
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/Binaryify/OneDark-Pro
+ */
+:root {
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The Vivid syntax colors, from src/themes/themeData.ts. */
+  --pro-malibu: #61afef;
+  --pro-green: #89ca78;
+  --pro-coral: #ef596f;
+  --pro-purple: #d55fde;
+  --pro-whiskey: #d19a66;
+  --pro-fountain-blue: #2bbac5;
+  --pro-chalky: #e5c07b;
+  --pro-light-white: #abb2bf;
+  --pro-light-dark: #7f848e;
+  --pro-dark: #5c6370;
+
+  /* The One Dark Pro Flat workbench, from src/themes/data/oneDarkProFlat.ts. */
+  --flat-bg: #282c34;
+  --flat-widget: #21252b;
+  --flat-border: #23252c;
+  --flat-button: #404754;
+  --flat-bracket-match: #515a6b;
+  --flat-hover: #2c313a;
+  --flat-focus: #323842;
+  --flat-ignored: #636b78;
+  --flat-sidebar-fg: #969aa4;
+  --flat-cursor: #f0f0f0;
+  --flat-error: #c24038;
+  --flat-ansi-red: #e05561;
+  --flat-ansi-bright-magenta: #de73ff;
+  --flat-ansi-bright-yellow: #f0a45d;
+  --flat-ansi-yellow: #d18f52;
+  --flat-ansi-bright-white: #e6e6e6;
+
+  /* Window chrome. */
+  --text: var(--pro-light-white);
+  --text-dim: var(--flat-sidebar-fg);
+  --accent: var(--flat-button);
+  --accent-hover: var(--flat-bracket-match);
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--pro-coral);
+  --warning: var(--pro-whiskey);
+  --window: var(--flat-bg);
+  --control: var(--flat-widget);
+  --control-hover: var(--flat-focus);
+  --control-pressed: var(--flat-hover);
+  --subtle-hover: rgb(171 178 191 / 10%);
+  --subtle-pressed: rgb(171 178 191 / 6%);
+  --stroke: rgb(171 178 191 / 14%);
+  --stroke-strong: rgb(171 178 191 / 26%);
+  --divider: var(--flat-border);
+  --surface: var(--flat-widget);
+  --layer: rgb(33 37 43 / 94%);
+  --shadow: 0 16px 44px rgb(0 0 0 / 50%), 0 2px 6px rgb(0 0 0 / 35%);
+
+  /*
+   * Closed tiles are flat pits in the sidebar color, set into the editor
+   * background the way the sidebar meets the editor. Their edge is the sidebar
+   * border, a hair lighter than the pit.
+   */
+  --board-plate: var(--flat-bg);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 600;
+
+  --cell-rounding: 0.06;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--flat-widget);
+  --cell-closed-hover: color-mix(in srgb, #323842, var(--system-accent, #323842) 25%);
+  --cell-closed-pressed: var(--flat-hover);
+  --cell-closed-edge: var(--flat-border);
+  --cell-open: var(--flat-bg);
+  --cell-open-edge: var(--flat-hover);
+  --cell-exploded: var(--flat-error);
+
+  --flag: var(--flat-ansi-red);
+  --flag-outline: var(--flat-widget);
+  --flag-pole: var(--flat-cursor);
+  --question: var(--pro-chalky);
+  --mine: var(--flat-widget);
+  --mine-spark: var(--pro-coral);
+  --mine-spikes: 8;
+  --hint: var(--pro-malibu);
+  --focus: var(--flat-cursor);
+  --win: var(--pro-green);
+
+  /*
+   * Counts follow the syntax tokens: purple keywords, coral fields, chalky
+   * types, malibu functions, green strings, fountain-blue operators, whiskey
+   * numbers, then the text color, since comment gray misses 4.5:1. Five move
+   * in OKLab lightness only, keeping hue and chroma. Coral #ef596f to #f65f74 and
+   * purple #d55fde to #d962e2 reach 4.5:1 on the open cell. Malibu #61afef to
+   * #6ab8f9, chalky #e5c07b to #ecc681, and light white #abb2bf to #b2b9c6
+   * stay apart from fountain blue and green under color blindness.
+   */
+  --number-1: #d962e2;
+  --number-2: #f65f74;
+  --number-3: #ecc681;
+  --number-4: #6ab8f9;
+  --number-5: var(--pro-green);
+  --number-6: var(--pro-fountain-blue);
+  --number-7: var(--pro-whiskey);
+  --number-8: #b2b9c6;
+  --number-9: var(--flat-ansi-bright-magenta);
+  --number-10: var(--flat-ansi-bright-yellow);
+  --number-11: var(--flat-ansi-yellow);
+  --number-12: var(--flat-ansi-bright-white);
+}

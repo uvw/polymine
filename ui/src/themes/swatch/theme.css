@@ -1,0 +1,67 @@
+/*
+ * Name: Swatch
+ * Author: Polymine
+ * Description: Flat tiles in your system accent color, in light or dark mode
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: digits;
+
+  /*
+   * Closed tiles are the accent itself, which runs from yellow to navy. No
+   * floor clears 3:1 against all of them, so hue tells tiles from the floor.
+   */
+  --swatch: var(--system-accent, #007aff);
+  --ink: #111216;
+
+  --board-plate: light-dark(#e2e4e9, #0e0f12);
+  --board-gap: 3px;
+  --board-font:
+    "Segoe UI Variable Display", "Segoe UI", -apple-system, ui-rounded, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  /* Flat: no bevel, no sheen, and an edge in the tile's own color. */
+  --cell-rounding: 0.16;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--swatch);
+  --cell-closed-hover: color-mix(in srgb, var(--swatch), white 22%);
+  --cell-closed-pressed: color-mix(in srgb, var(--swatch), black 25%);
+  --cell-closed-edge: var(--swatch);
+  --cell-open: light-dark(#fbfbfc, #1d1f24);
+  --cell-open-edge: light-dark(#eceef2, #272a30);
+  --cell-exploded: #e5484d;
+
+  /* A white flag with a dark edge clears 4.5:1 on any accent, by one or the other. */
+  --flag: #ffffff;
+  --flag-outline: var(--ink);
+  --flag-pole: var(--ink);
+  --question: var(--ink);
+  --mine: #16171b;
+  --mine-spark: var(--swatch);
+  --mine-spikes: 4;
+  --hint: color-mix(in srgb, var(--swatch), white 55%);
+  --focus: light-dark(#0b0c0f, #ffffff);
+  --win: var(--swatch);
+
+  /*
+   * Classic minesweeper hues, deep enough for the light floor, and Graphite's
+   * numbers on the dark one. Both sets are checked for color-blind separation.
+   */
+  --number-1: light-dark(#1768e9, #56b4e9);
+  --number-2: light-dark(#277142, #2fc79c);
+  --number-3: light-dark(#da194a, #f07848);
+  --number-4: light-dark(#3a2a9e, #d88cc0);
+  --number-5: light-dark(#892d14, #e9a23b);
+  --number-6: light-dark(#067592, #f0e442);
+  --number-7: light-dark(#1d1e22, #b9c3ff);
+  --number-8: light-dark(#736d67, #dfe3ea);
+  --number-9: light-dark(#a60a68, #ff8fa3);
+  --number-10: light-dark(#6d6104, #8fe3d2);
+  --number-11: light-dark(#7749c6, #c7a7ff);
+  --number-12: light-dark(#c12a04, #ffc9a8);
+}

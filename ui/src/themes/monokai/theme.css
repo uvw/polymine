@@ -1,0 +1,117 @@
+/*
+ * Name: Monokai
+ * Author: Wimer Hazenberg, adapted by Polymine
+ * Description: The original 2006 Monokai: neon syntax colors on warm charcoal
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://web.archive.org/web/20070226173053/http://www.monokai.nl/blog/wp-content/asdev/Monokai.tmTheme
+ */
+:root {
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The 2006 TextMate theme's colors, as Monokai.tmTheme lists them. */
+  --monokai-bg: #272822;
+  --monokai-fg: #f8f8f2;
+  --monokai-caret: #f8f8f0;
+  --monokai-invisibles: #3b3a32;
+  --monokai-line: #3e3d32;
+  --monokai-selection: #49483e;
+  --monokai-comment: #75715e;
+  --monokai-yellow: #e6db74;
+  --monokai-purple: #ae81ff;
+  --monokai-pink: #f92672;
+  --monokai-blue: #66d9ef;
+  --monokai-green: #a6e22e;
+  --monokai-orange: #fd971f;
+
+  /*
+   * The theme has no window colors, so the chrome reuses the syntax colors.
+   * The tray is the background darkened by 25% black, and the dimmed text is
+   * the comment color lightened by 35% foreground so help lines stay readable.
+   */
+  --monokai-tray: #1d1e1a;
+
+  /* Window chrome. */
+  --text: var(--monokai-fg);
+  --text-dim: #a3a092;
+  --accent: var(--monokai-pink);
+  --accent-hover: var(--monokai-orange);
+  --on-accent: var(--monokai-tray);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--monokai-pink);
+  --warning: var(--monokai-orange);
+  --window: var(--monokai-bg);
+  --window-image:
+    radial-gradient(900px 520px at 0% -10%, rgb(249 38 114 / 10%), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgb(253 151 31 / 8%), transparent 60%);
+  --control: var(--monokai-line);
+  --control-hover: var(--monokai-selection);
+  --control-pressed: var(--monokai-invisibles);
+  --subtle-hover: rgb(248 248 242 / 10%);
+  --subtle-pressed: rgb(248 248 242 / 6%);
+  --stroke: rgb(248 248 242 / 14%);
+  --stroke-strong: rgb(248 248 242 / 26%);
+  --divider: rgb(248 248 242 / 12%);
+  --surface: var(--monokai-bg);
+  --layer: rgb(39 40 34 / 94%);
+  --shadow: 0 16px 44px rgb(0 0 0 / 50%), 0 2px 6px rgb(0 0 0 / 30%);
+  --accent-image: linear-gradient(135deg, #f92672, #fd971f);
+
+  /*
+   * Closed tiles are flat pits in the darkened tray color, set into the
+   * editor background. Their edge sits halfway between the pit and the
+   * background.
+   */
+  --board-plate: var(--monokai-bg);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.12;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--monokai-tray);
+  --cell-closed-hover: color-mix(in srgb, #3e3d32, var(--system-accent, #3e3d32) 25%);
+  --cell-closed-pressed: color-mix(in srgb, var(--monokai-tray), var(--monokai-bg));
+  --cell-closed-edge: color-mix(in srgb, var(--monokai-tray), var(--monokai-bg));
+  --cell-open: var(--monokai-bg);
+  --cell-open-edge: var(--monokai-invisibles);
+  --cell-exploded: var(--monokai-pink);
+
+  --flag: var(--monokai-pink);
+  --flag-outline: var(--monokai-tray);
+  --flag-pole: var(--monokai-fg);
+  --question: var(--monokai-yellow);
+  --mine: var(--monokai-tray);
+  --mine-spark: var(--monokai-orange);
+  --mine-spikes: 8;
+  --hint: var(--monokai-blue);
+  --focus: var(--monokai-caret);
+  --win: var(--monokai-green);
+
+  /*
+   * Counts follow the syntax tokens: pink keywords, green class and function
+   * names, yellow strings, blue storage types, purple numbers, orange
+   * arguments, then the foreground. Monokai has only seven colors, so five
+   * more mix a syntax color half and half with the foreground. Pink #f92672
+   * moves to #ff4384 in OKLab lightness only, keeping hue and chroma, to reach
+   * 4.5:1 on the open cell.
+   */
+  --number-1: #ff4384;
+  --number-2: var(--monokai-green);
+  --number-3: var(--monokai-yellow);
+  --number-4: var(--monokai-blue);
+  --number-5: var(--monokai-purple);
+  --number-6: var(--monokai-orange);
+  --number-7: var(--monokai-fg);
+  --number-8: color-mix(in srgb, var(--monokai-pink), var(--monokai-fg));
+  --number-9: color-mix(in srgb, var(--monokai-blue), var(--monokai-fg));
+  --number-10: color-mix(in srgb, var(--monokai-green), var(--monokai-fg));
+  --number-11: color-mix(in srgb, var(--monokai-orange), var(--monokai-fg));
+  --number-12: color-mix(in srgb, var(--monokai-yellow), var(--monokai-fg));
+}

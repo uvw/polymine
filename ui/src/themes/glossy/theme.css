@@ -1,0 +1,100 @@
+/*
+ * Name: Glossy
+ * Author: Polymine
+ * Description: Glazed candy tiles in your accent color, with a glare and a rim light
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: digits;
+
+  /*
+   * Solid glazed tiles, the opposite of Frost's glass. The glaze is the
+   * accent: deep in light mode and light in dark mode, so every accent from
+   * yellow to dark gray keeps 3:1 against the floor, shade included. Dark
+   * mode shades tiles toward a slate gray, not black, for the same reason.
+   */
+  --glaze: light-dark(
+    color-mix(in srgb, #06102a, var(--system-accent, #1f6fe0) 55%),
+    color-mix(in srgb, #ffffff, var(--system-accent, #3b86f0) 65%)
+  );
+  --ink: #0b1020;
+
+  --board-plate: light-dark(#d3d8e2, #06070a);
+  --board-gap: 3px;
+  --board-font:
+    ui-rounded, "Segoe UI Variable Display", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0.34;
+  --cell-bevel: 0.12;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--glaze);
+  --cell-closed-hover: color-mix(in srgb, var(--glaze), #ffffff 18%);
+  --cell-closed-pressed: color-mix(in srgb, var(--glaze), #000000 22%);
+  --cell-closed-edge: color-mix(in srgb, var(--glaze), #000000 38%);
+  --cell-open: light-dark(#f1f2f5, #12151b);
+  --cell-open-edge: light-dark(#d6dae2, #1e232c);
+  --cell-exploded: #d64545;
+
+  /*
+   * One light from just left of the top. The glare bows like a glazed dome,
+   * the rim catches light along the lower edges, and the shade rounds the
+   * tile off underneath. Open cells sit recessed under their lit edge.
+   */
+  --cell-light-angle: -15deg;
+  --cell-gloss: #ffffff;
+  --cell-gloss-opacity: 62%;
+  --cell-gloss-fade: 8%;
+  --cell-gloss-extent: 0.48;
+  --cell-gloss-shape: arc;
+  --cell-glint-opacity: 35%;
+  --cell-rim: #ffffff;
+  --cell-rim-opacity: 45%;
+  --cell-rim-width: 1.5px;
+  --cell-rim-angle: 165deg;
+  --cell-shade: light-dark(var(--ink), #232733);
+  --cell-shade-opacity: 30%;
+  --cell-shade-depth: 0.6;
+  --cell-open-shade: light-dark(var(--ink), #000000);
+  --cell-open-shade-opacity: 12%;
+
+  /*
+   * Light marks on deep tiles and dark marks on pale ones. The outline
+   * carries the flag wherever the glare lightens the tile.
+   */
+  --flag: light-dark(#fff4c2, #ff4f3a);
+  --flag-outline: var(--ink);
+  --flag-pole: light-dark(#f3f5f9, var(--ink));
+  --question: light-dark(#ffffff, var(--ink));
+  --question-outline: var(--ink);
+  --mine: #0e0f12;
+  --mine-spark: light-dark(#c2410c, #f07848);
+  --mine-spikes: 8;
+  --hint: light-dark(#0b57d0, #8fd3ff);
+  --focus: light-dark(var(--ink), #ffffff);
+  --win: #2fc79c;
+
+  /* Engraved in light mode, raised enamel in dark mode. */
+  --number-shadow: light-dark(#ffffff, #000000);
+  --number-shadow-opacity: 55%;
+
+  /*
+   * Checked against the floor and its shaded top, and for color-blind
+   * separation. Dark mode keeps Graphite's counts.
+   */
+  --number-1: light-dark(#2343e8, #56b4e9);
+  --number-2: light-dark(#346500, #2fc79c);
+  --number-3: light-dark(#90001a, #f07848);
+  --number-4: light-dark(#8c04c7, #d88cc0);
+  --number-5: light-dark(#bd0000, #e9a23b);
+  --number-6: light-dark(#004b41, #f0e442);
+  --number-7: light-dark(#a42c6d, #b9c3ff);
+  --number-8: light-dark(#50567d, #dfe3ea);
+  --number-9: light-dark(#934000, #ff8fa3);
+  --number-10: light-dark(#524ab2, #8fe3d2);
+  --number-11: light-dark(#3f2e30, #c7a7ff);
+  --number-12: light-dark(#004384, #ffc9a8);
+}

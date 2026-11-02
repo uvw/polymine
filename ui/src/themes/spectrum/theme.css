@@ -1,0 +1,62 @@
+/*
+ * Name: Spectrum
+ * Author: Polymine
+ * Description: Colors instead of numbers, red to violet
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: colors;
+
+  /* Pride in reverse, on slate tiles. */
+  --board-plate: color-mix(in srgb, #08090c, var(--system-accent, #08090c) 12%);
+  --board-gap: 2px;
+  --board-font:
+    "Segoe UI Variable Display", "Segoe UI", -apple-system, ui-rounded, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.22;
+  --cell-bevel: 0.1;
+  --cell-sheen: rgb(255 255 255 / 10%);
+  --cell-closed: #343944;
+  --cell-closed-hover: color-mix(in srgb, #404654, var(--system-accent, #404654) 35%);
+  --cell-closed-pressed: #2a2e37;
+  --cell-closed-edge: color-mix(in srgb, #5c6475, var(--system-accent, #5c6475) 30%);
+  --cell-open: #0d0f13;
+  --cell-open-edge: #1b1e25;
+  --cell-exploded: #d64545;
+
+  --flag: #ffffff;
+  --flag-outline: #08090c;
+  --flag-pole: #e6e8ee;
+  --question: #f0e442;
+  --mine: #0e0f12;
+  --mine-spark: #f07848;
+  --mine-spikes: 4;
+  --hint: #56b4e9;
+  --focus: #ffffff;
+  --win: #2fc79c;
+
+  /*
+   * Red, orange, yellow, green, cyan, blue, violet, then white for 8. From 9
+   * the colors start again as rings, so a ringed red is 9.
+   */
+  --number-1: #e8202a;
+  --number-2: #fe8200;
+  --number-3: #ffe14d;
+  --number-4: #07bf6c;
+  --number-5: #2fd6ff;
+  --number-6: #344cf5;
+  --number-7: #b970ff;
+  --number-8: #ffffff;
+  --number-9: var(--number-1);
+  --number-10: var(--number-2);
+  --number-11: var(--number-3);
+  --number-12: var(--number-4);
+  --number-13: var(--number-5);
+  --number-14: var(--number-6);
+  --number-ring-from: 9;
+}

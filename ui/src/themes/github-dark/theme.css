@@ -1,0 +1,124 @@
+/*
+ * Name: GitHub Dark
+ * Author: GitHub, adapted by Polymine
+ * Description: GitHub Dark Default's code-review colors on an inky canvas
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/primer/github-vscode-theme
+ */
+:root {
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  /* GitHub Dark Default, from github-vscode-theme on Primer primitives 7.10. */
+  --gh-canvas: #0d1117;
+  --gh-canvas-overlay: #161b22;
+  --gh-canvas-inset: #010409;
+  --gh-border: #30363d;
+  --gh-border-muted: #21262d;
+  --gh-fg: #e6edf3;
+  --gh-fg-muted: #7d8590;
+  --gh-neutral: #6e7681;
+  --gh-gray: #484f58;
+  --gh-accent: #2f81f7;
+  --gh-accent-emphasis: #1f6feb;
+  --gh-success: #3fb950;
+  --gh-danger: #f85149;
+  --gh-danger-emphasis: #da3633;
+  --gh-attention: #d29922;
+  --gh-button: #238636;
+  --gh-button-hover: #2ea043;
+  --gh-button-secondary: #282e33;
+  --gh-ansi-blue: #58a6ff;
+  --gh-ansi-cyan: #39c5cf;
+  --gh-bracket-pink: #ff9bce;
+
+  /* Syntax colors. */
+  --gh-comment: #8b949e;
+  --gh-keyword: #ff7b72;
+  --gh-entity: #ffa657;
+  --gh-function: #d2a8ff;
+  --gh-tag: #7ee787;
+  --gh-string: #a5d6ff;
+
+  /* Window chrome. */
+  --text: var(--gh-fg);
+  --text-dim: var(--gh-fg-muted);
+  --accent: var(--gh-accent-emphasis);
+  --accent-hover: var(--gh-accent);
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--gh-danger);
+  --warning: var(--gh-attention);
+  --window: var(--gh-canvas);
+  --control: var(--gh-border-muted);
+  --control-hover: var(--gh-border);
+  --control-pressed: var(--gh-button-secondary);
+  --subtle-hover: rgb(110 118 129 / 10%);
+  --subtle-pressed: rgb(110 118 129 / 40%);
+  --stroke: rgb(240 246 252 / 10%);
+  --stroke-strong: var(--gh-border);
+  --divider: var(--gh-border-muted);
+  --surface: var(--gh-canvas-overlay);
+  --layer: rgb(22 27 34 / 94%);
+  --shadow: 0 16px 40px rgb(1 4 9 / 60%), 0 0 0 1px rgb(240 246 252 / 6%);
+  --accent-image: linear-gradient(180deg, #2ea043, #238636);
+
+  /*
+   * Closed tiles are flat wells in the inset canvas color, set into the
+   * default canvas like a review page's text fields. Their edge is the overlay
+   * color, a hair lighter than the well.
+   */
+  --board-plate: var(--gh-canvas);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 600;
+
+  --cell-rounding: 0.16;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--gh-canvas-inset);
+  --cell-closed-hover: color-mix(in srgb, #21262d, var(--system-accent, #21262d) 25%);
+  --cell-closed-pressed: var(--gh-canvas-overlay);
+  --cell-closed-edge: var(--gh-canvas-overlay);
+  --cell-open: var(--gh-canvas);
+  --cell-open-edge: var(--gh-border-muted);
+  --cell-exploded: var(--gh-danger-emphasis);
+
+  --flag: var(--gh-danger);
+  --flag-outline: var(--gh-canvas-inset);
+  --flag-pole: var(--gh-fg);
+  --question: var(--gh-attention);
+  --mine: var(--gh-canvas-inset);
+  --mine-spark: var(--gh-accent);
+  --mine-spikes: 4;
+  --hint: var(--gh-accent);
+  --focus: var(--gh-fg);
+  --win: var(--gh-success);
+
+  /*
+   * Counts follow the syntax tokens: red keywords, blue constants and
+   * properties, orange variables and types, purple functions, light blue
+   * strings, green tags, gray comments, then the text color. Three move in
+   * OKLab lightness only, keeping hue and chroma, to stay apart under color
+   * blindness. Constant blue #79c0ff to #66adeb parts from purple. Entity
+   * orange #ffa657 to #ffaa5b and danger red #f85149 to #f64f47 part from
+   * green.
+   */
+  --number-1: var(--gh-keyword);
+  --number-2: #66adeb;
+  --number-3: #ffaa5b;
+  --number-4: var(--gh-function);
+  --number-5: var(--gh-string);
+  --number-6: var(--gh-tag);
+  --number-7: var(--gh-comment);
+  --number-8: var(--gh-fg);
+  --number-9: #f64f47;
+  --number-10: var(--gh-success);
+  --number-11: var(--gh-ansi-cyan);
+  --number-12: var(--gh-bracket-pink);
+}

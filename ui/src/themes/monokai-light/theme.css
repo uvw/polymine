@@ -1,0 +1,124 @@
+/*
+ * Name: Monokai Light
+ * Author: Wimer Hazenberg, adapted by Polymine
+ * Description: The 2006 Monokai turned inside out: its syntax colors, deepened, on its own foreground
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://web.archive.org/web/20070226173053/http://www.monokai.nl/blog/wp-content/asdev/Monokai.tmTheme
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The 2006 TextMate theme's colors, as Monokai.tmTheme lists them. */
+  --monokai-bg: #272822;
+  --monokai-fg: #f8f8f2;
+  --monokai-line: #3e3d32;
+  --monokai-comment: #75715e;
+  --monokai-yellow: #e6db74;
+  --monokai-purple: #ae81ff;
+  --monokai-pink: #f92672;
+  --monokai-blue: #66d9ef;
+  --monokai-green: #a6e22e;
+  --monokai-orange: #fd971f;
+
+  /*
+   * Monokai has no light variant, so this one swaps the editor's background
+   * and foreground and keeps the syntax colors' hues. Each moves in OKLab
+   * lightness only, keeping hue and chroma, to reach 4.5:1 on the foreground:
+   * pink #f92672 to #de005d, green #a6e22e to #4a7e00, blue #66d9ef to
+   * #007b90, purple #ae81ff to #8556d0, and orange #fd971f to #b55500. Yellow
+   * #e6db74 goes further, to #665b00, so it stays apart from green under
+   * red-green color blindness.
+   */
+  --ml-pink: #de005d;
+  --ml-green: #4a7e00;
+  --ml-yellow: #665b00;
+  --ml-blue: #007b90;
+  --ml-purple: #8556d0;
+  --ml-orange: #b55500;
+  --ml-tray: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 6%);
+
+  /* Window chrome. */
+  --text: var(--monokai-bg);
+  --text-dim: var(--monokai-comment);
+  --accent: var(--ml-pink);
+  --accent-hover: var(--ml-orange);
+  --on-accent: var(--monokai-fg);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--ml-pink);
+  --warning: var(--ml-orange);
+  --window: var(--monokai-fg);
+  --window-image:
+    radial-gradient(900px 520px at 0% -10%, rgb(249 38 114 / 7%), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgb(253 151 31 / 6%), transparent 60%);
+  --control: var(--ml-tray);
+  --control-hover: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 11%);
+  --control-pressed: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 15%);
+  --subtle-hover: rgb(39 40 34 / 8%);
+  --subtle-pressed: rgb(39 40 34 / 5%);
+  --stroke: rgb(39 40 34 / 14%);
+  --stroke-strong: rgb(39 40 34 / 26%);
+  --divider: rgb(39 40 34 / 12%);
+  --surface: var(--monokai-fg);
+  --layer: rgb(248 248 242 / 95%);
+  --shadow: 0 14px 36px rgb(39 40 34 / 16%), 0 2px 6px rgb(39 40 34 / 10%);
+  --accent-image: linear-gradient(135deg, #de005d, #b55500);
+
+  /*
+   * Closed tiles are flat in the tray color, a shade below the page, as in
+   * Monokai. Their edge sits halfway between the tray and the comment color.
+   */
+  --board-plate: var(--monokai-fg);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.12;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 12%);
+  --cell-closed-hover: color-mix(in srgb, #d9d9d2, var(--system-accent, #d9d9d2) 25%);
+  --cell-closed-pressed: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 8%);
+  --cell-closed-edge: color-mix(in srgb, var(--monokai-fg), var(--monokai-comment) 35%);
+  --cell-open: var(--monokai-fg);
+  --cell-open-edge: color-mix(in srgb, var(--monokai-fg), var(--monokai-bg) 10%);
+  --cell-exploded: var(--monokai-pink);
+
+  --flag: var(--ml-pink);
+  --flag-outline: var(--monokai-bg);
+  --flag-pole: var(--monokai-bg);
+  --question: var(--ml-orange);
+  --mine: var(--monokai-bg);
+  --mine-spark: var(--monokai-orange);
+  --mine-spikes: 8;
+  --hint: var(--ml-blue);
+  --focus: var(--monokai-bg);
+  --win: var(--ml-green);
+
+  /*
+   * Counts follow Monokai's token order: pink keywords, green class and
+   * function names, yellow strings, blue storage types, purple numbers, orange
+   * arguments, then the text color. Counts 8 to 12 blend two syntax colors, or
+   * deepen pink, then darken in OKLab lightness to 4.5:1. They are pink with
+   * 65% purple, pink with 35% purple, pink deepened, orange and purple half
+   * and half, and blue and pink half and half. Each stays at least 2.5 apart
+   * from the others under every color vision deficiency.
+   */
+  --number-1: var(--ml-pink);
+  --number-2: var(--ml-green);
+  --number-3: var(--ml-yellow);
+  --number-4: var(--ml-blue);
+  --number-5: var(--ml-purple);
+  --number-6: var(--ml-orange);
+  --number-7: var(--monokai-bg);
+  --number-8: #ac45b2;
+  --number-9: #c82f8c;
+  --number-10: #be0045;
+  --number-11: #a55b5e;
+  --number-12: #906091;
+}
