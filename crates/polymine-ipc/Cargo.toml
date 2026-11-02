@@ -1,0 +1,37 @@
+[package]
+name = "polymine-ipc"
+description = "What Polymine and polymine-cli share: instance names, paths, the wire protocol, board views, theme folders and the history file."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+[dependencies]
+polymine-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+interprocess = "2.4"
+dirs = "7"
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1.1", default-features = false, features = ["std", "process"] }
+
+[target.'cfg(windows)'.dependencies]
+widestring = "1.2"
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_System_IO",
+  "Win32_System_Pipes",
+  "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
