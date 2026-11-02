@@ -1,0 +1,121 @@
+/*
+ * Name: GitHub Light
+ * Author: GitHub, adapted by Polymine
+ * Description: GitHub Light Default's white review page, crisp syntax, and the green merge button
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/primer/github-vscode-theme
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* GitHub Light Default, from github-vscode-theme on Primer primitives 7.10. */
+  --gh-canvas: #ffffff;
+  --gh-canvas-inset: #f6f8fa;
+  --gh-gray-1: #eaeef2;
+  --gh-border: #d0d7de;
+  --gh-border-muted: #d8dee4;
+  --gh-gray-3: #afb8c1;
+  --gh-gray-4: #8c959f;
+  --gh-fg: #1f2328;
+  --gh-fg-muted: #656d76;
+  --gh-neutral: #6e7781;
+  --gh-accent: #0969da;
+  --gh-accent-strong: #0550ae;
+  --gh-success: #1a7f37;
+  --gh-danger: #cf222e;
+  --gh-attention: #9a6700;
+  --gh-severe: #bc4c00;
+  --gh-done: #8250df;
+  --gh-sponsors: #bf3989;
+  --gh-ansi-cyan: #1b7c83;
+  --gh-button: #1f883d;
+  --gh-button-hover: #f3f4f6;
+  --gh-button-active: #ebecf0;
+
+  /* Syntax colors. */
+  --gh-entity: #953800;
+  --gh-tag: #116329;
+  --gh-string: #0a3069;
+
+  /* Window chrome. */
+  --text: var(--gh-fg);
+  --text-dim: var(--gh-fg-muted);
+  --accent: var(--gh-accent);
+  --accent-hover: var(--gh-accent-strong);
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--gh-danger);
+  --warning: var(--gh-attention);
+  --window: var(--gh-canvas);
+  --control: var(--gh-canvas-inset);
+  --control-hover: var(--gh-button-hover);
+  --control-pressed: var(--gh-button-active);
+  --subtle-hover: rgb(175 184 193 / 20%);
+  --subtle-pressed: rgb(175 184 193 / 30%);
+  --stroke: var(--gh-border);
+  --stroke-strong: var(--gh-gray-4);
+  --divider: var(--gh-border-muted);
+  --surface: var(--gh-canvas);
+  --layer: rgb(246 248 250 / 96%);
+  --shadow: 0 12px 32px rgb(31 35 40 / 14%), 0 0 0 1px rgb(31 35 40 / 8%);
+  --accent-image: linear-gradient(180deg, #1f883d, #1a7f37);
+
+  /*
+   * Flat closed tiles in a pale gray sit a shade below the white page, like a
+   * review page's inset panels. Their edge is the muted border.
+   */
+  --board-plate: var(--gh-canvas);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 600;
+
+  --cell-rounding: 0.16;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--gh-gray-1);
+  --cell-closed-hover: color-mix(in srgb, #d8dee4, var(--system-accent, #d8dee4) 25%);
+  --cell-closed-pressed: var(--gh-canvas-inset);
+  --cell-closed-edge: var(--gh-border-muted);
+  --cell-open: var(--gh-canvas);
+  --cell-open-edge: var(--gh-border-muted);
+  --cell-exploded: var(--gh-danger);
+
+  --flag: var(--gh-danger);
+  --flag-outline: var(--gh-fg);
+  --flag-pole: var(--gh-fg);
+  --question: var(--gh-attention);
+  --mine: var(--gh-fg);
+  --mine-spark: var(--gh-accent);
+  --mine-spikes: 4;
+  --hint: var(--gh-accent);
+  --focus: var(--gh-fg);
+  --win: var(--gh-success);
+
+  /*
+   * Counts follow the syntax tokens: red keywords, blue constants and
+   * properties, orange variables and types, purple functions, navy strings,
+   * green tags, gray comments, then the text color. Three state colors move in
+   * OKLab lightness only, keeping hue and chroma, to stay apart under color
+   * blindness. Severe orange #bc4c00 to #c1500a parts from red, ANSI cyan
+   * #1b7c83 to #006f76 from gray and green, and sponsors pink #bf3989 to
+   * #c53f8e from gray.
+   */
+  --number-1: var(--gh-danger);
+  --number-2: var(--gh-accent-strong);
+  --number-3: var(--gh-entity);
+  --number-4: var(--gh-done);
+  --number-5: var(--gh-string);
+  --number-6: var(--gh-tag);
+  --number-7: var(--gh-neutral);
+  --number-8: var(--gh-fg);
+  --number-9: var(--gh-success);
+  --number-10: #c1500a;
+  --number-11: #006f76;
+  --number-12: #c53f8e;
+}

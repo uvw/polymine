@@ -1,0 +1,113 @@
+/*
+ * Name: Solarized Light
+ * Author: Ethan Schoonover, adapted by Polymine
+ * Description: Solarized's precise accents on its cream base, with a small dark sun for a mine
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://ethanschoonover.com/solarized/
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The 16 Solarized colors, from the project's README. */
+  --sol-base03: #002b36;
+  --sol-base02: #073642;
+  --sol-base01: #586e75;
+  --sol-base00: #657b83;
+  --sol-base0: #839496;
+  --sol-base1: #93a1a1;
+  --sol-base2: #eee8d5;
+  --sol-base3: #fdf6e3;
+  --sol-yellow: #b58900;
+  --sol-orange: #cb4b16;
+  --sol-red: #dc322f;
+  --sol-magenta: #d33682;
+  --sol-violet: #6c71c4;
+  --sol-blue: #268bd2;
+  --sol-cyan: #2aa198;
+  --sol-green: #859900;
+  --sol-border: #ddd6c1;
+
+  /* Window chrome: base01 for emphasized text and base00 for body text, as in light mode. */
+  --text: var(--sol-base01);
+  --text-dim: var(--sol-base00);
+  --accent: var(--sol-blue);
+  --accent-hover: var(--sol-cyan);
+  --on-accent: var(--sol-base03);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--sol-red);
+  --warning: var(--sol-yellow);
+  --window: var(--sol-base3);
+  --control: var(--sol-base2);
+  --control-hover: color-mix(in srgb, var(--sol-base2), var(--sol-base1) 20%);
+  --control-pressed: color-mix(in srgb, var(--sol-base2), var(--sol-base1) 30%);
+  --subtle-hover: rgb(88 110 117 / 10%);
+  --subtle-pressed: rgb(88 110 117 / 6%);
+  --stroke: rgb(88 110 117 / 14%);
+  --stroke-strong: rgb(88 110 117 / 26%);
+  --divider: rgb(88 110 117 / 12%);
+  --surface: var(--sol-base3);
+  --layer: rgb(238 232 213 / 95%);
+  --shadow: 0 14px 36px rgb(0 43 54 / 16%), 0 2px 6px rgb(0 43 54 / 10%);
+
+  /*
+   * Flat closed tiles in base2 sit a shade below the base3 page, as
+   * Solarized's sidebar does. Their edge is the editor's pane border.
+   */
+  --board-plate: var(--sol-base3);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.1;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--sol-base2);
+  --cell-closed-hover: color-mix(in srgb, #ddd6c1, var(--system-accent, #ddd6c1) 25%);
+  --cell-closed-pressed: color-mix(in srgb, var(--sol-base2), var(--sol-base3));
+  --cell-closed-edge: var(--sol-border);
+  --cell-open: var(--sol-base3);
+  --cell-open-edge: var(--sol-base2);
+  --cell-exploded: var(--sol-red);
+
+  --flag: var(--sol-red);
+  --flag-outline: var(--sol-base03);
+  --flag-pole: var(--sol-base03);
+  --question: #c04103;
+  --mine: var(--sol-base03);
+  --mine-spark: var(--sol-yellow);
+  --mine-spikes: 12;
+  --hint: var(--sol-blue);
+  --focus: var(--sol-base03);
+  --win: var(--sol-green);
+
+  /*
+   * Counts follow the syntax tokens: green keywords, blue variables and
+   * functions, orange class names, cyan strings, magenta numbers, red regular
+   * expressions, violet inherited classes, then the emphasized text and
+   * base03. No accent reaches 4.5:1 on base3 as published, so each moves in
+   * OKLab lightness only, keeping hue and chroma: blue #268bd2 to #0075bb,
+   * green #859900 to #667800, red #dc322f to #d72d2b, violet #6c71c4 to
+   * #5b5eb0, orange #cb4b16 to #c04103, cyan #2aa198 to #007f77, and magenta
+   * #d33682 to #cd2f7d. Violet, orange, and base01 (#586e75 to #546a71) go a
+   * little past 4.5:1 to stay apart under color blindness. Counts 10 to 12 mix
+   * an accent half and half with base03.
+   */
+  --number-1: #667800;
+  --number-2: #0075bb;
+  --number-3: #c04103;
+  --number-4: #007f77;
+  --number-5: #cd2f7d;
+  --number-6: #d72d2b;
+  --number-7: #5b5eb0;
+  --number-8: #546a71;
+  --number-9: var(--sol-base03);
+  --number-10: color-mix(in srgb, var(--sol-red), var(--sol-base03));
+  --number-11: color-mix(in srgb, var(--sol-violet), var(--sol-base03));
+  --number-12: color-mix(in srgb, var(--sol-cyan), var(--sol-base03));
+}

@@ -1,0 +1,114 @@
+/*
+ * Name: Dracula
+ * Author: Zeno Rocha, adapted by Polymine
+ * Description: Dracula's candy-bright colors on its dark purple-gray, with a bat for a mine
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://draculatheme.com/spec
+ */
+:root {
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  /* The Dracula palette, from the spec and dracula/visual-studio-code. */
+  --dracula-bg: #282a36;
+  --dracula-fg: #f8f8f2;
+  --dracula-selection: #44475a;
+  --dracula-comment: #6272a4;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-pink: #ff79c6;
+  --dracula-purple: #bd93f9;
+  --dracula-red: #ff5555;
+  --dracula-yellow: #f1fa8c;
+  --dracula-bright-red: #ff6e6e;
+  --dracula-bright-blue: #d6acff;
+  --dracula-bright-magenta: #ff92df;
+  --dracula-bg-lighter: #424450;
+  --dracula-bg-light: #343746;
+  --dracula-bg-dark: #21222c;
+  --dracula-bg-darker: #191a21;
+
+  /* Window chrome. */
+  --text: var(--dracula-fg);
+  --text-dim: var(--dracula-comment);
+  --accent: var(--dracula-purple);
+  --accent-hover: var(--dracula-bright-blue);
+  --on-accent: var(--dracula-bg);
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--dracula-red);
+  --warning: var(--dracula-orange);
+  --window: var(--dracula-bg-dark);
+  --window-image:
+    radial-gradient(1100px 640px at 50% -12%, rgb(189 147 249 / 12%), transparent 62%),
+    radial-gradient(800px 520px at 105% 110%, rgb(255 121 198 / 8%), transparent 60%);
+  --control: var(--dracula-bg-light);
+  --control-hover: var(--dracula-bg-lighter);
+  --control-pressed: var(--dracula-bg);
+  --subtle-hover: rgb(68 71 90 / 46%);
+  --subtle-pressed: rgb(68 71 90 / 30%);
+  --stroke: rgb(255 255 255 / 10%);
+  --stroke-strong: rgb(98 114 164 / 70%);
+  --divider: rgb(255 255 255 / 10%);
+  --surface: var(--dracula-bg);
+  --layer: rgb(33 34 44 / 94%);
+  --shadow: 0 18px 50px rgb(0 0 0 / 50%), 0 2px 8px rgb(0 0 0 / 30%);
+  --accent-image: linear-gradient(135deg, #bd93f9, #ff79c6);
+
+  /*
+   * Closed tiles are flat pits in the darkest panel color, set into the
+   * editor background. Their edge is the next panel color up, a hair lighter
+   * than the pit.
+   */
+  --board-plate: var(--dracula-bg);
+  --board-gap: 3px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.3;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--dracula-bg-darker);
+  --cell-closed-hover: color-mix(in srgb, #343746, var(--system-accent, #343746) 25%);
+  --cell-closed-pressed: var(--dracula-bg-dark);
+  --cell-closed-edge: var(--dracula-bg-dark);
+  --cell-open: var(--dracula-bg);
+  --cell-open-edge: var(--dracula-bg-light);
+  --cell-exploded: var(--dracula-red);
+
+  --flag: var(--dracula-pink);
+  --flag-outline: var(--dracula-bg-darker);
+  --flag-pole: var(--dracula-fg);
+  --question: var(--dracula-yellow);
+  --mine: var(--dracula-bg-darker);
+  --mine-spark: var(--dracula-pink);
+  --mine-spikes: 8;
+  --hint: var(--dracula-cyan);
+  --focus: var(--dracula-fg);
+  --win: var(--dracula-green);
+
+  /*
+   * Counts follow the syntax tokens: pink keywords, purple constants and
+   * numbers, cyan types, green functions, yellow strings, orange parameters,
+   * red, then the foreground. Bright green #69ff94 moves to #72ff9c in OKLab
+   * lightness only, keeping hue and chroma, to stay apart from green and
+   * yellow under color blindness.
+   */
+  --number-1: var(--dracula-pink);
+  --number-2: var(--dracula-purple);
+  --number-3: var(--dracula-cyan);
+  --number-4: var(--dracula-green);
+  --number-5: var(--dracula-yellow);
+  --number-6: var(--dracula-orange);
+  --number-7: var(--dracula-red);
+  --number-8: var(--dracula-fg);
+  --number-9: var(--dracula-bright-red);
+  --number-10: #72ff9c;
+  --number-11: var(--dracula-bright-blue);
+  --number-12: var(--dracula-bright-magenta);
+}

@@ -1,0 +1,122 @@
+/*
+ * Name: Atom One Dark
+ * Author: GitHub's Atom team, adapted by Polymine
+ * Description: Atom's One Dark syntax colors, with tiles sunk into the editor and an atom for a mine
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/atom/atom/tree/master/packages/one-dark-syntax
+ */
+:root {
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  /* One Dark's syntax colors, from one-dark-syntax/styles/colors.less. */
+  --one-bg: #282c34;
+  --one-fg: #abb2bf;
+  --one-mono-2: #828997;
+  --one-cyan: #56b6c2;
+  --one-blue: #61afef;
+  --one-purple: #c678dd;
+  --one-green: #98c379;
+  --one-red: #e06c75;
+  --one-red-2: #be5046;
+  --one-orange: #d19a66;
+  --one-orange-2: #e5c07b;
+  --one-cursor: #528bff;
+
+  /* One Dark UI's colors, from one-dark-ui/styles. */
+  --ui-fg: #9da5b4;
+  --ui-border: #181a1f;
+  --ui-gutter: #636d83;
+  --ui-level-1: #353b45;
+  --ui-level-3: #21252b;
+  --ui-level-3-hover: #2f333d;
+  --ui-selected: #3a3f4b;
+  --ui-overlay: #252830;
+  --ui-highlight: #d7dae0;
+  --ui-error: #ff6347;
+  --ui-warning: #e2c08d;
+  --ui-success: #73c990;
+  --ui-accent: #4d78cc;
+  --ui-accent-color: #568af2;
+  --ui-accent-text: #759ef2;
+
+  /* Window chrome. */
+  --text: var(--ui-fg);
+  --text-dim: var(--one-mono-2);
+  --accent: var(--ui-accent);
+  --accent-hover: var(--ui-accent-color);
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--ui-error);
+  --warning: var(--ui-warning);
+  --window: var(--ui-level-3);
+  --control: var(--ui-level-1);
+  --control-hover: var(--ui-selected);
+  --control-pressed: var(--ui-level-3-hover);
+  --subtle-hover: rgb(157 165 180 / 10%);
+  --subtle-pressed: rgb(157 165 180 / 6%);
+  --stroke: rgb(157 165 180 / 14%);
+  --stroke-strong: rgb(157 165 180 / 26%);
+  --divider: var(--ui-border);
+  --surface: var(--one-bg);
+  --layer: rgb(37 40 48 / 94%);
+  --shadow: 0 16px 44px rgb(0 0 0 / 45%), 0 2px 6px rgb(0 0 0 / 30%);
+
+  /*
+   * Closed tiles are flat pits in the pane border color, set into the editor
+   * background. Their edge is the tab bar color, a hair lighter than the pit.
+   */
+  --board-plate: var(--one-bg);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.24;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--ui-border);
+  --cell-closed-hover: color-mix(in srgb, #2f333d, var(--system-accent, #2f333d) 25%);
+  --cell-closed-pressed: var(--ui-level-3);
+  --cell-closed-edge: var(--ui-level-3);
+  --cell-open: var(--one-bg);
+  --cell-open-edge: var(--ui-level-3-hover);
+  --cell-exploded: var(--one-red-2);
+
+  --flag: var(--one-red);
+  --flag-outline: var(--ui-border);
+  --flag-pole: var(--ui-highlight);
+  --question: var(--one-orange-2);
+  --mine: var(--ui-border);
+  --mine-spark: var(--one-blue);
+  --mine-spikes: 6;
+  --hint: var(--one-cursor);
+  --focus: var(--ui-highlight);
+  --win: var(--one-green);
+
+  /*
+   * Counts follow the syntax tokens: purple keywords, red variables and
+   * fields, yellow classes, blue functions, green strings, cyan operators,
+   * orange numbers, then the text color, since comment gray misses 4.5:1.
+   * Three move in OKLab lightness only, keeping hue and chroma. Red #e06c75 to
+   * #e36f78 reaches 4.5:1 on the open cell. Green #98c379 to #96c077 and cyan
+   * #56b6c2 to #51b1bd stay apart from yellow, gray, and blue under color
+   * blindness.
+   */
+  --number-1: var(--one-purple);
+  --number-2: #e36f78;
+  --number-3: var(--one-orange-2);
+  --number-4: var(--one-blue);
+  --number-5: #96c077;
+  --number-6: #51b1bd;
+  --number-7: var(--one-orange);
+  --number-8: var(--one-fg);
+  --number-9: var(--ui-error);
+  --number-10: var(--ui-highlight);
+  --number-11: var(--ui-accent-text);
+  --number-12: var(--ui-success);
+}

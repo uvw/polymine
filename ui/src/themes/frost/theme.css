@@ -1,0 +1,62 @@
+/*
+ * Name: Frost
+ * Author: Polymine
+ * Description: Glass cells over a blurred window
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast, number-readability
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: frosted;
+  --number-style: digits;
+
+  /*
+   * Translucent cells over a frosted window. Open cells are the clearest
+   * layer, so a bright desktop can wash out the numbers; in this theme the
+   * look comes first.
+   */
+  --board-plate: color-mix(in srgb, #0c0e14, var(--system-accent, #0c0e14) 12%);
+  --board-plate-opacity: 15%;
+  --board-gap: 3px;
+  --board-font:
+    "Segoe UI Variable Display", "Segoe UI", -apple-system, ui-rounded, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.3;
+  --cell-bevel: 0.05;
+  --cell-sheen: rgb(255 255 255 / 6%);
+  --cell-closed: #e4ebf7;
+  --cell-closed-hover: color-mix(in srgb, #ffffff, var(--system-accent, #ffffff) 35%);
+  --cell-closed-pressed: #c9d2e2;
+  --cell-closed-edge: color-mix(in srgb, #ffffff, var(--system-accent, #ffffff) 30%);
+  --cell-closed-opacity: 14%;
+  --cell-open: #0b0d12;
+  --cell-open-edge: #ffffff;
+  --cell-open-opacity: 6%;
+  --cell-exploded: #d64545;
+
+  --flag: #ff7043;
+  --flag-outline: #14161b;
+  --flag-pole: #e6e8ee;
+  --question: #f0e442;
+  --mine: #0e0f12;
+  --mine-spark: #f07848;
+  --mine-spikes: 4;
+  --hint: #56b4e9;
+  --focus: #ffffff;
+  --win: #2fc79c;
+
+  --number-1: #8fd3ff;
+  --number-2: #7ff0c4;
+  --number-3: #ffb38a;
+  --number-4: #f3a6e4;
+  --number-5: #ffd27a;
+  --number-6: #fff38a;
+  --number-7: #ff9fb2;
+  --number-8: #ffffff;
+  --number-9: #cad6fe;
+  --number-10: #a8f3e6;
+  --number-11: #dac0f7;
+  --number-12: #ffd7c1;
+}

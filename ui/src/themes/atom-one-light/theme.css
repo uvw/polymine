@@ -1,0 +1,118 @@
+/*
+ * Name: Atom One Light
+ * Author: GitHub's Atom team, adapted by Polymine
+ * Description: Atom's One Light syntax colors on paper white, with an atom for a mine
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: pane-contrast
+ * Source: https://github.com/atom/atom/tree/master/packages/one-light-syntax
+ */
+:root {
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  /* One Light's syntax colors, from one-light-syntax/styles/colors.less. */
+  --one-bg: #fafafa;
+  --one-fg: #383a42;
+  --one-mono-2: #696c77;
+  --one-mono-3: #a0a1a7;
+  --one-cyan: #0184bc;
+  --one-blue: #4078f2;
+  --one-purple: #a626a4;
+  --one-green: #50a14f;
+  --one-red: #e45649;
+  --one-red-2: #ca1243;
+  --one-orange: #b76b01;
+  --one-cursor: #526eff;
+
+  /* One Light UI's colors, from one-light-ui/styles. */
+  --ui-fg: #424243;
+  --ui-border: #dbdbdc;
+  --ui-level-1: #ffffff;
+  --ui-level-3: #eaeaeb;
+  --ui-highlight: #e5e5e6;
+  --ui-overlay: #f2f2f2;
+  --ui-subtle: #8e8e90;
+  --ui-text-highlight: #232324;
+  --ui-accent: #5871ef;
+  --ui-accent-color: #556de8;
+
+  /* Window chrome. */
+  --text: var(--ui-fg);
+  --text-dim: var(--one-mono-2);
+  --accent: var(--ui-accent);
+  --accent-hover: var(--ui-accent-color);
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --danger: var(--one-red-2);
+  --warning: var(--one-orange);
+  --window: var(--ui-level-3);
+  --control: var(--ui-level-1);
+  --control-hover: var(--ui-overlay);
+  --control-pressed: var(--ui-highlight);
+  --subtle-hover: rgb(66 66 67 / 10%);
+  --subtle-pressed: rgb(66 66 67 / 6%);
+  --stroke: rgb(66 66 67 / 14%);
+  --stroke-strong: rgb(66 66 67 / 26%);
+  --divider: var(--ui-border);
+  --surface: var(--ui-level-1);
+  --layer: rgb(242 242 242 / 94%);
+  --shadow: 0 16px 40px rgb(56 58 66 / 18%), 0 2px 6px rgb(56 58 66 / 12%);
+
+  /*
+   * Flat closed tiles in the highlight gray sit a shade below the editor
+   * background, as the panes do. Their edge is the pane border.
+   */
+  --board-plate: var(--one-bg);
+  --board-gap: 2px;
+  --board-font:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Menlo, Consolas, ui-monospace,
+    monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.24;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: var(--ui-highlight);
+  --cell-closed-hover: color-mix(in srgb, #dbdbdc, var(--system-accent, #dbdbdc) 25%);
+  --cell-closed-pressed: var(--ui-level-3);
+  --cell-closed-edge: var(--ui-border);
+  --cell-open: var(--one-bg);
+  --cell-open-edge: var(--ui-highlight);
+  --cell-exploded: var(--one-red-2);
+
+  --flag: var(--one-red);
+  --flag-outline: var(--one-fg);
+  --flag-pole: var(--one-fg);
+  --question: var(--one-fg);
+  --mine: var(--one-fg);
+  --mine-spark: var(--one-blue);
+  --mine-spikes: 6;
+  --hint: var(--one-cursor);
+  --focus: var(--ui-text-highlight);
+  --win: var(--one-green);
+
+  /*
+   * Counts follow the syntax tokens: purple keywords, red variables and
+   * fields, orange classes and numbers, blue functions, green strings, cyan
+   * operators, then the text color and a quiet gray. One Light's hues miss
+   * 4.5:1 on its background, so five move in OKLab lightness only, keeping hue
+   * and chroma: blue #4078f2 to #2f64dd, green #50a14f to #318332, red #e45649
+   * to #ce4137, orange #b76b01 to #ac6000, and cyan #0184bc to #007ab2. The
+   * blue also stays apart from cyan under color blindness. Counts 9 to 12 mix
+   * a syntax color half and half with the text color.
+   */
+  --number-1: var(--one-purple);
+  --number-2: #ce4137;
+  --number-3: #ac6000;
+  --number-4: #2f64dd;
+  --number-5: #318332;
+  --number-6: #007ab2;
+  --number-7: var(--one-fg);
+  --number-8: var(--one-mono-2);
+  --number-9: color-mix(in srgb, var(--one-blue), var(--one-fg));
+  --number-10: color-mix(in srgb, var(--one-green), var(--one-fg));
+  --number-11: color-mix(in srgb, var(--one-purple), var(--one-fg));
+  --number-12: color-mix(in srgb, var(--one-orange), var(--one-fg));
+}

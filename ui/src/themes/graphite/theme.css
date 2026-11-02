@@ -1,0 +1,55 @@
+/*
+ * Name: Graphite
+ * Author: Polymine
+ * Description: Matches light or dark mode
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  --color-scheme: light dark;
+  --window-material: default;
+  --number-style: digits;
+
+  /* A recessed graphite tray that reads well on light and dark chrome. */
+  --board-plate: color-mix(in srgb, #14161b, var(--system-accent, #14161b) 12%);
+  --board-gap: 2px;
+  --board-font:
+    "Segoe UI Variable Display", "Segoe UI", -apple-system, ui-rounded, system-ui, sans-serif;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.22;
+  --cell-bevel: 0.05;
+  --cell-sheen: rgb(255 255 255 / 7%);
+  --cell-closed: #667089;
+  --cell-closed-hover: color-mix(in srgb, #737e99, var(--system-accent, #737e99) 35%);
+  --cell-closed-pressed: #4e5669;
+  --cell-closed-edge: color-mix(in srgb, #6f7991, var(--system-accent, #6f7991) 30%);
+  --cell-open: #1e2128;
+  --cell-open-edge: #363c48;
+  --cell-exploded: #d64545;
+
+  --flag: #ff7043;
+  --flag-outline: #14161b;
+  --flag-pole: #e6e8ee;
+  --question: #f0e442;
+  --mine: #0e0f12;
+  --mine-spark: #f07848;
+  --mine-spikes: 4;
+  --hint: #56b4e9;
+  --focus: #ffffff;
+  --win: #2fc79c;
+
+  /* Checked for color-blind separation. */
+  --number-1: #56b4e9;
+  --number-2: #2fc79c;
+  --number-3: #f07848;
+  --number-4: #d88cc0;
+  --number-5: #e9a23b;
+  --number-6: #f0e442;
+  --number-7: #b9c3ff;
+  --number-8: #dfe3ea;
+  --number-9: #ff8fa3;
+  --number-10: #8fe3d2;
+  --number-11: #c7a7ff;
+  --number-12: #ffc9a8;
+}
