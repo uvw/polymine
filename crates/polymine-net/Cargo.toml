@@ -1,0 +1,31 @@
+[package]
+name = "polymine-net"
+description = "Polymine's network layer: HTTPS requests under a fixed policy, a response cache, GitHub folder downloads and a JSON API helper."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+log = "0.4"
+percent-encoding = "2.3"
+# TLS through rustls with the ring provider, and the operating system's
+# certificate verifier instead of bundled roots.
+ureq = { version = "3.5", default-features = false, features = ["rustls-no-provider", "platform-verifier"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+
+[features]
+# Opens the loopback test server and the plain HTTP switch to other crates'
+# tests. Only dev-dependencies turn it on.
+test-support = []
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
