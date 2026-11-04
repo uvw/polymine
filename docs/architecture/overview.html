@@ -1,0 +1,3181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Polymine architecture</title>
+    <link rel="icon" href="data:," />
+    <meta
+      name="description"
+      content="An interactive map of Polymine's parts and the paths a click, a CLI move, startup, autosave, hints, themes, and a release take through them."
+    />
+    <script>
+      // Applies the saved or system theme before the first paint.
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem("polymine-architecture-theme");
+        } catch (e) {}
+        var dark =
+          saved === "dark" ||
+          (saved !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+      })();
+    </script>
+    <style>
+      :root {
+        --bg: #faf9f5;
+        --surface: #ffffff;
+        --surface2: #f0eee6;
+        --ink: #141413;
+        --body: #3d3d3a;
+        --muted: #75746d;
+        --line: #d1cfc5;
+        --line-soft: #e6e3da;
+        --clay: #c8613f;
+        --clay-soft: rgba(217, 119, 87, 0.1);
+        --olive: #687c4d;
+        --olive-soft: rgba(120, 140, 93, 0.12);
+        --blue: #4f7189;
+        --blue-soft: rgba(91, 126, 150, 0.12);
+        --gold: #a9843a;
+        --gold-soft: rgba(201, 164, 92, 0.14);
+        --zone: rgba(20, 20, 19, 0.022);
+        --zone-line: #d1cfc5;
+        --zone-emph: rgba(217, 119, 87, 0.05);
+        --zone-emph-line: #c8613f;
+        --shadow: 0 8px 28px rgba(0, 0, 0, 0.13);
+        --display:
+          system-ui, -apple-system, "Segoe UI Variable Display", "Segoe UI", Roboto, sans-serif;
+        --sans: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, sans-serif;
+        --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+        color-scheme: light;
+      }
+      html.dark {
+        --bg: #0c0f1c;
+        --surface: #171b2e;
+        --surface2: #1e2440;
+        --ink: #f3f5ff;
+        --body: #c4c9e0;
+        --muted: #8c93ae;
+        --line: #2e3452;
+        --line-soft: #222840;
+        --clay: #8c8df6;
+        --clay-soft: rgba(140, 141, 246, 0.16);
+        --olive: #9fd84e;
+        --olive-soft: rgba(159, 216, 78, 0.13);
+        --blue: #56b6e8;
+        --blue-soft: rgba(86, 182, 232, 0.15);
+        --gold: #e3924c;
+        --gold-soft: rgba(227, 146, 76, 0.15);
+        --zone: rgba(255, 255, 255, 0.018);
+        --zone-line: #2a3052;
+        --zone-emph: rgba(140, 141, 246, 0.07);
+        --zone-emph-line: #8c8df6;
+        --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg);
+        color: var(--body);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      html.dark body {
+        background: radial-gradient(1300px 760px at 62% -8%, #1b2138 0%, #0f1324 52%, #0a0c17 100%);
+      }
+      :focus-visible {
+        outline: 2px solid var(--clay);
+        outline-offset: 2px;
+      }
+
+      /* top bar */
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 10px 14px;
+        flex-wrap: wrap;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line-soft);
+        flex: none;
+      }
+      .bar h1 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 18px;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .bar .sub {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .bar .sub a {
+        color: inherit;
+        text-decoration: underline dotted;
+        text-underline-offset: 2px;
+      }
+      .bar .sub a:hover {
+        color: var(--ink);
+      }
+      .chip,
+      .btn {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.02em;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .chip {
+        border-radius: 999px;
+      }
+      .btn {
+        border-radius: 6px;
+      }
+      .chip:hover,
+      .btn:hover {
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--bg);
+      }
+      .tools {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      /* stage */
+      .stage {
+        flex: 1;
+        position: relative;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .stage svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: grab;
+        touch-action: none;
+      }
+      .stage svg.grabbing {
+        cursor: grabbing;
+      }
+      .stage svg:focus-visible {
+        outline-offset: -4px;
+      }
+
+      .zone rect {
+        fill: var(--zone);
+        stroke: var(--zone-line);
+        stroke-width: 1;
+        stroke-dasharray: 5 5;
+      }
+      .zone.emph rect {
+        fill: var(--zone-emph);
+        stroke: var(--zone-emph-line);
+        stroke-width: 1.5;
+        stroke-dasharray: none;
+      }
+      .zone .ztitle {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        letter-spacing: 0.08em;
+        fill: var(--muted);
+        font-weight: 600;
+      }
+      .zone .zsub {
+        font-family: var(--mono);
+        font-size: 10px;
+        fill: var(--muted);
+      }
+      .zone.emph .ztitle,
+      .zone.emph .zsub {
+        fill: var(--zone-emph-line);
+      }
+
+      .node {
+        cursor: pointer;
+        outline: none;
+      }
+      .node rect.box {
+        fill: var(--surface);
+        stroke: var(--line);
+        stroke-width: 1.5;
+        transition: stroke 0.15s ease;
+      }
+      .node:hover rect.box {
+        stroke: var(--muted);
+      }
+      .node:focus-visible rect.box {
+        stroke: var(--clay);
+        stroke-width: 2.6;
+      }
+      .node.sel rect.box {
+        stroke: var(--clay) !important;
+        stroke-width: 2.4;
+      }
+      .node .t {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 650;
+        fill: var(--ink);
+        pointer-events: none;
+      }
+      .node .m {
+        font-family: var(--mono);
+        font-size: 10px;
+        fill: var(--muted);
+        pointer-events: none;
+      }
+      .node .k {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        pointer-events: none;
+      }
+      .node.gate rect.box {
+        fill: var(--clay-soft);
+        stroke: var(--clay);
+      }
+      .node.gate .k {
+        fill: var(--clay);
+      }
+      .node.store rect.box {
+        fill: var(--surface2);
+      }
+      .node.store .k,
+      .node.svc .k {
+        fill: var(--blue);
+      }
+      .node.worker rect.box {
+        fill: var(--olive-soft);
+        stroke: var(--olive);
+      }
+      .node.worker .k {
+        fill: var(--olive);
+      }
+      .node.ext rect.box {
+        stroke-dasharray: 6 3;
+      }
+      .node.ext .k {
+        fill: var(--gold);
+      }
+      .node .accent {
+        fill: var(--muted);
+      }
+      .node.gate .accent {
+        fill: var(--clay);
+      }
+      .node.svc .accent,
+      .node.store .accent {
+        fill: var(--blue);
+      }
+      .node.worker .accent {
+        fill: var(--olive);
+      }
+      .node.ext .accent {
+        fill: var(--gold);
+      }
+      .node.disabled rect.box {
+        stroke-dasharray: 2 4 !important;
+      }
+      .node.disabled .t,
+      .node.disabled .m {
+        opacity: 0.68;
+      }
+      .node.disabled .accent {
+        opacity: 0.4;
+      }
+
+      .edge {
+        stroke: var(--muted);
+        stroke-width: 1.5;
+        fill: none;
+        marker-end: url(#a-mut);
+        transition:
+          opacity 0.2s ease,
+          stroke 0.2s ease;
+      }
+      .edge.dash {
+        stroke-dasharray: 5 4;
+      }
+      .elbl {
+        font-family: var(--mono);
+        font-size: 10px;
+        fill: var(--muted);
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        paint-order: stroke;
+        stroke: var(--bg);
+        stroke-width: 3.5px;
+        stroke-linejoin: round;
+      }
+
+      .flowing .edge {
+        opacity: 0.09;
+      }
+      .flowing .elbl {
+        opacity: 0.09;
+      }
+      .flowing .node {
+        opacity: 0.26;
+      }
+      .flowing .zone {
+        opacity: 0.5;
+      }
+      .flowing .edge.lit {
+        opacity: 1;
+        stroke: var(--clay);
+        stroke-width: 2;
+        marker-end: url(#a-clay);
+        stroke-dasharray: 7 5;
+        animation: march 0.9s linear infinite;
+      }
+      .flowing .elbl.lit {
+        opacity: 1;
+        fill: var(--clay);
+      }
+      .flowing .node.lit {
+        opacity: 1;
+      }
+      .flowing .node.lit rect.box {
+        stroke: var(--clay);
+      }
+      @keyframes march {
+        to {
+          stroke-dashoffset: -12;
+        }
+      }
+      .pulse {
+        fill: var(--clay);
+        pointer-events: none;
+      }
+      .badge {
+        pointer-events: none;
+      }
+      .badge circle {
+        fill: var(--clay);
+      }
+      .badge text {
+        fill: var(--bg);
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .stage:not(.flowing) .badge,
+      .stage:not(.flowing) .pulse {
+        display: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flowing .edge.lit {
+          animation: none;
+        }
+        .pulse {
+          display: none;
+        }
+      }
+
+      /* floating cards */
+      .card {
+        position: absolute;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 13px 15px;
+        box-shadow: var(--shadow);
+        overflow: auto;
+      }
+      .card .x {
+        position: absolute;
+        top: 8px;
+        right: 9px;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card .x:hover {
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      .card code {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--clay);
+        white-space: nowrap;
+      }
+      .card ul.files code {
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      #detail {
+        right: 16px;
+        bottom: 16px;
+        width: 360px;
+        max-width: calc(100% - 32px);
+        max-height: calc(100% - 76px);
+      }
+      #detail[hidden],
+      #flowcap[hidden],
+      #legend[hidden] {
+        display: none;
+      }
+      #detail h3 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 17px;
+        color: var(--ink);
+        margin-bottom: 2px;
+        padding-right: 26px;
+      }
+      #detail .meta {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 9px;
+        letter-spacing: 0.03em;
+      }
+      #detail p,
+      #detail li {
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      #detail .sec {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 10px 0 4px;
+      }
+      #detail ul {
+        margin-left: 17px;
+      }
+      #detail li {
+        margin-bottom: 3px;
+      }
+      #detail ul.files {
+        list-style: none;
+        margin-left: 0;
+      }
+      #flowcap {
+        left: 16px;
+        bottom: 16px;
+        width: 480px;
+        max-width: calc(100% - 32px);
+        max-height: calc(100% - 76px);
+      }
+      #flowcap .fname {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--clay);
+        margin-bottom: 7px;
+        padding-right: 26px;
+      }
+      #flowcap ol {
+        margin-left: 18px;
+      }
+      #flowcap li {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin-bottom: 3px;
+      }
+      @media (max-width: 1200px) {
+        #flowcap {
+          width: 400px;
+        }
+        #detail {
+          width: 330px;
+        }
+        #flowcap li,
+        #detail p,
+        #detail li {
+          font-size: 12px;
+        }
+      }
+      #legend {
+        left: 16px;
+        top: 14px;
+        width: 250px;
+        max-height: calc(100% - 28px);
+      }
+      #legend .lt {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 9px;
+      }
+      .lrow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 7px;
+        font-size: 11.5px;
+        color: var(--body);
+      }
+      .sw {
+        width: 22px;
+        height: 14px;
+        border-radius: 4px;
+        border: 1.5px solid var(--line);
+        flex: none;
+        background: var(--surface);
+      }
+      .sw.gate {
+        background: var(--clay-soft);
+        border-color: var(--clay);
+      }
+      .sw.store {
+        background: var(--surface2);
+      }
+      .sw.worker {
+        background: var(--olive-soft);
+        border-color: var(--olive);
+      }
+      .sw.ext {
+        border-color: var(--gold);
+        border-style: dashed;
+      }
+      .sw.disabled {
+        border-style: dotted;
+        border-color: var(--muted);
+      }
+      .lnote {
+        font-size: 11.5px;
+        line-height: 1.45;
+        color: var(--body);
+        margin-top: 8px;
+      }
+      .ln {
+        width: 22px;
+        height: 0;
+        border-top: 1.5px solid var(--muted);
+        flex: none;
+      }
+      .ln.dash {
+        border-top-style: dashed;
+      }
+
+      .zind {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--muted);
+        min-width: 38px;
+        text-align: center;
+      }
+      .zbtn {
+        width: 27px;
+        height: 27px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--surface);
+        color: var(--body);
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .zbtn:hover {
+        border-color: var(--muted);
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <div>
+        <h1>Polymine architecture</h1>
+        <div class="sub">click a box or a flow · see <a href="../design.md">docs/design.md</a></div>
+      </div>
+      <div class="spacer"></div>
+      <nav class="chips" id="chips" aria-label="Flows">
+        <button class="chip" data-flow="all" aria-pressed="true">Everything</button>
+        <button class="chip" data-flow="click" aria-pressed="false">Click a cell</button>
+        <button class="chip" data-flow="cli" aria-pressed="false">CLI move</button>
+        <button class="chip" data-flow="startup" aria-pressed="false">Startup</button>
+        <button class="chip" data-flow="autosave" aria-pressed="false">Autosave</button>
+        <button class="chip" data-flow="hint" aria-pressed="false">Hint and bot</button>
+        <button class="chip" data-flow="themes" aria-pressed="false">Themes</button>
+        <button class="chip" data-flow="sync" aria-pressed="false">Sync</button>
+        <button class="chip" data-flow="release" aria-pressed="false">Release</button>
+      </nav>
+      <div class="tools">
+        <button class="btn" id="legendBtn" aria-expanded="false" aria-controls="legend">
+          Legend
+        </button>
+        <button class="btn" id="themeBtn" title="Switch between the system, light, and dark look">
+          Look: system
+        </button>
+        <button class="zbtn" id="zoomOut" aria-label="Zoom out">&minus;</button>
+        <span class="zind" id="zind" aria-live="polite">100%</span>
+        <button class="zbtn" id="zoomIn" aria-label="Zoom in">+</button>
+        <button class="btn" id="zoomReset">Reset</button>
+      </div>
+    </header>
+
+    <main class="stage" id="stage">
+      <svg
+        id="svg"
+        tabindex="0"
+        role="group"
+        aria-label="Architecture diagram. Tab moves between boxes, Enter opens one, arrow keys pan, plus and minus zoom."
+      >
+        <defs>
+          <marker
+            id="a-mut"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="6.5"
+            markerHeight="6.5"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 z" style="fill: var(--muted)" />
+          </marker>
+          <marker
+            id="a-clay"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="6.5"
+            markerHeight="6.5"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 z" style="fill: var(--clay)" />
+          </marker>
+        </defs>
+        <g id="svg-content"></g>
+      </svg>
+
+      <div class="card" id="legend" hidden>
+        <button class="x" id="legendClose" aria-label="Close the legend">&times;</button>
+        <div class="lt">Legend</div>
+        <div class="lrow"><span class="sw gate"></span> App, the shell's hub</div>
+        <div class="lrow"><span class="sw"></span> Code in this repository</div>
+        <div class="lrow"><span class="sw worker"></span> Background thread or build job</div>
+        <div class="lrow"><span class="sw store"></span> Files on disk</div>
+        <div class="lrow"><span class="sw ext"></span> Outside the repository</div>
+        <div class="lrow"><span class="sw disabled"></span> Partial, in progress, or planned</div>
+        <div class="lrow"><span class="ln"></span> Calls, sends, or writes at run time</div>
+        <div class="lrow"><span class="ln dash"></span> Build time, or planned</div>
+        <p class="lnote">
+          Arrows point from the caller to what it uses. Replies travel back along the same line.
+        </p>
+        <p class="lnote">
+          Drag to pan and scroll to zoom. Tab moves between boxes, Enter opens one, and Escape
+          closes it. Arrow keys pan and plus and minus zoom when the diagram has focus.
+        </p>
+      </div>
+
+      <div class="card" id="flowcap" hidden aria-live="polite">
+        <button class="x" id="flowClose" aria-label="Close the flow steps">&times;</button>
+        <div class="fname" id="f-name"></div>
+        <ol id="f-steps"></ol>
+      </div>
+
+      <div class="card" id="detail" hidden aria-live="polite">
+        <button class="x" id="detailClose" aria-label="Close the details">&times;</button>
+        <h3 id="d-title"></h3>
+        <div class="meta" id="d-meta"></div>
+        <div id="d-body"></div>
+      </div>
+    </main>
+
+    <script>
+      /* ───────────────────────── data model ───────────────────────── */
+      // Rows: tier A at y 110 and 290, tier B at 560, tier C at 830, 1030, and 1210.
+      // A node with two meta lines is 112 tall; the zone title sits at z.y + 28.
+      const ZONES = [
+        {
+          title: "CLI",
+          sub: "crates/polymine-cli · people and agents",
+          x: 40,
+          y: 40,
+          w: 560,
+          h: 400,
+        },
+        { title: "UI", sub: "ui/src · svelte 5 · pixijs", x: 660, y: 40, w: 760, h: 400 },
+        {
+          title: "BUILD AND RELEASE",
+          sub: ".github/workflows · scripts",
+          x: 1480,
+          y: 40,
+          w: 760,
+          h: 400,
+        },
+        { title: "IPC CRATE", sub: "crates/polymine-ipc", x: 40, y: 490, w: 560, h: 220 },
+        { title: "OS AND PLATFORM", sub: "windows 11 · macos", x: 660, y: 490, w: 760, h: 220 },
+        { title: "NETWORK", sub: "crates/polymine-net", x: 1480, y: 490, w: 760, h: 220 },
+        { title: "ON-DISK DATA", sub: "per user · per instance", x: 40, y: 760, w: 560, h: 620 },
+        {
+          title: "DESKTOP SHELL",
+          sub: "src-tauri · tauri 2",
+          x: 660,
+          y: 760,
+          w: 1000,
+          h: 620,
+          emph: true,
+        },
+        { title: "ENGINE", sub: "crates/polymine-core · no I/O", x: 1720, y: 960, w: 520, h: 420 },
+      ];
+
+      const NODES = [
+        // CLI
+        {
+          id: "cli-agent",
+          cls: "ext",
+          x: 70,
+          y: 110,
+          w: 150,
+          h: 112,
+          t: "Terminal or agent",
+          k: "caller",
+          m: ["a person or an agent", "reads JSON"],
+        },
+        {
+          id: "cli-skill",
+          cls: "svc",
+          x: 240,
+          y: 110,
+          w: 150,
+          h: 112,
+          t: "Agent skill",
+          k: "SKILL.md",
+          m: ["the agents' guide", "printed by skill"],
+        },
+        {
+          id: "cli-sync",
+          cls: "svc",
+          x: 420,
+          y: 110,
+          w: 140,
+          h: 112,
+          t: "History sync",
+          k: "sync.rs",
+          m: ["history in a gist", "merges both ways"],
+        },
+        {
+          id: "cli-local",
+          cls: "svc",
+          x: 80,
+          y: 290,
+          w: 220,
+          h: 112,
+          t: "Headless games",
+          k: "local.rs",
+          m: ["--local: replays saved moves", "no app needed"],
+        },
+        {
+          id: "cli-main",
+          cls: "svc",
+          x: 340,
+          y: 290,
+          w: 220,
+          h: 112,
+          t: "polymine-cli",
+          k: "main.rs · cli.rs",
+          m: ["commands in, JSON out", "exit codes 0 to 5"],
+        },
+        // UI
+        {
+          id: "ui-light",
+          cls: "svc",
+          x: 690,
+          y: 110,
+          w: 160,
+          h: 112,
+          t: "Light",
+          k: "board/light.ts",
+          m: ["shade, glare, rim", "one shared texture"],
+        },
+        {
+          id: "ui-board",
+          cls: "svc",
+          x: 870,
+          y: 110,
+          w: 160,
+          h: 112,
+          t: "Board renderer",
+          k: "pixijs 8 · lib/board",
+          m: ["draws while moving", "cells in groups"],
+        },
+        {
+          id: "ui-store",
+          cls: "svc",
+          x: 1050,
+          y: 110,
+          w: 160,
+          h: 112,
+          t: "Game store",
+          k: "game.svelte.ts",
+          m: ["queues backend calls", "drops old revisions"],
+        },
+        {
+          id: "ui-app",
+          cls: "svc",
+          x: 1230,
+          y: 110,
+          w: 160,
+          h: 112,
+          t: "Svelte app",
+          k: "App.svelte",
+          m: ["toolbar, dialogs", "chrome tokens"],
+        },
+        {
+          id: "ui-themes",
+          cls: "svc",
+          x: 690,
+          y: 290,
+          w: 160,
+          h: 112,
+          t: "Themes",
+          k: "lib/themes · themes/",
+          m: ["built-in and player", "resolve, accent tint"],
+        },
+        {
+          id: "ui-filter",
+          cls: "svc",
+          x: 870,
+          y: 290,
+          w: 160,
+          h: 112,
+          t: "Color filter",
+          k: "themes/filter.ts",
+          m: ["three deficiencies", "moves colors apart"],
+        },
+        {
+          id: "ui-api",
+          cls: "svc",
+          x: 1050,
+          y: 290,
+          w: 160,
+          h: 112,
+          t: "Backend bridge",
+          k: "api.ts · bindings",
+          m: ["sole command caller", "tauri-specta types"],
+        },
+        {
+          id: "ui-i18n",
+          cls: "svc",
+          x: 1230,
+          y: 290,
+          w: 160,
+          h: 112,
+          t: "Strings",
+          k: "lib/i18n",
+          m: ["t() for every string", "en.json baseline"],
+        },
+        // Build and release
+        {
+          id: "b-notices",
+          cls: "worker",
+          x: 1520,
+          y: 110,
+          w: 200,
+          h: 112,
+          t: "Third-party notices",
+          k: "scripts/notices.mjs",
+          m: ["cargo-about + vite modules", "shown in the About window"],
+        },
+        {
+          id: "b-ci",
+          cls: "worker",
+          x: 1760,
+          y: 110,
+          w: 200,
+          h: 112,
+          t: "CI",
+          k: "ci.yml",
+          m: ["lint, types, tests, clippy", "ubuntu, windows, macos"],
+        },
+        {
+          id: "b-release",
+          cls: "worker",
+          x: 2000,
+          y: 110,
+          w: 200,
+          h: 112,
+          t: "Release workflow",
+          k: "release.yml · v* tags",
+          m: ["CI first, then a draft", "cli built as a sidecar"],
+        },
+        {
+          id: "b-bindings",
+          cls: "worker",
+          x: 1520,
+          y: 290,
+          w: 200,
+          h: 112,
+          t: "Bindings export",
+          k: "tests/bindings.rs",
+          m: ["cargo test writes index.ts", "CI fails on a diff"],
+        },
+        {
+          id: "b-smoke",
+          cls: "worker",
+          x: 1760,
+          y: 290,
+          w: 200,
+          h: 112,
+          t: "CLI smoke test",
+          k: "scripts/cli-smoke.mjs",
+          m: ["named instance, scratch data", "seeded game over the CLI"],
+        },
+        {
+          id: "b-gh",
+          cls: "ext",
+          x: 2000,
+          y: 290,
+          w: 200,
+          h: 112,
+          t: "GitHub Releases",
+          k: "draft release",
+          m: ["dmg · setup.exe", "portable Windows zip"],
+        },
+        // IPC crate
+        {
+          id: "ipc-inst",
+          cls: "svc",
+          x: 80,
+          y: 560,
+          w: 145,
+          h: 112,
+          t: "Instances",
+          k: "instance.rs",
+          m: ["folders per instance", "running registry"],
+        },
+        {
+          id: "ipc-proto",
+          cls: "svc",
+          x: 250,
+          y: 560,
+          w: 145,
+          h: 112,
+          t: "Protocol & views",
+          k: "protocol · view",
+          m: ["version 1, one line", "agent board views"],
+        },
+        {
+          id: "ipc-transport",
+          cls: "svc",
+          x: 420,
+          y: 560,
+          w: 145,
+          h: 112,
+          t: "Transport",
+          k: "transport.rs",
+          m: ["call · serve", "16 at once, 64 KiB"],
+        },
+        // OS and platform
+        {
+          id: "os-socket",
+          cls: "ext",
+          x: 700,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "Local socket",
+          k: "named pipe · unix socket",
+          m: ["owner-only pipe on Windows", "/tmp/polymine-<uid>"],
+        },
+        {
+          id: "os-webview",
+          cls: "ext",
+          x: 940,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "WebView",
+          k: "webview2 · wkwebview",
+          m: ["runs the UI bundle", "Tauri IPC, locked CSP"],
+        },
+        {
+          id: "os-native",
+          cls: "ext",
+          x: 1180,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "Native look",
+          k: "mica · acrylic · vibrancy",
+          m: ["window-vibrancy crate", "accent: UISettings, NSColor"],
+        },
+        // Network
+        {
+          id: "pl-net",
+          cls: "svc",
+          x: 1520,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "Network crate",
+          k: "crates/polymine-net",
+          m: ["HTTPS under a host policy", "only the CLI uses it"],
+        },
+        {
+          id: "pl-github",
+          cls: "ext",
+          x: 1760,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "GitHub gist",
+          k: "api.github.com",
+          m: ["history.jsonl for sync", "remote themes: planned"],
+        },
+        // On-disk data
+        {
+          id: "da-runtime",
+          cls: "store",
+          x: 80,
+          y: 830,
+          w: 220,
+          h: 112,
+          t: "Runtime folder",
+          k: "dev.uvw.polymine",
+          m: ["instances/ registry", "games/ for --local"],
+        },
+        {
+          id: "da-logs",
+          cls: "store",
+          x: 340,
+          y: 830,
+          w: 220,
+          h: 112,
+          t: "Logs",
+          k: "tauri-plugin-log",
+          m: ["Polymine.log per instance", "panics with backtraces"],
+        },
+        {
+          id: "da-themes",
+          cls: "store",
+          x: 80,
+          y: 1030,
+          w: 220,
+          h: 112,
+          t: "Themes folder",
+          k: "themes/ · per instance",
+          m: ["a folder per theme", "css variables, no scripts"],
+        },
+        {
+          id: "da-data",
+          cls: "store",
+          x: 340,
+          y: 1030,
+          w: 220,
+          h: 292,
+          t: "Data folder",
+          k: "Polymine · per instance",
+          m: [
+            "settings.json",
+            "history.jsonl",
+            "game.json",
+            "window.json",
+            "saves/",
+            "",
+            "portable: data/ beside exe",
+            "named: instances/<name>",
+          ],
+        },
+        // Desktop shell
+        {
+          id: "sh-remote",
+          cls: "svc",
+          x: 700,
+          y: 830,
+          w: 200,
+          h: 112,
+          t: "Remote server",
+          k: "remote.rs",
+          m: ["answers polymine-cli", "emits external changes"],
+        },
+        {
+          id: "sh-commands",
+          cls: "svc",
+          x: 940,
+          y: 830,
+          w: 200,
+          h: 112,
+          t: "Tauri commands",
+          k: "commands.rs · lib.rs",
+          m: ["23 typed commands", "slow ones on a thread pool"],
+        },
+        {
+          id: "sh-window",
+          cls: "svc",
+          x: 1180,
+          y: 830,
+          w: 200,
+          h: 112,
+          t: "Window & chrome",
+          k: "material · accent",
+          m: ["Mica, vibrancy, edge fit", "window.json, traffic lights"],
+        },
+        {
+          id: "sh-settings",
+          cls: "svc",
+          x: 700,
+          y: 1030,
+          w: 200,
+          h: 112,
+          t: "Settings",
+          k: "settings.rs",
+          m: ["theme, filter, rules", "bad fields fall back"],
+        },
+        {
+          id: "sh-app",
+          cls: "gate",
+          x: 960,
+          y: 1030,
+          w: 180,
+          h: 292,
+          t: "App",
+          k: "app.rs · the hub",
+          m: [
+            "owns the session,",
+            "settings, and history",
+            "",
+            "one path for the UI",
+            "and for the CLI",
+            "",
+            "records finished games",
+            "stats on demand",
+          ],
+        },
+        {
+          id: "sh-startup",
+          cls: "svc",
+          x: 1180,
+          y: 1030,
+          w: 200,
+          h: 112,
+          t: "Startup",
+          k: "lib.rs run()",
+          m: ["plugins, folders, window", "then App, remote, autosave"],
+        },
+        {
+          id: "sh-autosave",
+          cls: "worker",
+          x: 1420,
+          y: 1030,
+          w: 200,
+          h: 112,
+          t: "Autosave & sleep",
+          k: "lib.rs · sleep.rs",
+          m: ["saves every 5 s on change", "pauses after sleep"],
+        },
+        {
+          id: "sh-history",
+          cls: "svc",
+          x: 700,
+          y: 1210,
+          w: 200,
+          h: 112,
+          t: "History",
+          k: "history.rs",
+          m: ["append-only JSON lines", "ranked games in memory"],
+        },
+        {
+          id: "sh-saves",
+          cls: "svc",
+          x: 1420,
+          y: 830,
+          w: 200,
+          h: 112,
+          t: "Named saves",
+          k: "saves.rs",
+          m: ["save, list, load, delete", "Saves dialog"],
+        },
+        {
+          id: "sh-session",
+          cls: "svc",
+          x: 1420,
+          y: 1210,
+          w: 200,
+          h: 112,
+          t: "Session & clock",
+          k: "session.rs",
+          m: ["game, clock, pause, moves", "a revision per change"],
+        },
+        // Engine
+        {
+          id: "en-solver",
+          cls: "svc",
+          x: 1760,
+          y: 1030,
+          w: 200,
+          h: 112,
+          t: "Solver",
+          k: "solver.rs",
+          m: ["certain moves, then odds", "search budget per call"],
+        },
+        {
+          id: "en-tilings",
+          cls: "svc",
+          x: 2000,
+          y: 1030,
+          w: 200,
+          h: 112,
+          t: "Tilings & board",
+          k: "tiling · catalog · board",
+          m: ["tilings as data", "neighbors from geometry"],
+        },
+        {
+          id: "en-rules",
+          cls: "svc",
+          x: 1760,
+          y: 1210,
+          w: 200,
+          h: 112,
+          t: "Rules",
+          k: "game.rs · config.rs",
+          m: ["open, mark, smart click", "ChaCha8 from a seed"],
+        },
+        {
+          id: "en-stats",
+          cls: "svc",
+          x: 2000,
+          y: 1210,
+          w: 200,
+          h: 112,
+          t: "Statistics",
+          k: "stats.rs",
+          m: ["records to statistics", "champions per board"],
+        },
+      ];
+
+      // Anchors: [node, side, frac], where frac runs 0..1 along the side, or
+      // {x} / {y} pins an absolute coordinate on it. via lists the waypoints of an
+      // orthogonal route; without it, the edge is a short curve.
+      const EDGES = [
+        // UI
+        { id: "e-board-store", from: ["ui-board", "right", 0.35], to: ["ui-store", "left", 0.35] },
+        { id: "e-store-board", from: ["ui-store", "left", 0.7], to: ["ui-board", "right", 0.7] },
+        { id: "e-uiapp-store", from: ["ui-app", "left", 0.5], to: ["ui-store", "right", 0.5] },
+        {
+          id: "e-store-api",
+          from: ["ui-store", "bottom", { x: 1100 }],
+          to: ["ui-api", "top", { x: 1100 }],
+          label: "queued calls",
+          lx: 1094,
+          ly: 284,
+          lanchor: "end",
+        },
+        {
+          id: "e-api-store",
+          from: ["ui-api", "top", { x: 1150 }],
+          to: ["ui-store", "bottom", { x: 1150 }],
+          label: "events",
+          lx: 1156,
+          ly: 240,
+          lanchor: "start",
+        },
+        {
+          id: "e-uiapp-api",
+          from: ["ui-app", "bottom", { x: 1250 }],
+          to: ["ui-api", "top", { x: 1194 }],
+          via: [
+            [1250, 256],
+            [1194, 256],
+          ],
+          label: "environment",
+          lx: 1226,
+          ly: 250,
+        },
+        {
+          id: "e-uiapp-i18n",
+          from: ["ui-app", "bottom", 0.5],
+          to: ["ui-i18n", "top", 0.5],
+          label: "t()",
+        },
+        {
+          id: "e-store-themes",
+          from: ["ui-store", "bottom", { x: 1066 }],
+          to: ["ui-themes", "top", { x: 800 }],
+          via: [
+            [1066, 268],
+            [800, 268],
+          ],
+          label: "theme id",
+          lx: 860,
+          ly: 262,
+        },
+        {
+          id: "e-themes-filter",
+          from: ["ui-themes", "right", 0.5],
+          to: ["ui-filter", "left", 0.5],
+        },
+        {
+          id: "e-filter-board",
+          from: ["ui-filter", "top", 0.5],
+          to: ["ui-board", "bottom", 0.5],
+          label: "palette",
+          lx: 957,
+          ly: 248,
+          lanchor: "start",
+        },
+        {
+          id: "e-board-light",
+          from: ["ui-board", "left", 0.5],
+          to: ["ui-light", "right", 0.5],
+        },
+        {
+          id: "e-light-themes",
+          from: ["ui-light", "bottom", { x: 720 }],
+          to: ["ui-themes", "top", { x: 720 }],
+          label: "profiles",
+          lx: 727,
+          ly: 248,
+          lanchor: "start",
+        },
+        // UI and OS
+        {
+          id: "e-api-webview",
+          from: ["ui-api", "bottom", { x: 1110 }],
+          to: ["os-webview", "top", { x: 1110 }],
+          label: "invoke",
+          lx: 1117,
+          ly: 520,
+          lanchor: "start",
+        },
+        {
+          id: "e-webview-api",
+          from: ["os-webview", "top", { x: 1066 }],
+          to: ["ui-api", "bottom", { x: 1066 }],
+          label: "events",
+          lx: 1059,
+          ly: 520,
+          lanchor: "end",
+        },
+        // Build and release
+        {
+          id: "e-release-ci",
+          from: ["b-release", "left", 0.5],
+          to: ["b-ci", "right", 0.5],
+          label: "runs",
+        },
+        {
+          id: "e-ci-notices",
+          from: ["b-ci", "left", 0.5],
+          to: ["b-notices", "right", 0.5],
+          label: "drift",
+        },
+        {
+          id: "e-notices-uiapp",
+          from: ["b-notices", "left", 0.5],
+          to: ["ui-app", "right", 0.5],
+          dash: true,
+          label: "notices file",
+          lx: 1442,
+          ly: 160,
+          lanchor: "start",
+        },
+        {
+          id: "e-ci-bindings",
+          from: ["b-ci", "bottom", 0.15],
+          to: ["b-bindings", "top", 0.5],
+          via: [
+            [1790, 256],
+            [1620, 256],
+          ],
+          label: "cargo test",
+        },
+        {
+          id: "e-bindings-api",
+          from: ["b-bindings", "bottom", 0.5],
+          to: ["ui-api", "bottom", { x: 1180 }],
+          via: [
+            [1620, 448],
+            [1180, 448],
+          ],
+          dash: true,
+          label: "writes bindings/index.ts",
+          lx: 1627,
+          ly: 432,
+          lanchor: "start",
+        },
+        {
+          id: "e-ci-smoke",
+          from: ["b-ci", "bottom", 0.6],
+          to: ["b-smoke", "top", 0.6],
+          label: "runs",
+        },
+        {
+          id: "e-release-gh",
+          from: ["b-release", "bottom", 0.5],
+          to: ["b-gh", "top", 0.5],
+          label: "uploads",
+        },
+        // CLI
+        {
+          id: "e-agent-cli",
+          from: ["cli-agent", "bottom", 0.5],
+          to: ["cli-main", "top", { x: 352 }],
+          via: [
+            [145, 256],
+            [352, 256],
+          ],
+          label: "commands",
+        },
+        {
+          id: "e-agent-skill",
+          from: ["cli-agent", "right", 0.5],
+          to: ["cli-skill", "left", 0.5],
+        },
+        {
+          id: "e-main-skill",
+          from: ["cli-main", "top", { x: 376 }],
+          to: ["cli-skill", "bottom", { x: 376 }],
+          label: "prints",
+        },
+        {
+          id: "e-main-sync",
+          from: ["cli-main", "top", { x: 500 }],
+          to: ["cli-sync", "bottom", { x: 500 }],
+          label: "sync",
+        },
+        {
+          id: "e-sync-net",
+          from: ["cli-sync", "top", { x: 540 }],
+          to: ["pl-net", "left", { y: 600 }],
+          via: [
+            [540, 26],
+            [1436, 26],
+            [1436, 600],
+          ],
+          label: "gist API",
+        },
+        {
+          id: "e-sync-data",
+          from: ["cli-sync", "right", 0.5],
+          to: ["da-data", "right", { y: 1200 }],
+          via: [],
+          label: "history.jsonl",
+          lx: 580,
+          ly: 742,
+          lanchor: "end",
+        },
+        { id: "e-main-local", from: ["cli-main", "left", 0.5], to: ["cli-local", "right", 0.5] },
+        {
+          id: "e-main-transport",
+          from: ["cli-main", "bottom", { x: 492.5 }],
+          to: ["ipc-transport", "top", 0.5],
+          label: "call",
+        },
+        {
+          id: "e-main-inst",
+          from: ["cli-main", "bottom", 0.1],
+          to: ["ipc-inst", "top", { x: 214 }],
+          via: [
+            [362, 448],
+            [214, 448],
+          ],
+          label: "instances · paths",
+        },
+        {
+          id: "e-local-runtime",
+          from: ["cli-local", "left", 0.5],
+          to: ["da-runtime", "left", 0.5],
+          via: [[54, 886]],
+          label: "games/",
+          lx: 62,
+          ly: 477,
+          lanchor: "start",
+        },
+        {
+          id: "e-local-rules",
+          from: ["cli-local", "bottom", 0.5],
+          to: ["en-rules", "left", 0.125],
+          via: [
+            [190, 464],
+            [1462, 464],
+            [1462, 730],
+            [1705, 730],
+            [1705, 1224],
+          ],
+          label: "Game and solver, no app",
+          lx: 1290,
+          ly: 458,
+        },
+        // IPC
+        {
+          id: "e-transport-socket",
+          from: ["ipc-transport", "right", 0.5],
+          to: ["os-socket", "left", 0.5],
+          label: "JSON line",
+          lx: 610,
+          ly: 610,
+          lanchor: "start",
+        },
+        {
+          id: "e-transport-proto",
+          from: ["ipc-transport", "left", 0.5],
+          to: ["ipc-proto", "right", 0.5],
+        },
+        {
+          id: "e-inst-runtime",
+          from: ["ipc-inst", "bottom", { x: 214 }],
+          to: ["da-runtime", "top", { x: 214 }],
+          label: "registry",
+        },
+        // OS and shell
+        {
+          id: "e-socket-remote",
+          from: ["os-socket", "bottom", 0.6],
+          to: ["sh-remote", "top", 0.6],
+          label: "request",
+        },
+        {
+          id: "e-webview-commands",
+          from: ["os-webview", "bottom", 0.5],
+          to: ["sh-commands", "top", 0.5],
+          label: "Tauri IPC",
+          lx: 1033,
+          ly: 712,
+          lanchor: "end",
+        },
+        {
+          id: "e-window-native",
+          from: ["sh-window", "top", 0.5],
+          to: ["os-native", "bottom", 0.5],
+          label: "apply",
+          lx: 1287,
+          ly: 712,
+          lanchor: "start",
+        },
+        {
+          id: "e-remote-webview",
+          from: ["sh-remote", "top", 0.9],
+          to: ["os-webview", "bottom", 0.15],
+          via: [
+            [880, 738],
+            [970, 738],
+          ],
+          label: "polymine://external",
+          lx: 887,
+          ly: 777,
+          lanchor: "start",
+        },
+        {
+          id: "e-autosave-webview",
+          from: ["sh-autosave", "right", 0.25],
+          to: ["os-webview", "bottom", 0.75],
+          via: [
+            [1675, 1058],
+            [1675, 750],
+            [1090, 750],
+          ],
+          label: "reload after sleep",
+        },
+        // Shell
+        {
+          id: "e-commands-app",
+          from: ["sh-commands", "bottom", 0.5],
+          to: ["sh-app", "top", { x: 1040 }],
+          label: "App methods",
+          lx: 1047,
+          ly: 963,
+          lanchor: "start",
+        },
+        {
+          id: "e-commands-window",
+          from: ["sh-commands", "right", 0.5],
+          to: ["sh-window", "left", 0.5],
+        },
+        {
+          id: "e-remote-app",
+          from: ["sh-remote", "right", 0.875],
+          to: ["sh-app", "left", { y: 1058 }],
+          via: [
+            [930, 928],
+            [930, 1058],
+          ],
+          label: "same methods",
+          lx: 925,
+          ly: 1016,
+          lanchor: "end",
+        },
+        {
+          id: "e-startup-app",
+          from: ["sh-startup", "left", 0.5],
+          to: ["sh-app", "right", { y: 1086 }],
+        },
+        {
+          id: "e-startup-window",
+          from: ["sh-startup", "top", 0.5],
+          to: ["sh-window", "bottom", 0.5],
+          label: "show",
+        },
+        {
+          id: "e-startup-autosave",
+          from: ["sh-startup", "right", 0.5],
+          to: ["sh-autosave", "left", 0.5],
+        },
+        {
+          id: "e-startup-remote",
+          from: ["sh-startup", "top", 0.1],
+          to: ["sh-remote", "bottom", 0.9],
+          via: [
+            [1200, 975],
+            [880, 975],
+          ],
+          label: "start",
+          lx: 1150,
+          ly: 969,
+        },
+        {
+          id: "e-startup-logs",
+          from: ["sh-startup", "top", 0.3],
+          to: ["da-logs", "right", 0.5],
+          via: [
+            [1240, 990],
+            [620, 990],
+            [620, 886],
+          ],
+          label: "log plugin",
+          lx: 680,
+          ly: 984,
+        },
+        {
+          id: "e-autosave-app",
+          from: ["sh-autosave", "bottom", 0.5],
+          to: ["sh-app", "right", { y: 1176 }],
+          via: [[1520, 1176]],
+          label: "save_game",
+        },
+        {
+          id: "e-app-settings",
+          from: ["sh-app", "left", { y: 1086 }],
+          to: ["sh-settings", "right", 0.5],
+        },
+        {
+          id: "e-app-history",
+          from: ["sh-app", "left", { y: 1266 }],
+          to: ["sh-history", "right", 0.5],
+        },
+        {
+          id: "e-app-session",
+          from: ["sh-app", "right", { y: 1266 }],
+          to: ["sh-session", "left", 0.5],
+          label: "moves, hints",
+        },
+        {
+          id: "e-settings-data",
+          from: ["sh-settings", "left", 0.5],
+          to: ["da-data", "right", { y: 1086 }],
+          label: "settings.json",
+        },
+        {
+          id: "e-history-data",
+          from: ["sh-history", "left", 0.5],
+          to: ["da-data", "right", { y: 1266 }],
+          label: "history.jsonl",
+        },
+        {
+          id: "e-app-data",
+          from: ["sh-app", "bottom", { x: 1014 }],
+          to: ["da-data", "right", { y: 1313 }],
+          via: [
+            [1014, 1352],
+            [610, 1352],
+            [610, 1313],
+          ],
+          label: "game.json",
+        },
+        {
+          id: "e-app-stats",
+          from: ["sh-app", "bottom", { x: 1122 }],
+          to: ["en-stats", "bottom", 0.5],
+          via: [
+            [1122, 1366],
+            [2100, 1366],
+          ],
+          label: "champions",
+        },
+        {
+          id: "e-session-rules",
+          from: ["sh-session", "right", 0.5],
+          to: ["en-rules", "left", 0.5],
+          label: "play",
+        },
+        {
+          id: "e-session-solver",
+          from: ["sh-session", "right", 0.25],
+          to: ["en-solver", "left", 0.5],
+          via: [
+            [1690, 1238],
+            [1690, 1086],
+          ],
+          label: "suggest",
+          lx: 1683,
+          ly: 1166,
+          lanchor: "end",
+        },
+        {
+          id: "e-solver-rules",
+          from: ["en-solver", "bottom", 0.3],
+          to: ["en-rules", "top", 0.3],
+          label: "numbers",
+        },
+        {
+          id: "e-rules-tilings",
+          from: ["en-rules", "top", 0.85],
+          to: ["en-tilings", "bottom", 0.25],
+          via: [
+            [1930, 1176],
+            [2050, 1176],
+          ],
+          label: "board",
+        },
+        // Network, player themes, and saves
+        {
+          id: "e-commands-net",
+          from: ["sh-commands", "top", 0.85],
+          to: ["pl-net", "bottom", 0.2],
+          via: [
+            [1110, 790],
+            [1560, 790],
+          ],
+          dash: true,
+          label: "planned download command",
+          lx: 1440,
+          ly: 784,
+        },
+        {
+          id: "e-net-github",
+          from: ["pl-net", "right", 0.5],
+          to: ["pl-github", "left", 0.5],
+          label: "HTTPS",
+        },
+        {
+          id: "e-commands-themes",
+          from: ["sh-commands", "top", { x: 1010 }],
+          to: ["da-themes", "top", 0.5],
+          via: [
+            [1010, 724],
+            [645, 724],
+            [645, 1002],
+            [190, 1002],
+          ],
+          label: "list_themes · read_theme",
+        },
+        {
+          id: "e-app-saves",
+          from: ["sh-app", "top", { x: 1125 }],
+          to: ["sh-saves", "bottom", { x: 1440 }],
+          via: [
+            [1125, 1006],
+            [1440, 1006],
+          ],
+        },
+      ];
+
+      const DETAIL = {
+        "cli-agent": {
+          t: "Terminal or agent",
+          m: "caller · outside the repository",
+          owns: "Whoever runs polymine-cli: a person at a terminal, or a coding agent that follows the skill.",
+          files: ["docs/CLI.md"],
+          rules: [
+            "Results go to stdout as JSON. Errors go to stderr with a code, a message, and a hint.",
+            "A permission rule such as `Bash(polymine-cli:*)` lets an agent play without asking for each move.",
+          ],
+        },
+        "cli-skill": {
+          t: "Agent skill",
+          m: "skills/polymine-cli",
+          owns: "The guide coding agents read. polymine-cli compiles it in with `include_str!` and prints it with `polymine-cli skill`.",
+          files: ["skills/polymine-cli/SKILL.md", "crates/polymine-cli/src/main.rs"],
+          rules: ["Update it with any change to the CLI's commands or output."],
+        },
+        "cli-main": {
+          t: "polymine-cli",
+          m: "crates/polymine-cli · console program",
+          owns: "Parses commands with clap, picks a target, and prints JSON. It is a program of its own because the app is a GUI program on Windows and can't reliably write to a terminal.",
+          files: [
+            "crates/polymine-cli/src/main.rs",
+            "crates/polymine-cli/src/cli.rs",
+            "crates/polymine-cli/tests/contract.rs",
+          ],
+          rules: [
+            "The target is the default instance, `--instance <name>`, or `--local <game>`. It never falls back from one to another.",
+            "Exit codes: 0 success, 1 failed, 2 usage, 3 not running, 4 timeout, 5 busy.",
+            "Every call opens one connection, sends one line, reads one line, and exits.",
+          ],
+        },
+        "cli-local": {
+          t: "Headless games",
+          m: "--local · local.rs",
+          owns: "Games without the app. Each is a small JSON file with its configuration, seed, and moves, replayed on the engine on every call.",
+          files: ["crates/polymine-cli/src/local.rs"],
+          rules: [
+            "Mines come from the seed, so a replay is exact.",
+            "Anyone who reads the file can rebuild the mines, so these games are for practice and agents, not records.",
+            "Statistics belong to the app. Headless games keep none.",
+          ],
+        },
+        "cli-sync": {
+          t: "History sync",
+          m: "crates/polymine-cli/src/sync.rs",
+          owns: "`polymine-cli sync --gist <id>` shares a history between machines through a GitHub gist. It merges the gist's `history.jsonl` with the instance's own, writes the union back to the gist, and appends the games the instance lacked to its file.",
+          files: [
+            "crates/polymine-cli/src/sync.rs",
+            "crates/polymine-core/src/stats.rs",
+            "docs/CLI.md",
+          ],
+          rules: [
+            "It reads and appends to the files itself, so no app has to run.",
+            "The token comes from `POLYMINE_GITHUB_TOKEN` and needs the gist scope. Without it, `sync` fails with a usage error.",
+            "Requests go through polymine-net to api.github.com. A file the API truncates is read whole from gist.githubusercontent.com, without the token.",
+          ],
+        },
+        "ipc-inst": {
+          t: "Instances",
+          m: "crates/polymine-ipc/src/instance.rs",
+          owns: "Instance names, the folders each instance uses, the portable and `POLYMINE_DATA_DIR` overrides, and the registry of running instances.",
+          files: ["crates/polymine-ipc/src/instance.rs"],
+          rules: [
+            "The crate is shared by the app and the CLI and has no Tauri dependency.",
+            "Names use 1 to 24 ASCII letters, digits, `-`, or `_`.",
+            "`polymine-cli instances` drops an entry whose socket nobody listens on. An instance that answers with an error stays listed with an `error` field.",
+          ],
+        },
+        "ipc-proto": {
+          t: "Protocol & views",
+          m: "protocol.rs · view.rs",
+          owns: "The wire format: one JSON request line and one reply line, protocol version 2, the error codes, and board views shaped for agents.",
+          files: ["crates/polymine-ipc/src/protocol.rs", "crates/polymine-ipc/src/view.rs"],
+          rules: [
+            "The version is read before the rest of the request, so another version gets `version_mismatch` even when the shape changed.",
+            "Views never reveal a closed cell.",
+            "The app's remote server and the CLI's headless games answer through the same views.",
+          ],
+        },
+        "ipc-transport": {
+          t: "Transport",
+          m: "crates/polymine-ipc/src/transport.rs",
+          owns: "Sends one request and serves one reply per connection over a local socket. Nothing stays connected between calls.",
+          files: ["crates/polymine-ipc/src/transport.rs"],
+          rules: [
+            "The app reads at most 64 KiB per request and gives a client 5 seconds to send it.",
+            "It answers up to 16 requests at once and turns more away as busy.",
+            "Its Windows code holds two of the allowed `unsafe` modules: one reads the user's SID to name the pipe and lock its DACL, the other times out pipe reads and writes.",
+          ],
+        },
+        "os-socket": {
+          t: "Local socket",
+          m: "named pipe · unix socket",
+          owns: "The channel between polymine-cli and a running instance, provided by the operating system.",
+          files: ["crates/polymine-ipc/src/transport.rs"],
+          rules: [
+            "Windows: a named pipe `dev.uvw.polymine.<SID>.<instance>` that only that user can open.",
+            "macOS and Linux: `<instance>.sock` in `/tmp/polymine-<uid>`, which keeps the path under 104 bytes. The app and the CLI both refuse the folder unless only the user can open it.",
+            "Checks that need other Windows accounts wait in docs/handoffs.md.",
+          ],
+        },
+        "os-webview": {
+          t: "WebView",
+          m: "webview2 · wkwebview",
+          owns: "The system web view that runs the built UI: WebView2 on Windows, WKWebView on macOS. Tauri's IPC carries command calls to Rust and events back.",
+          files: ["src-tauri/tauri.conf.json", "src-tauri/capabilities/default.json"],
+          rules: [
+            "The content security policy limits the page to its own files and Tauri's IPC.",
+            "The window is transparent, so the system material shows through.",
+          ],
+        },
+        "os-native": {
+          t: "Native look",
+          m: "mica · acrylic · vibrancy",
+          owns: "Platform APIs behind the native look: Mica and Acrylic on Windows 11, vibrancy on macOS, and the system accent color.",
+          files: ["src-tauri/src/environment.rs", "src-tauri/src/accent.rs"],
+          rules: [
+            "Without a material, as on Windows 10 and Linux, the UI paints an opaque background.",
+            "The accent comes from `UISettings` on Windows and `NSColor.controlAccentColor` on macOS, since CSS `AccentColor` only returns Chromium's default.",
+          ],
+        },
+        "ui-board": {
+          t: "Board renderer",
+          m: "ui/src/lib/board \u00b7 pixijs 8",
+          owns: "BoardView draws the minefield on a canvas: one polygon per cell, flood ripples, hint rings, particles, zoom, and scrolling. In a color-only theme it draws high counts as rings, and BoardCanvas shows a key of the counts under the board.",
+          files: [
+            "ui/src/lib/board/BoardView.ts",
+            "ui/src/lib/board/animator.ts",
+            "ui/src/lib/board/navigation.ts",
+            "ui/src/components/BoardCanvas.svelte",
+            "ui/src/lib/themes/counts.ts",
+          ],
+          rules: [
+            "Cells share one `GraphicsContext` per shape and state, and sit in render groups of 1,024, so a change rebatches one group instead of the whole board.",
+            "The ticker runs only while something moves, so an idle board costs nothing.",
+            "Reduced motion skips the shake, particles, confetti, ripples, and hint pulse.",
+          ],
+        },
+        "ui-light": {
+          t: "Light",
+          m: "ui/src/lib/board/light.ts \u00b7 themes/gloss.ts",
+          owns: "The theme's light on cells: a shade away from the light, a glare, and a rim light. gloss.ts turns the theme's variables into profiles across the cell, and light.ts draws them from one gradient texture.",
+          files: [
+            "ui/src/lib/board/light.ts",
+            "ui/src/lib/themes/gloss.ts",
+            "docs/themes/how-theming-works.md",
+          ],
+          rules: [
+            "Every shape in every tiling shares the texture, so cells stay in the same batches.",
+            "The theme tests and the color filter measure the colors the light puts under each mark.",
+            "A theme without light variables draws flat cells.",
+          ],
+        },
+        "ui-store": {
+          t: "Game store",
+          m: "ui/src/lib/game.svelte.ts",
+          owns: "GameStore: the UI's copy of the game, the clock display, the idle assistant, and the bot loop.",
+          files: ["ui/src/lib/game.svelte.ts"],
+          rules: [
+            "Backend calls run through one queue, so they land in the order they happened.",
+            "Every result carries a revision. The store drops one older than what it shows and reloads a snapshot instead.",
+            "The UI holds no game rules.",
+          ],
+        },
+        "ui-app": {
+          t: "Svelte app",
+          m: "App.svelte \u00b7 components",
+          owns: "The window's UI: the toolbar, dialogs, the macOS menu, platform classes on `<html>`, the theme's chrome tokens and material, and the pause when the window loses focus.",
+          files: [
+            "ui/src/App.svelte",
+            "ui/src/components/",
+            "ui/src/lib/menu.ts",
+            "ui/src/lib/platform.svelte.ts",
+            "ui/src/lib/log.ts",
+          ],
+          rules: [
+            "Platform differences go through the `platform-*` classes on `<html>`, not user-agent checks.",
+            "Chrome colors come from the CSS tokens in `ui/src/app.css`, which a theme may override. No hard-coded colors in components.",
+            "Console warnings and errors also go to the app's log file.",
+          ],
+        },
+        "ui-themes": {
+          t: "Themes",
+          m: "ui/src/lib/themes \u00b7 ui/src/themes",
+          owns: "Every theme is a folder with a `theme.css` of CSS variables, optional SVG glyphs, and an optional preview.png. The built-in themes in `ui/src/themes` are read at build time, and player themes come from the data folder through the shell. Themes resolves the chosen one for light or dark mode and the system accent.",
+          files: [
+            "ui/src/lib/themes/builtin.ts",
+            "ui/src/lib/themes/library.svelte.ts",
+            "ui/src/lib/themes/format.ts",
+            "ui/src/lib/themes/resolve.ts",
+            "ui/src/lib/themes/accent.ts",
+            "ui/src/themes/<id>/theme.css",
+          ],
+          rules: [
+            "Theme files are untrusted. Values go through format.ts, and SVGs load only as images.",
+            "Board colors come from the active theme. Tests check contrast and color-blind separation for every built-in theme.",
+            "An unknown theme id falls back to the default, Frost. A renamed built-in id opens the theme it became.",
+          ],
+        },
+        "ui-filter": {
+          t: "Color filter",
+          m: "ui/src/lib/themes/filter.ts",
+          owns: "The color filter in Settings: off, deuteranopia, protanopia, or tritanopia. It moves the board colors a player has to tell apart until every pair passes under a simulation of that deficiency, and in normal vision too.",
+          files: [
+            "ui/src/lib/themes/filter.ts",
+            "ui/src/lib/themes/color.ts",
+            "ui/src/lib/game.svelte.ts",
+          ],
+          rules: [
+            "The store runs the resolved theme through it, so the board and the Settings previews show the filtered colors.",
+            "A board that already passes comes back unchanged.",
+            "It changes only board colors, never the chrome.",
+          ],
+        },
+        "ui-api": {
+          t: "Backend bridge",
+          m: "api.ts · bindings",
+          owns: "api.ts wraps the generated bindings: a typed function for every Tauri command, and the listener for `polymine://external`.",
+          files: ["ui/src/lib/api.ts", "ui/src/lib/bindings/index.ts"],
+          rules: [
+            "The UI calls app commands only through api.ts.",
+            "bindings/index.ts is generated by `cargo test`. Never edit it by hand.",
+          ],
+        },
+        "ui-i18n": {
+          t: "Strings",
+          m: "ui/src/lib/i18n",
+          owns: "`t()` and the language files. main.ts sets the language before the app mounts.",
+          files: ["ui/src/lib/i18n/index.ts", "ui/src/lib/i18n/en.json"],
+          rules: [
+            "Every UI string goes through `t()`.",
+            "English in en.json is the baseline and the fallback for missing keys.",
+            "Changing the language reloads the window.",
+          ],
+        },
+        "b-notices": {
+          t: "Third-party notices",
+          m: "scripts/notices.mjs",
+          owns: "Writes the licenses the About window shows: the npm packages in the Vite bundle and the Rust crates the app and the CLI ship.",
+          files: [
+            "scripts/notices.mjs",
+            "about.toml",
+            "ui/src/lib/notices/THIRD-PARTY-NOTICES.txt",
+          ],
+          rules: [
+            "Needs cargo-about 0.8.4, the version CI pins.",
+            "CI fails when the committed file is out of date.",
+          ],
+        },
+        "b-ci": {
+          t: "CI",
+          m: ".github/workflows/ci.yml",
+          owns: "Runs on pushes to main, on pull requests, and from the release workflow.",
+          files: [".github/workflows/ci.yml", "deny.toml", "scripts/check-versions.mjs"],
+          rules: [
+            "Web job on Ubuntu: version check, Prettier, ESLint, svelte-check, coverage, and the build.",
+            "Rust jobs on Windows and macOS: fmt, clippy with `-D warnings`, tests, and the CLI smoke test. They fail when the bindings drift.",
+            "Two more Ubuntu jobs: one fails when the notices drift, and cargo-deny checks licenses and advisories.",
+          ],
+        },
+        "b-release": {
+          t: "Release workflow",
+          m: ".github/workflows/release.yml",
+          owns: "Builds installers for a `v*` tag or a manual run, for macOS on Apple silicon and Intel and for Windows x64.",
+          files: [
+            ".github/workflows/release.yml",
+            "scripts/check-versions.mjs",
+            "src-tauri/tauri.bundle-cli.conf.json",
+          ],
+          rules: [
+            "No release from a commit that hasn't passed CI.",
+            "The tag must match the version in Cargo.toml, tauri.conf.json, and package.json.",
+            "docs/todo.md: Actions minutes are used up until December, so releases build on the owner's machines for now.",
+          ],
+        },
+        "b-bindings": {
+          t: "Bindings export",
+          m: "src-tauri/tests/bindings.rs",
+          owns: "A test that writes the TypeScript types and command wrappers from `specta_builder` in src-tauri/src/lib.rs.",
+          files: [
+            "src-tauri/tests/bindings.rs",
+            "src-tauri/src/lib.rs",
+            "ui/src/lib/bindings/index.ts",
+          ],
+          rules: [
+            "A new command goes into `specta_builder`. A type no command uses gets a `.typ::<T>()` line there.",
+            "CI fails when `cargo test` changes the committed file.",
+          ],
+        },
+        "b-smoke": {
+          t: "CLI smoke test",
+          m: "scripts/cli-smoke.mjs",
+          owns: "Starts a named instance with a scratch data folder and plays a seeded game through the CLI, checking JSON replies and exit codes.",
+          files: ["scripts/cli-smoke.mjs"],
+          rules: [
+            "Test a running app as a named instance, never the default one, so the player's settings and history stay untouched.",
+          ],
+        },
+        "b-gh": {
+          t: "GitHub Releases",
+          m: "draft release",
+          owns: "The draft release the workflow creates once, before the build jobs fill it.",
+          files: [".github/workflows/release.yml"],
+          rules: [
+            "macOS: a dmg for Apple silicon and one for Intel, ad-hoc signed.",
+            "Windows: setup.exe and a portable ZIP that keeps its data beside the executable.",
+            "Builds aren't signed with a certificate or notarized yet.",
+          ],
+        },
+        "pl-net": {
+          t: "Network crate",
+          m: "crates/polymine-net",
+          owns: "Every network request Polymine makes: an HTTPS client under a host policy, a disk cache that revalidates, GitHub folder and gist downloads, and a typed JSON API.",
+          files: [
+            "crates/polymine-net/src/lib.rs",
+            "crates/polymine-net/src/client.rs",
+            "crates/polymine-net/src/policy.rs",
+            "crates/polymine-net/src/cache.rs",
+            "crates/polymine-net/src/github.rs",
+            "crates/polymine-net/src/json.rs",
+          ],
+          rules: [
+            "polymine-cli uses it for `sync`. src-tauri doesn't depend on it yet, so the app makes no requests.",
+            "HTTPS on port 443 to listed hosts only, with timeouts, a 4 MiB cap, and five redirects, each checked again.",
+            "The client blocks, so callers run it on a worker thread.",
+            "Tests use a loopback server and never touch the real network.",
+          ],
+        },
+        "pl-github": {
+          t: "GitHub gist",
+          m: "api.github.com \u00b7 external",
+          owns: "The gist `polymine-cli sync` keeps a shared `history.jsonl` in. Remote themes from a repository folder or a gist are planned; docs/todo.md lists what is left.",
+          files: [
+            "crates/polymine-cli/src/sync.rs",
+            "crates/polymine-net/src/github.rs",
+            "docs/todo.md",
+          ],
+          rules: [
+            "Sync reads the gist and writes it back with a PATCH request.",
+            "Planned: remote themes pinned to a commit, downloaded into a staging folder within limits.",
+            "Sync sends its token only to api.github.com. The client never passes a token to another origin.",
+          ],
+        },
+        "da-runtime": {
+          t: "Runtime folder",
+          m: "dev.uvw.polymine · per user",
+          owns: "Files that matter while instances run: `instances/` holds one registry entry per running instance, and `games/` holds the CLI's headless games.",
+          files: ["crates/polymine-ipc/src/instance.rs", "crates/polymine-cli/src/local.rs"],
+          rules: [
+            "Lives in the platform's local data folder under `dev.uvw.polymine`.",
+            "`POLYMINE_DATA_DIR` moves the headless games with the rest of the data.",
+          ],
+        },
+        "da-logs": {
+          t: "Logs",
+          m: "log · tauri-plugin-log",
+          owns: "The app's log file, Polymine.log or Polymine-<name>.log. `polymine-cli log` prints its end.",
+          files: [
+            "src-tauri/src/lib.rs",
+            "ui/src/lib/log.ts",
+            "crates/polymine-ipc/src/instance.rs",
+          ],
+          rules: [
+            "A panic hook logs each panic with a backtrace, since Windows release builds have no console.",
+            "macOS keeps it in ~/Library/Logs/dev.uvw.polymine. With a data folder override it goes to `logs/` inside it.",
+          ],
+        },
+        "da-themes": {
+          t: "Themes folder",
+          m: "themes/ \u00b7 player themes",
+          owns: "A `themes` folder in the instance's data folder, one folder per theme: a `theme.css` of CSS variables, optional SVGs for the mine, flag, and numbers, and an optional preview.png.",
+          files: [
+            "src-tauri/src/themes.rs",
+            "crates/polymine-ipc/src/themes.rs",
+            "ui/src/lib/themes/library.svelte.ts",
+          ],
+          rules: [
+            "The UI reads the folder through `list_themes` and `read_theme`, never from disk itself. polymine-ipc caps the number and size of the files.",
+            "Themes hold no scripts, so they are safe to share. The UI parses each `theme.css` and skips one that breaks the format, and Settings lists why.",
+            "Polymine reads the folder again when Settings opens and when the window regains focus. Settings opens it with `open_themes_folder`.",
+          ],
+        },
+        "da-data": {
+          t: "Data folder",
+          m: "Polymine · per instance",
+          owns: "The player's files in a Polymine folder: %APPDATA%\\Polymine on Windows and ~/Library/Application Support/Polymine on macOS.",
+          files: [
+            "src-tauri/src/settings.rs",
+            "src-tauri/src/history.rs",
+            "src-tauri/src/app.rs",
+            "src-tauri/src/window_state.rs",
+            "src-tauri/src/files.rs",
+          ],
+          rules: [
+            "settings.json, game.json, and history rewrites go through a synced temporary file and a rename, so a crash leaves the old file or the new one.",
+            "history.jsonl is append-only. Unreadable lines are skipped on load.",
+            "Named saves go in `saves/`, and player themes in `themes/`.",
+            "A portable copy keeps everything in `data/` beside the executable. A named instance uses `instances/<name>`.",
+          ],
+        },
+        "sh-remote": {
+          t: "Remote server",
+          m: "src-tauri/src/remote.rs",
+          owns: "Answers polymine-cli requests through the same App methods the window uses, then tells the window what changed.",
+          files: ["src-tauri/src/remote.rs", "src-tauri/src/lib.rs"],
+          rules: [
+            "A named instance whose socket fails to start exits. The default instance plays on without the CLI.",
+            "Moves from the CLI mark the game assisted, so it never ranks. A move resumes a paused game.",
+            "Events go out after the game lock is released, so they can arrive out of order. The window checks revisions.",
+          ],
+        },
+        "sh-commands": {
+          t: "Tauri commands",
+          m: "commands.rs \u00b7 themes.rs \u00b7 lib.rs",
+          owns: "The 23 commands the window calls: thin wrappers over App, the named-save commands, the player-theme commands, and the environment, material, accent, and foreground commands.",
+          files: ["src-tauri/src/commands.rs", "src-tauri/src/themes.rs", "src-tauri/src/lib.rs"],
+          rules: [
+            "src-tauri stays thin. Game rules belong in the engine.",
+            "Moves, hints, new games, snapshots, and theme reads run on Tauri's thread pool, so the window stays responsive.",
+            "A new command goes into `specta_builder`, which feeds the bindings.",
+          ],
+        },
+        "sh-saves": {
+          t: "Named saves",
+          m: "src-tauri/src/saves.rs",
+          owns: "Games a player keeps under a name in a `saves` folder beside the autosave. Each file is the autosave's `SavedGame`, so loading replays its moves. The Saves dialog lists them, saves the game in play, and loads and deletes them.",
+          files: [
+            "src-tauri/src/saves.rs",
+            "src-tauri/src/app.rs",
+            "ui/src/lib/game.svelte.ts",
+            "ui/src/components/SavesDialog.svelte",
+          ],
+          rules: [
+            "A loaded save starts paused and counts as assisted, so it never ranks.",
+            "A name must make a valid file name on every platform, up to 40 characters.",
+          ],
+        },
+        "sh-window": {
+          t: "Window & chrome",
+          m: "environment · accent · window_state · traffic_lights · edge_fit · foreground",
+          owns: "The window's material, the platform facts the UI needs, the saved size and place in window.json, the macOS traffic lights, the Windows edge fit, and whether the window is in front.",
+          files: [
+            "src-tauri/src/environment.rs",
+            "src-tauri/src/accent.rs",
+            "src-tauri/src/window_state.rs",
+            "src-tauri/src/traffic_lights.rs",
+            "src-tauri/src/edge_fit.rs",
+            "src-tauri/src/foreground.rs",
+            "ui/src/lib/windowFit.ts",
+          ],
+          rules: [
+            "The window starts hidden and shows once its place is applied, so it doesn't jump.",
+            "macOS saves bounds in points and Windows in physical pixels.",
+            "Frosted themes switch to Acrylic or under-window vibrancy. Other themes get Mica or the sidebar material back.",
+            "On Windows, a double click on the window's edge sends the UI a `fit-window` event, and windowFit.ts fits the window to the board.",
+            "The UI pauses on focus loss only when `window_in_front` says another window is in front.",
+          ],
+        },
+        "sh-startup": {
+          t: "Startup",
+          m: "src-tauri/src/lib.rs run()",
+          owns: "Builds the Tauri app, registers the plugins, prepares the window, then starts App, the remote server, and the autosave thread.",
+          files: ["src-tauri/src/lib.rs", "src-tauri/src/main.rs"],
+          rules: [
+            "For the default instance the single-instance plugin comes first, so a second launch only focuses the running window.",
+            "A named instance that is already running exits.",
+            "Untested on purpose: it needs a real window and is checked by running the app.",
+          ],
+        },
+        "sh-settings": {
+          t: "Settings",
+          m: "src-tauri/src/settings.rs",
+          owns: "Player preferences: rules, the last tiling and level, the assistant, the theme id, the accent tint, the color filter, the language, and window behavior.",
+          files: ["src-tauri/src/settings.rs"],
+          rules: [
+            "A field this build doesn't understand takes its default, and the file is copied to settings.json.bad.",
+            "A file that isn't JSON moves aside and the defaults replace it.",
+            "Without a settings file, the defaults are saved right away. About opens only when the player asks.",
+          ],
+        },
+        "sh-app": {
+          t: "App",
+          m: "src-tauri/src/app.rs · the hub",
+          owns: "A plain struct that holds the session, settings, and history behind their own locks. Every operation the window or the CLI asks for goes through it.",
+          files: ["src-tauri/src/app.rs", "src-tauri/src/error.rs"],
+          rules: [
+            "src-tauri owns the session, clock, settings, and history, and translates between commands and the engine.",
+            "Locks are taken session first, then settings, so they can't deadlock.",
+            "Tests drive it directly with temporary folders.",
+          ],
+        },
+        "sh-autosave": {
+          t: "Autosave & sleep",
+          m: "lib.rs · sleep.rs",
+          owns: "A background thread that ticks every second. It saves the game and notices when the computer slept.",
+          files: ["src-tauri/src/lib.rs", "src-tauri/src/sleep.rs"],
+          rules: [
+            "Saves every 5 seconds, only when moves happened in between.",
+            "A jump of 10 seconds or more on the wall clock or the monotonic clock between ticks means the computer slept. A game in play pauses as of the last tick.",
+            "A panic in one round is logged, and the next round runs as usual.",
+          ],
+        },
+        "sh-session": {
+          t: "Session & clock",
+          m: "src-tauri/src/session.rs",
+          owns: "One game in progress: the engine's Game, the stopwatch, the pause state, whether the assistant helped, the move log for replay, and a revision count.",
+          files: ["src-tauri/src/session.rs"],
+          rules: [
+            "Every method that depends on time takes `now`, so tests drive the clock.",
+            "A rules change mid-game is logged with the moves, so each move replays under its own rules.",
+            "The clock starts on the first open and stops on pause and at the end.",
+          ],
+        },
+        "sh-history": {
+          t: "History",
+          m: "src-tauri/src/history.rs",
+          owns: "Finished games, one JSON record per line, with the ranked records kept in memory for statistics.",
+          files: ["src-tauri/src/history.rs"],
+          rules: [
+            "Assisted, custom, and abandoned games are counted but never rank.",
+            "At 3,000 unranked records the file is rewritten with every ranked record and the newest 2,000 unranked.",
+            "A record that fails to write stays in memory and goes out with the next save.",
+          ],
+        },
+        "en-solver": {
+          t: "Solver",
+          m: "crates/polymine-core/src/solver.rs",
+          owns: "The assistant: local rules, then exact counts per region, combined in log space into probabilities and certainties.",
+          files: ["crates/polymine-core/src/solver.rs"],
+          rules: [
+            "It sees only open numbers and the mine count, never marks.",
+            "A region too large for the search budget counts as unconstrained, so certainties stay sound and its odds become estimates.",
+            "Property tests check that no certain move is ever wrong.",
+          ],
+        },
+        "en-tilings": {
+          t: "Tilings & board",
+          m: "tiling.rs · catalog.rs · board.rs · geometry.rs",
+          owns: "Tilings as data: a patch of polygons repeated on a lattice. Boards, neighbors, fitting a board to a window, and the picker previews come from here.",
+          files: [
+            "crates/polymine-core/src/tiling.rs",
+            "crates/polymine-core/src/tiling/catalog.rs",
+            "crates/polymine-core/src/board.rs",
+            "crates/polymine-core/src/geometry.rs",
+          ],
+          rules: [
+            "Cells are neighbors when their polygons share an edge or a corner.",
+            "Tests check coverage, symmetric neighbors, and neighbor counts for every tiling.",
+            "Geometry comes from the math, never from FastMines' code or tables.",
+          ],
+        },
+        "en-rules": {
+          t: "Rules",
+          m: "game.rs · config.rs",
+          owns: "Game: mine placement, opening and flooding, marks, smart click, winning, and losing. Levels and validated configurations.",
+          files: ["crates/polymine-core/src/game.rs", "crates/polymine-core/src/config.rs"],
+          rules: [
+            "polymine-core does no I/O and depends on nothing UI-related.",
+            "Mines come from ChaCha8 seeded per game, so a seed rebuilds the same board.",
+            "The first open is safe, and twin cells never hold a mine when the board has room.",
+          ],
+        },
+        "en-stats": {
+          t: "Statistics",
+          m: "crates/polymine-core/src/stats.rs",
+          owns: "Turns finished-game records into per-player statistics and the champions table.",
+          files: ["crates/polymine-core/src/stats.rs"],
+          rules: [
+            "Records are the source of truth. Views are computed on demand, so a new view never needs a migration.",
+            "Assisted and custom games never rank.",
+          ],
+        },
+      };
+
+      const FLOWS = {
+        click: {
+          name: "Click a cell",
+          edges: [
+            "e-board-store",
+            "e-store-api",
+            "e-api-webview",
+            "e-webview-commands",
+            "e-commands-app",
+            "e-app-session",
+            "e-session-rules",
+            "e-store-board",
+          ],
+          nodes: [
+            "ui-board",
+            "ui-store",
+            "ui-api",
+            "os-webview",
+            "sh-commands",
+            "sh-app",
+            "sh-session",
+            "en-rules",
+          ],
+          steps: [
+            "BoardView turns the pointer into a cell id and calls the store's `primary()`.",
+            "The store queues the call, so clicks land in order, and calls `api.primary`.",
+            "The generated binding invokes the `primary` command through the WebView's Tauri IPC.",
+            "commands.rs hands it to `App::primary` on Tauri's thread pool.",
+            "App locks the session, which plays the move on the engine's Game and returns only the changed cells, with a ring number for the flood ripple.",
+            "A move that ends the game appends a record to history.jsonl first.",
+            "The store checks the revision and BoardView animates the changed cells.",
+          ],
+        },
+        cli: {
+          name: "CLI move against a running app",
+          edges: [
+            "e-agent-cli",
+            "e-main-transport",
+            "e-transport-proto",
+            "e-transport-socket",
+            "e-socket-remote",
+            "e-remote-app",
+            "e-app-session",
+            "e-session-rules",
+            "e-remote-webview",
+            "e-webview-api",
+            "e-api-store",
+            "e-store-board",
+          ],
+          nodes: [
+            "cli-agent",
+            "cli-main",
+            "ipc-transport",
+            "ipc-proto",
+            "os-socket",
+            "sh-remote",
+            "sh-app",
+            "sh-session",
+            "en-rules",
+            "os-webview",
+            "ui-api",
+            "ui-store",
+            "ui-board",
+          ],
+          steps: [
+            "An agent runs `polymine-cli open 12`.",
+            "The CLI sends one JSON request line with the protocol version to the instance's socket: an owner-only named pipe on Windows, a socket in `/tmp/polymine-<uid>` on macOS.",
+            "remote.rs checks the cells, then plays them through `App::play_from_outside`, the path a click takes. The game counts as assisted.",
+            "The CLI reads one reply line with the changed cells and exits.",
+            "The shell emits `polymine://external`. The store applies it in order with clicks, or reloads a snapshot when it is stale, and the board animates the move.",
+          ],
+        },
+        startup: {
+          name: "Startup",
+          edges: [
+            "e-startup-logs",
+            "e-startup-window",
+            "e-window-native",
+            "e-startup-app",
+            "e-app-settings",
+            "e-settings-data",
+            "e-app-history",
+            "e-history-data",
+            "e-app-data",
+            "e-startup-remote",
+            "e-startup-autosave",
+            "e-uiapp-api",
+            "e-api-webview",
+            "e-webview-commands",
+            "e-commands-window",
+          ],
+          nodes: [
+            "sh-startup",
+            "da-logs",
+            "sh-window",
+            "os-native",
+            "sh-app",
+            "sh-settings",
+            "sh-history",
+            "da-data",
+            "sh-remote",
+            "sh-autosave",
+            "ui-app",
+            "ui-api",
+            "os-webview",
+            "sh-commands",
+          ],
+          steps: [
+            "The default instance registers single-instance first, so a second launch only focuses the running window. Named instances skip it.",
+            "The log plugin opens the log file.",
+            "The hidden window gets Mica or vibrancy and its place from window.json, then shows.",
+            "`App::load` reads settings.json and history.jsonl and restores game.json when it replays. Without a settings file, it saves the defaults.",
+            "The remote server starts listening and registers the instance, and the autosave thread starts.",
+            "In the window, App.svelte calls `get_environment` for the platform, the material, and the accent. The store then loads settings, previews, and a snapshot.",
+          ],
+        },
+        autosave: {
+          name: "Autosave and restore",
+          edges: [
+            "e-autosave-app",
+            "e-app-data",
+            "e-app-history",
+            "e-history-data",
+            "e-autosave-webview",
+            "e-webview-api",
+            "e-startup-app",
+            "e-app-session",
+            "e-session-rules",
+          ],
+          nodes: [
+            "sh-autosave",
+            "sh-app",
+            "da-data",
+            "sh-history",
+            "os-webview",
+            "ui-api",
+            "sh-startup",
+            "sh-session",
+            "en-rules",
+          ],
+          steps: [
+            "The autosave thread ticks every second and saves every 5 seconds when moves happened in between. Pausing and quitting save too.",
+            "App first writes any finished game that missed history.jsonl, then writes game.json: configuration, seed, rules, moves, elapsed time, and whether it was helped.",
+            "A fresh or finished game deletes game.json instead.",
+            "When either clock jumps 10 seconds or more between ticks, the computer slept. The game pauses as of the last tick and the window reloads.",
+            "On the next start, `App::load` replays the saved moves on a new Game from the same seed and restores it paused. A save it can't replay is dropped.",
+          ],
+        },
+        hint: {
+          name: "Hint and bot",
+          edges: [
+            "e-uiapp-store",
+            "e-store-api",
+            "e-api-webview",
+            "e-webview-commands",
+            "e-commands-app",
+            "e-app-session",
+            "e-session-solver",
+            "e-solver-rules",
+            "e-store-board",
+          ],
+          nodes: [
+            "ui-app",
+            "ui-store",
+            "ui-api",
+            "os-webview",
+            "sh-commands",
+            "sh-app",
+            "sh-session",
+            "en-solver",
+            "en-rules",
+            "ui-board",
+          ],
+          steps: [
+            "H or the toolbar asks for a hint. B starts the bot, which calls `assist` once per move with a pause between moves.",
+            "The session asks the solver, which sees only the open numbers and the mine count.",
+            "Certain moves come first, then the cell least likely to hold a mine. Odds from a region too large for the search budget are estimates.",
+            "A hint pulses a ring on the cell. An assist plays the move and marks the game assisted, so it never ranks.",
+            "The bot stops on a player's click, before a guess when the setting says so, and at the end of a game unless it is set to start the next one.",
+          ],
+        },
+        themes: {
+          name: "Theme loading",
+          edges: [
+            "e-store-api",
+            "e-api-webview",
+            "e-webview-commands",
+            "e-commands-app",
+            "e-app-settings",
+            "e-settings-data",
+            "e-commands-themes",
+            "e-store-themes",
+            "e-themes-filter",
+            "e-filter-board",
+            "e-board-light",
+            "e-light-themes",
+            "e-uiapp-store",
+            "e-uiapp-api",
+            "e-commands-window",
+            "e-window-native",
+            "e-commands-net",
+            "e-net-github",
+          ],
+          nodes: [
+            "ui-store",
+            "ui-api",
+            "os-webview",
+            "sh-commands",
+            "sh-app",
+            "sh-settings",
+            "da-data",
+            "da-themes",
+            "ui-themes",
+            "ui-filter",
+            "ui-board",
+            "ui-light",
+            "ui-app",
+            "sh-window",
+            "os-native",
+            "pl-net",
+            "pl-github",
+          ],
+          steps: [
+            "The store reads the theme id, the accent tint, and the color filter from settings.json through `get_settings`.",
+            "Built-in themes are folders in `ui/src/themes`, read at build time. For player themes the store calls `list_themes`, and src-tauri reads the `themes` folder in the data folder within polymine-ipc's limits. `read_theme` fetches a theme's SVG glyphs.",
+            "The UI parses each `theme.css` as untrusted text and skips one that breaks the format. Settings lists why.",
+            "Themes resolves the chosen theme's variables for light or dark mode and the system accent. An unknown id gets Frost.",
+            "The color filter moves the board colors apart for the chosen deficiency. A board that already passes stays unchanged.",
+            "BoardView draws the palette, with high counts as rings in a color-only theme. The light layers, a shade, a glare, and a rim light, come from one gradient texture every cell shares.",
+            "App.svelte sets the theme's chrome tokens on `<html>`. A frosted theme calls `set_material`: Acrylic on Windows, under-window vibrancy on macOS. Others get Mica or the sidebar material.",
+            "The accent comes from `get_environment`, and again from `get_accent` when the window regains focus. Planned: a download command in src-tauri fetches remote themes through polymine-net.",
+          ],
+        },
+        sync: {
+          name: "History sync",
+          edges: ["e-agent-cli", "e-main-sync", "e-sync-data", "e-sync-net", "e-net-github"],
+          nodes: ["cli-agent", "cli-main", "cli-sync", "da-data", "pl-net", "pl-github"],
+          steps: [
+            "A player runs `polymine-cli sync --gist <id>` with a token that has the gist scope in `POLYMINE_GITHUB_TOKEN`.",
+            "sync.rs reads the instance's `history.jsonl` straight from its data folder, so no app has to run.",
+            "It fetches the gist from api.github.com through polymine-net. A file the API truncates is read whole from gist.githubusercontent.com.",
+            "The two histories merge into their union. The union goes back to the gist when the gist lacked games, and the games the instance lacked are appended to its file.",
+            "The reply counts the games and how many each side gained.",
+          ],
+        },
+        release: {
+          name: "Release build",
+          edges: [
+            "e-release-ci",
+            "e-ci-notices",
+            "e-notices-uiapp",
+            "e-ci-bindings",
+            "e-bindings-api",
+            "e-ci-smoke",
+            "e-release-gh",
+          ],
+          nodes: [
+            "b-release",
+            "b-ci",
+            "b-notices",
+            "ui-app",
+            "b-bindings",
+            "ui-api",
+            "b-smoke",
+            "b-gh",
+          ],
+          steps: [
+            "A `v*` tag or a manual run starts release.yml, which first runs ci.yml on that commit.",
+            "CI fails when `npm run notices` or `cargo test` changes a committed file, so the notices and the bindings always match the code.",
+            "It also runs the CLI smoke test against a named instance on Windows and macOS.",
+            "check-versions.mjs checks the tag against every version file, then one draft release is created.",
+            "Each target builds polymine-cli first as the sidecar, then tauri-action bundles the app and uploads the installers. Windows also gets a portable ZIP.",
+            "For now, docs/todo.md says releases build on the owner's machines, since Actions minutes are used up until December.",
+          ],
+        },
+      };
+
+      /* ───────────────────────── render ───────────────────────── */
+      const NS = "http://www.w3.org/2000/svg";
+      const XLINK = "http://www.w3.org/1999/xlink";
+      const nodeById = Object.fromEntries(NODES.map((n) => [n.id, n]));
+      const root = document.getElementById("svg-content");
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+      function el(tag, attrs, parent) {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        if (parent) parent.appendChild(e);
+        return e;
+      }
+      function anchor([id, side, f]) {
+        const n = nodeById[id];
+        const along = (start, len) =>
+          f == null ? start + len / 2 : typeof f === "object" ? (f.x ?? f.y) : start + len * f;
+        switch (side) {
+          case "left":
+            return { x: n.x, y: along(n.y, n.h), nx: -1, ny: 0 };
+          case "right":
+            return { x: n.x + n.w, y: along(n.y, n.h), nx: 1, ny: 0 };
+          case "top":
+            return { x: along(n.x, n.w), y: n.y, nx: 0, ny: -1 };
+          case "bottom":
+            return { x: along(n.x, n.w), y: n.y + n.h, nx: 0, ny: 1 };
+        }
+      }
+      // The polyline of a routed edge: anchor, a stub out of the face, the waypoints,
+      // a stub that approaches the target from outside, so the arrowhead points in.
+      function routePoints(e) {
+        const a = anchor(e.from),
+          b = anchor(e.to),
+          off = 26;
+        return [
+          [a.x, a.y],
+          [a.x + a.nx * off, a.y + a.ny * off],
+          ...e.via,
+          [b.x + b.nx * off, b.y + b.ny * off],
+          [b.x, b.y],
+        ];
+      }
+      function edgePath(e) {
+        if (e.via)
+          return (
+            "M" +
+            routePoints(e)
+              .map((p) => p.join(","))
+              .join(" L")
+          );
+        const a = anchor(e.from),
+          b = anchor(e.to);
+        const c = Math.max(20, Math.min(230, Math.hypot(b.x - a.x, b.y - a.y) * 0.45));
+        return `M${a.x},${a.y} C${a.x + a.nx * c},${a.y + a.ny * c} ${b.x + b.nx * c},${b.y + b.ny * c} ${b.x},${b.y}`;
+      }
+      // Puts a label beside the longest straight run: above a horizontal one,
+      // right of a vertical one. la: "end" moves it near the target instead.
+      function labelSpot(e, path) {
+        if (e.lx != null) return { x: e.lx, y: e.ly, anchor: e.lanchor || "middle" };
+        let p, q;
+        if (e.via) {
+          const pts = routePoints(e);
+          let best = -1;
+          for (let i = 1; i < pts.length - 2; i++) {
+            const len = Math.abs(pts[i + 1][0] - pts[i][0]) + Math.abs(pts[i + 1][1] - pts[i][1]);
+            if (len > best) {
+              best = len;
+              p = pts[i];
+              q = pts[i + 1];
+            }
+          }
+        } else {
+          const len = path.getTotalLength();
+          const at = e.la === "end" ? len * 0.72 : len * 0.5;
+          const m1 = path.getPointAtLength(Math.max(0, at - 4)),
+            m2 = path.getPointAtLength(Math.min(len, at + 4));
+          p = [m1.x, m1.y];
+          q = [m2.x, m2.y];
+        }
+        const mx = (p[0] + q[0]) / 2,
+          my = (p[1] + q[1]) / 2;
+        if (Math.abs(q[0] - p[0]) >= Math.abs(q[1] - p[1]))
+          return { x: mx, y: my - 6, anchor: "middle" };
+        return { x: mx + 7, y: my + 3.5, anchor: "start" };
+      }
+
+      ZONES.forEach((z) => {
+        const g = el("g", { class: "zone" + (z.emph ? " emph" : "") }, root);
+        el("rect", { x: z.x, y: z.y, width: z.w, height: z.h, rx: 16 }, g);
+        el("text", { class: "ztitle", x: z.x + 20, y: z.y + 28 }, g).textContent = z.title;
+        if (z.sub) el("text", { class: "zsub", x: z.x + 20, y: z.y + 45 }, g).textContent = z.sub;
+      });
+
+      const edgeLayer = el("g", {}, root);
+      EDGES.forEach((e) => {
+        e._path = el(
+          "path",
+          { id: e.id, class: "edge" + (e.dash ? " dash" : ""), d: edgePath(e) },
+          edgeLayer,
+        );
+      });
+
+      NODES.forEach((n) => {
+        const d = DETAIL[n.id];
+        const g = el(
+          "g",
+          {
+            class: "node " + n.cls + (n.disabled ? " disabled" : ""),
+            "data-k": n.id,
+            tabindex: "0",
+            role: "button",
+            "aria-label": `${n.t}, ${n.k}${n.disabled ? ", partial, in progress, or planned" : ""}. Open details.`,
+          },
+          root,
+        );
+        el("rect", { class: "box", x: n.x, y: n.y, width: n.w, height: n.h, rx: 11 }, g);
+        el(
+          "rect",
+          { class: "accent", x: n.x + 12, y: n.y - 1.5, width: n.w - 24, height: 3, rx: 1.5 },
+          g,
+        );
+        el("text", { class: "t", x: n.x + 16, y: n.y + 27 }, g).textContent = n.t;
+        el("text", { class: "k", x: n.x + 16, y: n.y + 43 }, g).textContent = n.k;
+        (n.m || []).forEach((line, i) => {
+          if (line)
+            el("text", { class: "m", x: n.x + 16, y: n.y + 64 + i * 17 }, g).textContent = line;
+        });
+        if (!d) console.warn("no detail for", n.id);
+      });
+
+      // Labels go above the nodes so a crossing line never hides one.
+      const lblLayer = el("g", {}, root);
+      EDGES.forEach((e) => {
+        if (!e.label) return;
+        const s = labelSpot(e, e._path);
+        el(
+          "text",
+          { class: "elbl", "data-e": e.id, x: s.x, y: s.y, "text-anchor": s.anchor },
+          lblLayer,
+        ).textContent = e.label;
+      });
+      const markLayer = el("g", {}, root);
+
+      const VB = (() => {
+        let minX = 1e9,
+          minY = 1e9,
+          maxX = -1e9,
+          maxY = -1e9;
+        [...ZONES, ...NODES].forEach((z) => {
+          minX = Math.min(minX, z.x);
+          minY = Math.min(minY, z.y);
+          maxX = Math.max(maxX, z.x + z.w);
+          maxY = Math.max(maxY, z.y + z.h);
+        });
+        const pad = 30;
+        return [minX - pad, minY - pad, maxX - minX + pad * 2, maxY - minY + pad * 2];
+      })();
+      document.getElementById("svg").setAttribute("viewBox", VB.join(" "));
+
+      /* ───────────────────────── interactions ───────────────────────── */
+      const stage = document.getElementById("stage");
+      const svgEl = document.getElementById("svg");
+      const chips = document.querySelectorAll(".chip");
+      const fcap = document.getElementById("flowcap");
+      const detail = document.getElementById("detail");
+      const legend = document.getElementById("legend");
+      const legendBtn = document.getElementById("legendBtn");
+
+      function escapeHtml(s) {
+        return s.replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      }
+      // Text with `code` spans, escaped.
+      function rich(s) {
+        return escapeHtml(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+      }
+
+      // Puts a card in the stage corner where it hides the least of `avoid`.
+      // Corners are tried in the given order, so ties keep the preferred one.
+      function placeCard(card, avoid, order) {
+        const s = stage.getBoundingClientRect(),
+          w = card.offsetWidth,
+          h = card.offsetHeight,
+          m = 16;
+        let best = order[0],
+          bestCost = Infinity;
+        for (const corner of order) {
+          const x1 = corner[0] === "left" ? s.left + m : s.right - m - w;
+          const y1 = corner[1] === "top" ? s.top + m : s.bottom - m - h;
+          let cost = 0;
+          for (const { r, weight } of avoid) {
+            const ix = Math.max(0, Math.min(x1 + w, r.right) - Math.max(x1, r.left));
+            const iy = Math.max(0, Math.min(y1 + h, r.bottom) - Math.max(y1, r.top));
+            cost += ix * iy * weight;
+          }
+          if (cost < bestCost - 1) {
+            bestCost = cost;
+            best = corner;
+          }
+        }
+        Object.assign(card.style, { left: "auto", right: "auto", top: "auto", bottom: "auto" });
+        card.style[best[0]] = m + "px";
+        card.style[best[1]] = m + "px";
+      }
+      const rectsOf = (selector, weight) =>
+        [...document.querySelectorAll(selector)].map((x) => ({
+          r: x.getBoundingClientRect(),
+          weight,
+        }));
+      const openCards = (...cards) =>
+        cards.filter((c) => !c.hidden).map((c) => ({ r: c.getBoundingClientRect(), weight: 50 }));
+      function placeFlowCard() {
+        if (fcap.hidden) return;
+        placeCard(
+          fcap,
+          [...rectsOf(".node.lit rect.box", 1), ...openCards(legend)],
+          [
+            ["left", "bottom"],
+            ["left", "top"],
+            ["right", "bottom"],
+            ["right", "top"],
+          ],
+        );
+      }
+      function placeDetailCard() {
+        if (detail.hidden) return;
+        placeCard(
+          detail,
+          [
+            ...rectsOf(".node.sel rect.box", 20),
+            ...rectsOf(".node.lit rect.box", 1),
+            ...openCards(fcap, legend),
+          ],
+          [
+            ["right", "bottom"],
+            ["right", "top"],
+            ["left", "bottom"],
+            ["left", "top"],
+          ],
+        );
+      }
+
+      let currentFlow = "all";
+      function setFlow(key) {
+        currentFlow = key;
+        chips.forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.flow === key)));
+        document.querySelectorAll(".lit").forEach((x) => x.classList.remove("lit"));
+        markLayer.replaceChildren();
+        if (key === "all") {
+          stage.classList.remove("flowing");
+          fcap.hidden = true;
+          return;
+        }
+        const f = FLOWS[key];
+        stage.classList.add("flowing");
+        f.edges.forEach((id, i) => {
+          const p = document.getElementById(id);
+          p.classList.add("lit");
+          document.querySelector(`.elbl[data-e="${id}"]`)?.classList.add("lit");
+          const len = p.getTotalLength();
+          if (!reducedMotion.matches) {
+            const dot = el("circle", { class: "pulse", r: 4.5 }, markLayer);
+            const motion = el(
+              "animateMotion",
+              {
+                dur: Math.min(3, Math.max(0.9, len / 160)).toFixed(2) + "s",
+                repeatCount: "indefinite",
+                begin: (i * 0.25).toFixed(2) + "s",
+              },
+              dot,
+            );
+            const mpath = el("mpath", {}, motion);
+            mpath.setAttribute("href", "#" + id);
+            mpath.setAttributeNS(XLINK, "xlink:href", "#" + id);
+          }
+          let pt = p.getPointAtLength(Math.min(30, len * 0.35));
+          // A short hop has its label in the middle, so the badge moves off
+          // the line to the side away from the label.
+          if (len < 70) {
+            const mid = p.getPointAtLength(len / 2);
+            const ahead = p.getPointAtLength(Math.min(len, len / 2 + 2));
+            const across = Math.abs(ahead.x - mid.x) >= Math.abs(ahead.y - mid.y);
+            pt = across ? { x: mid.x, y: mid.y + 13 } : { x: mid.x - 13, y: mid.y };
+          }
+          const g = el("g", { class: "badge" }, markLayer);
+          el("circle", { cx: pt.x, cy: pt.y, r: 10 }, g);
+          el("text", { x: pt.x, y: pt.y + 4, "text-anchor": "middle" }, g).textContent = i + 1;
+        });
+        f.nodes.forEach((k) =>
+          document.querySelector(`.node[data-k="${k}"]`)?.classList.add("lit"),
+        );
+        document.getElementById("f-name").textContent = f.name;
+        document.getElementById("f-steps").innerHTML = f.steps
+          .map((s) => `<li>${rich(s)}</li>`)
+          .join("");
+        fcap.hidden = false;
+        placeFlowCard();
+        placeDetailCard();
+      }
+      chips.forEach((c) => c.addEventListener("click", () => setFlow(c.dataset.flow)));
+
+      function showDetail(k) {
+        const d = DETAIL[k];
+        if (!d) return;
+        document.querySelectorAll(".node.sel").forEach((x) => x.classList.remove("sel"));
+        document.querySelector(`.node[data-k="${k}"]`)?.classList.add("sel");
+        document.getElementById("d-title").textContent = d.t;
+        document.getElementById("d-meta").textContent = d.m;
+        document.getElementById("d-body").innerHTML =
+          `<p>${rich(d.owns)}</p>` +
+          `<div class="sec">Files</div><ul class="files">${d.files.map((f) => `<li><code>${escapeHtml(f)}</code></li>`).join("")}</ul>` +
+          `<div class="sec">Rules</div><ul>${d.rules.map((r) => `<li>${rich(r)}</li>`).join("")}</ul>`;
+        detail.hidden = false;
+        detail.scrollTop = 0;
+        placeDetailCard();
+      }
+      function closeDetail() {
+        detail.hidden = true;
+        document.querySelectorAll(".node.sel").forEach((x) => x.classList.remove("sel"));
+      }
+      document.querySelectorAll(".node").forEach((n) => {
+        n.addEventListener("click", () => {
+          if (!dragMoved) showDetail(n.dataset.k);
+        });
+        n.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            showDetail(n.dataset.k);
+          }
+        });
+      });
+
+      document.getElementById("detailClose").addEventListener("click", closeDetail);
+      document.getElementById("flowClose").addEventListener("click", () => {
+        fcap.hidden = true;
+      });
+      function setLegend(open) {
+        legend.hidden = !open;
+        legendBtn.setAttribute("aria-expanded", String(open));
+        placeFlowCard();
+        placeDetailCard();
+      }
+      legendBtn.addEventListener("click", () => setLegend(legend.hidden));
+      document.getElementById("legendClose").addEventListener("click", () => setLegend(false));
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key !== "Escape") return;
+        if (!detail.hidden) closeDetail();
+        else if (!legend.hidden) setLegend(false);
+        else if (currentFlow !== "all") setFlow("all");
+      });
+
+      // Look: follows the system until the reader picks light or dark.
+      const THEME_KEY = "polymine-architecture-theme";
+      const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+      const themeBtn = document.getElementById("themeBtn");
+      function savedLook() {
+        try {
+          return localStorage.getItem(THEME_KEY) || "system";
+        } catch (e) {
+          return "system";
+        }
+      }
+      function applyLook() {
+        const look = savedLook();
+        const dark = look === "dark" || (look === "system" && darkQuery.matches);
+        document.documentElement.classList.toggle("dark", dark);
+        themeBtn.textContent = "Look: " + look;
+      }
+      themeBtn.addEventListener("click", () => {
+        const next = { system: "light", light: "dark", dark: "system" }[savedLook()];
+        try {
+          if (next === "system") localStorage.removeItem(THEME_KEY);
+          else localStorage.setItem(THEME_KEY, next);
+        } catch (e) {}
+        applyLook();
+      });
+      darkQuery.addEventListener("change", applyLook);
+      applyLook();
+
+      /* ───────────────────────── pan & zoom ───────────────────────── */
+      let scale = 1,
+        tx = 0,
+        ty = 0;
+      let dragging = false,
+        dragMoved = false,
+        startX = 0,
+        startY = 0,
+        startTx = 0,
+        startTy = 0;
+      const zind = document.getElementById("zind");
+
+      function apply() {
+        root.setAttribute("transform", `translate(${tx} ${ty}) scale(${scale})`);
+        zind.textContent = Math.round(scale * 100) + "%";
+      }
+      // SVG units per CSS pixel, under the viewBox's "meet" scaling.
+      function svgPerPx() {
+        const r = svgEl.getBoundingClientRect();
+        return 1 / Math.min(r.width / VB[2], r.height / VB[3]);
+      }
+      function clientToSvg(cx, cy) {
+        const r = svgEl.getBoundingClientRect();
+        const s = Math.min(r.width / VB[2], r.height / VB[3]);
+        return {
+          ux: (cx - r.left - (r.width - VB[2] * s) / 2) / s + VB[0],
+          uy: (cy - r.top - (r.height - VB[3] * s) / 2) / s + VB[1],
+        };
+      }
+      svgEl.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        dragging = true;
+        dragMoved = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        startTx = tx;
+        startTy = ty;
+      });
+      window.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+          dragMoved = true;
+          svgEl.classList.add("grabbing");
+        }
+        if (!dragMoved) return;
+        const k = svgPerPx();
+        tx = startTx + (e.clientX - startX) * k;
+        ty = startTy + (e.clientY - startY) * k;
+        apply();
+      });
+      window.addEventListener("pointerup", () => {
+        dragging = false;
+        svgEl.classList.remove("grabbing");
+        // The click that ends a drag must not open a card.
+        setTimeout(() => {
+          dragMoved = false;
+        }, 0);
+      });
+      svgEl.addEventListener(
+        "click",
+        (e) => {
+          if (dragMoved) e.stopPropagation();
+        },
+        true,
+      );
+
+      function zoomAt(ux, uy, factor) {
+        const ns = Math.max(0.4, Math.min(4, scale * factor));
+        tx += (scale - ns) * ux;
+        ty += (scale - ns) * uy;
+        scale = ns;
+        apply();
+      }
+      const center = () => [VB[0] + VB[2] / 2, VB[1] + VB[3] / 2];
+      svgEl.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const { ux, uy } = clientToSvg(e.clientX, e.clientY);
+          zoomAt(ux, uy, e.deltaY < 0 ? 1.12 : 1 / 1.12);
+        },
+        { passive: false },
+      );
+      document.getElementById("zoomIn").addEventListener("click", () => zoomAt(...center(), 1.2));
+      document
+        .getElementById("zoomOut")
+        .addEventListener("click", () => zoomAt(...center(), 1 / 1.2));
+      function resetView() {
+        scale = 1;
+        tx = 0;
+        ty = 0;
+        apply();
+      }
+      document.getElementById("zoomReset").addEventListener("click", resetView);
+      svgEl.addEventListener("keydown", (e) => {
+        const step = 60 / scale;
+        const moves = {
+          ArrowLeft: [step, 0],
+          ArrowRight: [-step, 0],
+          ArrowUp: [0, step],
+          ArrowDown: [0, -step],
+        };
+        if (moves[e.key]) {
+          tx += moves[e.key][0] * scale;
+          ty += moves[e.key][1] * scale;
+          apply();
+          e.preventDefault();
+        } else if (e.key === "+" || e.key === "=") {
+          zoomAt(...center(), 1.2);
+          e.preventDefault();
+        } else if (e.key === "-") {
+          zoomAt(...center(), 1 / 1.2);
+          e.preventDefault();
+        } else if (e.key === "0") {
+          resetView();
+          e.preventDefault();
+        }
+      });
+      window.addEventListener("resize", () => {
+        placeFlowCard();
+        placeDetailCard();
+      });
+      apply();
+    </script>
+  </body>
+</html>
