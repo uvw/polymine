@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="apl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:#5b647a"/><stop offset="1" style="stop-color:#2a2f3b"/></linearGradient>
+<radialGradient id="aha" cx="0.5" cy="0.5" r="0.5"><stop offset="0" style="stop-color:#ffffff" stop-opacity="0.18"/><stop offset="1" style="stop-color:#ffffff" stop-opacity="0"/></radialGradient>
+<radialGradient id="aba" cx="0.38" cy="0.35" r="0.75"><stop offset="0" style="stop-color:#9aa0aa"/><stop offset="0.35" style="stop-color:#3a3e46"/><stop offset="1" style="stop-color:#07080a"/></radialGradient>
+<linearGradient id="asp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:#c4cad4"/><stop offset="1" style="stop-color:#3d424b"/></linearGradient>
+<radialGradient id="ash" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000" stop-opacity="0.6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<radialGradient id="ask" cx="0.5" cy="0.5" r="0.5"><stop offset="0" style="stop-color:#fff" stop-opacity="0.9"/><stop offset="1" style="stop-color:#fff" stop-opacity="0"/></radialGradient>
+<clipPath id="acl"><rect x="4" y="4" width="92" height="92" rx="20"/></clipPath>
+</defs>
+<rect x="4" y="4" width="92" height="92" rx="20" fill="url(#apl)"/>
+<g clip-path="url(#acl)"><circle cx="50" cy="50" r="40" fill="url(#aha)"/></g>
+<rect x="5" y="5" width="90" height="90" rx="19" fill="none" style="stroke:#ffffff" stroke-opacity="0.5" stroke-width="1.5"/>
+<ellipse cx="52" cy="79" rx="26" ry="6" fill="url(#ash)"/>
+<line x1="68.00" y1="50.00" x2="83.00" y2="50.00" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="62.73" y1="62.73" x2="73.33" y2="73.33" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="50.00" y1="68.00" x2="50.00" y2="83.00" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="37.27" y1="62.73" x2="26.67" y2="73.33" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="32.00" y1="50.00" x2="17.00" y2="50.00" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="37.27" y1="37.27" x2="26.67" y2="26.67" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="50.00" y1="32.00" x2="50.00" y2="17.00" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><line x1="62.73" y1="37.27" x2="73.33" y2="26.67" stroke="url(#asp)" stroke-width="7" stroke-linecap="round"/><circle cx="83.00" cy="50.00" r="3.6" style="fill:#6a707b"/><circle cx="73.33" cy="73.33" r="3.6" style="fill:#6a707b"/><circle cx="50.00" cy="83.00" r="3.6" style="fill:#6a707b"/><circle cx="26.67" cy="73.33" r="3.6" style="fill:#6a707b"/><circle cx="17.00" cy="50.00" r="3.6" style="fill:#6a707b"/><circle cx="26.67" cy="26.67" r="3.6" style="fill:#6a707b"/><circle cx="50.00" cy="17.00" r="3.6" style="fill:#6a707b"/><circle cx="73.33" cy="26.67" r="3.6" style="fill:#6a707b"/>
+<circle cx="50" cy="50" r="22" fill="url(#aba)"/>
+<circle cx="50" cy="50" r="21.3" fill="none" style="stroke:#e6e8ee" stroke-opacity="0.5" stroke-width="1.2"/>
+<ellipse cx="42" cy="40" rx="7" ry="4.5" fill="#fff" opacity="0.6" transform="rotate(-30 42 40)"/>
+</svg>
