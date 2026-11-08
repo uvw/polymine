@@ -202,7 +202,7 @@ describe("layout", () => {
   it("rebuilds with a new theme", async () => {
     const { view, internals } = await setup();
     const before = [...internals.contexts.values()];
-    view.setTheme(themeById("charcoal").board);
+    view.setTheme(themeById("datum").board);
     expect(before.every((c) => c.destroyed)).toBe(true);
     expect(internals.contexts.size).toBeGreaterThan(0);
   });

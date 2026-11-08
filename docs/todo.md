@@ -6,8 +6,8 @@ when it's done. When an item settles a question, record the choice in
 
 ## Next
 
-1. **Tune Charcoal, Frost, Pride, and Spectrum** once the owner has played with
-   them. Frost and Pride already got a measured pass; what's left is taste.
+1. **Tune Frost, Pride, and Spectrum** once the owner has played with them.
+   Frost and Pride already got a measured pass; what's left is taste.
 2. **The macOS Dock icon.** The window icon follows the theme on Windows and
    Linux only (decision 56). The Dock could follow it too, through
    `NSApplication.applicationIconImage` while the app runs.

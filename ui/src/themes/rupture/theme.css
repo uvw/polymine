@@ -1,0 +1,99 @@
+/*
+ * Name: Rupture
+ * Author: Polymine
+ * Description: Sliced glyphs and split color on cold steel
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  /*
+   * Square steel cells with a cyan rim, and counts as blocky glyphs cut into
+   * bands that jump sideways, with cyan and red ghosts where the color channels
+   * split. A cyan glint tears across a closed cell under the pointer.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #e8f6ff;
+  --text-dim: #7d8a99;
+  --accent: #00e5ff;
+  --accent-hover: #5cf0ff;
+  --on-accent: #030405;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #ff2050;
+  --warning: #ffb000;
+  --window: #030405;
+  --window-image:
+    repeating-linear-gradient(0deg, rgb(0 229 255 / 3%) 0 1px, transparent 1px 4px),
+    linear-gradient(
+      180deg,
+      transparent 0 31%,
+      rgb(255 32 80 / 6%) 31% 32.2%,
+      transparent 32.2% 67%,
+      rgb(0 229 255 / 7%) 67% 67.8%,
+      transparent 67.8%
+    );
+  --control: #10131a;
+  --control-hover: #181c26;
+  --control-pressed: #0b0d12;
+  --subtle-hover: rgb(0 229 255 / 7%);
+  --subtle-pressed: rgb(0 229 255 / 4%);
+  --stroke: rgb(0 229 255 / 14%);
+  --stroke-strong: rgb(0 229 255 / 28%);
+  --divider: rgb(0 229 255 / 10%);
+  --surface: #080a0e;
+  --layer: rgb(8 10 14 / 92%);
+  --shadow:
+    -3px 0 0 rgb(0 229 255 / 25%), 3px 0 0 rgb(255 32 80 / 25%), 0 14px 40px rgb(0 0 0 / 70%);
+
+  --board-plate: #030405;
+  --board-gap: 2px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #313848;
+  --cell-closed-hover: #363d4d;
+  --cell-closed-pressed: #232835;
+  --cell-closed-edge: #2f3646;
+  --cell-open: #06070a;
+  --cell-open-edge: #10131a;
+  --cell-exploded: #ff2050;
+  --cell-light-angle: 0deg;
+  --cell-gloss: #00e5ff;
+  --cell-glint-opacity: 0.45;
+  --cell-rim: #00e5ff;
+  --cell-rim-opacity: 0.45;
+  --cell-rim-width: 1px;
+  --cell-rim-angle: 0deg;
+  --cell-shade-opacity: 0.15;
+  --cell-shade-depth: 0.7;
+
+  --flag: #ff3b6b;
+  --flag-outline: #030405;
+  --flag-pole: #f2f2f2;
+  --question: #fff04a;
+  --mine: #050608;
+  --mine-spark: #00e5ff;
+  --mine-spikes: 8;
+  --hint: #00e5ff;
+  --focus: #ffffff;
+  --win: #b6ff3b;
+
+  --number-1: #35c4fc;
+  --number-2: #b1fe46;
+  --number-3: #fc4266;
+  --number-4: #c18cf9;
+  --number-5: #ffb22f;
+  --number-6: #31fdd5;
+  --number-7: #f97dd4;
+  --number-8: #f2f2f2;
+  --number-9: #f8f07a;
+  --number-10: #71b0e4;
+  --number-11: #fb8a44;
+  --number-12: #9bfdb1;
+}

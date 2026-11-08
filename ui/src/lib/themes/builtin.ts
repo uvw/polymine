@@ -50,11 +50,21 @@ export const BUILT_IN_ORDER = [
   "glossy",
   "glass",
   "graphite",
-  "charcoal",
+  "datum",
   "swatch",
   "pride",
   "spectrum",
   "midnight",
+  "elevation",
+  "facet",
+  "quanta",
+  "loop",
+  "umbra",
+  "deboss",
+  "interference",
+  "diode",
+  "rupture",
+  "corrode",
   ...EDITOR_ORDER,
 ];
 
@@ -77,11 +87,12 @@ export function themeGroup(entry: Pick<ThemeEntry, "id" | "builtIn">): ThemeGrou
 }
 
 /**
- * Ids the editor themes had before they took their sources' names. A saved
+ * Ids built-in themes had before a rename or a replacement. A saved
  * setting with one of them opens the theme it became, and a player's folder
  * can't take one.
  */
 export const RENAMED_BUILT_INS: ReadonlyMap<string, string> = new Map([
+  ["charcoal", "datum"],
   ["orbital-night", "atom-one-dark"],
   ["nightshift", "one-dark-pro"],
   ["velvet", "dracula"],

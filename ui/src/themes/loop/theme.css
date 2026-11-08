@@ -1,0 +1,59 @@
+/*
+ * Name: Loop
+ * Author: Polymine
+ * Description: One bright ribbon on flat gray
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Flat gray in both modes, with every bit of color saved for the counts and
+   * one twisted ribbon ring for the mine: hot orange and red on dark gray, acid
+   * green and yellow on light gray.
+   */
+  --color-scheme: light dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --window: light-dark(#9c9c9c, #3c3c3e);
+  --window-image: none;
+
+  --board-plate: light-dark(#8f8f8f, #333335);
+  --board-gap: 2px;
+  --board-font: "Segoe UI Variable Display", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --board-font-weight: 500;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: light-dark(#838383, #78787c);
+  --cell-closed-hover: light-dark(#8f8f8f, #838387);
+  --cell-closed-pressed: light-dark(#777777, #6c6c70);
+  --cell-closed-edge: light-dark(#7c7c7c, #707074);
+  --cell-open: light-dark(#e6e6e6, #2b2b2d);
+  --cell-open-edge: light-dark(#dadada, #262628);
+  --cell-exploded: light-dark(#2f9e3a, #ff3c1e);
+
+  --flag: light-dark(#2f9e3a, #ff5a1e);
+  --flag-outline: light-dark(#ffffff, #1e1e1e);
+  --flag-pole: light-dark(#1e1e1e, #e8e8e8);
+  --question: light-dark(#1e1e1e, #ffb000);
+  --mine: #1e1e1e;
+  --mine-spark: #ffb000;
+  --hint: light-dark(#1e1e1e, #ffb000);
+  --focus: light-dark(#000000, #ffffff);
+  --win: light-dark(#2f9e3a, #ffb000);
+
+  --number-1: light-dark(#167124, #ffb22f);
+  --number-2: light-dark(#3d6000, #f5712a);
+  --number-3: light-dark(#a03e16, #ed6e90);
+  --number-4: light-dark(#1b5c8b, #fcd948);
+  --number-5: light-dark(#76227c, #fb8cb0);
+  --number-6: light-dark(#436663, #cbfb69);
+  --number-7: light-dark(#8a573a, #7ed9fc);
+  --number-8: light-dark(#1d1d1d, #f2f2f2);
+  --number-9: light-dark(#592d08, #e49e76);
+  --number-10: light-dark(#34489d, #ac9cff);
+  --number-11: light-dark(#88203c, #fb8a44);
+  --number-12: light-dark(#3b3138, #dde0a2);
+}

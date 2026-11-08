@@ -1,0 +1,90 @@
+/*
+ * Name: Elevation
+ * Author: Polymine
+ * Description: Block digits standing on a plan drawing
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Flat planes of gray under a pale mint sky, with hairline rules. Counts are
+   * solid black block glyphs pushed back in an oblique extrusion, and the mine
+   * is a cluster of primitive shapes.
+   */
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #121212;
+  --text-dim: #5d6261;
+  --accent: #121212;
+  --accent-hover: #2e2e2e;
+  --on-accent: #f6f7f5;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #b3261e;
+  --warning: #8a5a00;
+  --window: #dfe9e4;
+  --window-image:
+    linear-gradient(180deg, transparent 0 91%, rgb(18 18 18 / 45%) 91% 91.1%, transparent 91.1%),
+    linear-gradient(172deg, transparent 0 52%, rgb(150 154 153 / 40%) 52% 100%),
+    linear-gradient(8deg, rgb(255 255 255 / 60%) 0 18%, transparent 18%);
+  --control: #eef2f0;
+  --control-hover: #e4e9e6;
+  --control-pressed: #d8dedb;
+  --subtle-hover: rgb(18 18 18 / 6%);
+  --subtle-pressed: rgb(18 18 18 / 10%);
+  --stroke: rgb(18 18 18 / 14%);
+  --stroke-strong: rgb(18 18 18 / 30%);
+  --divider: rgb(18 18 18 / 12%);
+  --surface: #f6f7f5;
+  --layer: rgb(246 247 245 / 94%);
+  --shadow: 0 0 0 1px rgb(18 18 18 / 12%), 0 10px 28px rgb(18 18 18 / 18%);
+
+  --board-plate: #c9d6d0;
+  --board-gap: 2px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #858887;
+  --cell-closed-hover: #919493;
+  --cell-closed-pressed: #787b7a;
+  --cell-closed-edge: #7c7f7e;
+  --cell-open: #f1f3f1;
+  --cell-open-edge: #dde1df;
+  --cell-exploded: #121212;
+  --cell-light-angle: 315deg;
+  --cell-shade-opacity: 0.12;
+  --cell-shade-depth: 0.8;
+
+  --flag: #121212;
+  --flag-outline: #f6f7f5;
+  --flag-pole: #121212;
+  --question: #121212;
+  --mine: #121212;
+  --mine-spark: #f6f7f5;
+  --mine-spikes: 4;
+  --hint: #121212;
+  --focus: #000000;
+  --win: #ffffff;
+
+  --icon-plate: #dfe9e4;
+  --icon-metal: #858887;
+  --icon-mine: #121212;
+  --icon-spark: #f6f7f5;
+
+  --number-1: #121212;
+  --number-2: #0b0a0e;
+  --number-3: #171b18;
+  --number-4: #150a01;
+  --number-5: #011422;
+  --number-6: #201101;
+  --number-7: #0e1f29;
+  --number-8: #291906;
+  --number-9: #606b89;
+  --number-10: #504223;
+  --number-11: #000000;
+  --number-12: #335166;
+}

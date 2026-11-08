@@ -377,7 +377,7 @@ mod tests {
         let text = r#"{
             "tiling": "hexagon",
             "level": "nonsense",
-            "theme": "charcoal",
+            "theme": "datum",
             "custom": { "cols": 9 },
             "assistant": { "idleAction": "dance", "idleSeconds": 9 }
         }"#;
@@ -387,7 +387,7 @@ mod tests {
         assert!(error.contains("level") && error.contains("assistant.idleAction"));
         assert_eq!(loaded.tiling, TilingId::Hexagon);
         assert_eq!(loaded.level, Level::Beginner);
-        assert_eq!(loaded.theme, "charcoal");
+        assert_eq!(loaded.theme, "datum");
         assert_eq!(loaded.custom.cols, 9);
         assert_eq!(loaded.custom.rows, Settings::default().custom.rows);
         assert_eq!(loaded.assistant.idle_seconds, 9);
@@ -409,12 +409,12 @@ mod tests {
         assert!(error.is_none());
         assert_eq!(loaded.color_filter, ColorFilter::Tritanopia);
 
-        fs::write(&path, r#"{ "colorFilter": "sepia", "theme": "charcoal" }"#).unwrap();
+        fs::write(&path, r#"{ "colorFilter": "sepia", "theme": "datum" }"#).unwrap();
         let (loaded, error) = Settings::load(&path);
         let error = error.expect("the dropped value is reported").to_string();
         assert!(error.contains("colorFilter"));
         assert_eq!(loaded.color_filter, ColorFilter::Off);
-        assert_eq!(loaded.theme, "charcoal");
+        assert_eq!(loaded.theme, "datum");
     }
 
     #[test]

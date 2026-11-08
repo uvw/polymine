@@ -1,0 +1,88 @@
+/*
+ * Name: Datum
+ * Author: Polymine
+ * Description: Dot-matrix ink on a black grid
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: number-separation
+ */
+:root {
+  /*
+   * Strict geometry in black and paper white, with one signal orange. Counts
+   * are dot-matrix glyphs in near-black inks, so their shape tells them apart,
+   * and one row of each glyph slips sideways where an orange sliver marks the
+   * tear.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #ecebe6;
+  --text-dim: #8a8a86;
+  --accent: #ff4f1a;
+  --accent-hover: #ff6a3d;
+  --on-accent: #000000;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #ff4f1a;
+  --warning: #f2c94c;
+  --window: #050505;
+  --window-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 3.5%) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 3.5%) 0 1px, transparent 1px 24px);
+  --control: #161616;
+  --control-hover: #222222;
+  --control-pressed: #0e0e0e;
+  --subtle-hover: rgb(255 255 255 / 6%);
+  --subtle-pressed: rgb(255 255 255 / 4%);
+  --stroke: rgb(255 255 255 / 12%);
+  --stroke-strong: rgb(255 255 255 / 24%);
+  --divider: rgb(255 255 255 / 10%);
+  --surface: #0b0b0b;
+  --layer: rgb(11 11 11 / 92%);
+  --shadow: 0 0 0 1px rgb(255 255 255 / 10%), 0 12px 32px rgb(0 0 0 / 70%);
+
+  --board-plate: #000000;
+  --board-gap: 3px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #1b1b1b;
+  --cell-closed-hover: #2b2b2b;
+  --cell-closed-pressed: #101010;
+  --cell-closed-edge: #333333;
+  --cell-open: #ecebe6;
+  --cell-open-edge: #d4d3cd;
+  --cell-exploded: #ff4f1a;
+
+  --flag: #ff4f1a;
+  --flag-outline: #000000;
+  --flag-pole: #f2f2ee;
+  --question: #f2f2ee;
+  --mine: #111111;
+  --mine-spark: #ff4f1a;
+  --mine-spikes: 4;
+  --hint: #ff4f1a;
+  --focus: #ffffff;
+  --win: #f2f2ee;
+
+  --icon-plate: #000000;
+  --icon-metal: #ecebe6;
+  --icon-mine: #111111;
+  --icon-spark: #ff4f1a;
+
+  --number-1: #111111;
+  --number-2: #1d2a3a;
+  --number-3: #3a1a16;
+  --number-4: #1e3324;
+  --number-5: #33291a;
+  --number-6: #2a1d38;
+  --number-7: #12302f;
+  --number-8: #0e3d5c;
+  --number-9: #303030;
+  --number-10: #1a2440;
+  --number-11: #401c2a;
+  --number-12: #4a4a4a;
+}
