@@ -175,6 +175,37 @@ describe("MenuButton", () => {
       expect(name("e")).toHaveFocus();
     });
 
+    it("keeps the column moving between two grids, as from levels to tilings", async () => {
+      const user = userEvent.setup();
+      const items = (ids: string[]) =>
+        ids.map((id) => ({ id, label: `Tile ${id}`, checked: false, onSelect: vi.fn() }));
+      render(MenuButton, {
+        props: {
+          entries: [
+            { kind: "grid", label: "Top", columns: 3, items: items(["x", "y", "z"]) },
+            { kind: "grid", label: "Bottom", columns: 2, items: items(["a", "b", "c", "d", "e"]) },
+          ],
+          label: "Pick",
+          children: text,
+          tile,
+        },
+      });
+      screen.getByRole("button", { name: "Pick" }).focus();
+      await user.keyboard("{ArrowDown}");
+      const name = (n: string) => screen.getByRole("menuitemradio", { name: `Tile ${n}` });
+      await vi.waitFor(() => expect(name("x")).toHaveFocus());
+      await user.keyboard("{ArrowRight}{ArrowDown}");
+      expect(name("b")).toHaveFocus();
+      await user.keyboard("{ArrowUp}");
+      expect(name("y")).toHaveFocus();
+      // The bottom grid is narrower, so the last column lands on its last one.
+      await user.keyboard("{ArrowRight}{ArrowDown}");
+      expect(name("b")).toHaveFocus();
+      // Up from the top row wraps to the bottom grid's last row.
+      await user.keyboard("{ArrowUp}{ArrowLeft}{ArrowUp}");
+      expect(name("e")).toHaveFocus();
+    });
+
     it("ignores left and right outside a grid", async () => {
       const { user, trigger } = setupGrid();
       trigger.focus();
