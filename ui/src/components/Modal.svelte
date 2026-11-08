@@ -136,9 +136,10 @@
     width: min(720px, calc(100vw - 48px));
   }
 
+  /* Room for the Themes page's four columns and more than one row of cards. */
   .box.fixed {
-    width: min(760px, calc(100vw - 40px));
-    height: min(560px, calc(100% - 12px));
+    width: min(900px, calc(100vw - 40px));
+    height: min(700px, calc(100% - 12px));
     max-height: none;
   }
 

@@ -61,8 +61,8 @@ file current.
 | [50](#50-editor-themes-take-their-sources-names-and-official-palettes)           | Editor themes take their sources' names and official palettes           |
 | [51](#51-editor-themes-part-cells-like-panes)                                    | Editor themes part cells like panes                                     |
 | [52](#52-editor-theme-counts-follow-the-syntax-colors)                           | Editor theme counts follow the syntax colors                            |
-| [53](#53-settings-splits-the-themes-into-tabs-by-where-they-come-from)           | Settings splits the themes into tabs by where they come from            |
-| [54](#54-the-code-tab-pairs-a-dark-theme-over-a-light-one-in-each-column)        | The Code tab pairs a dark theme over a light one in each column         |
+| [53](#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from)     | Themes get a page of their own, in sections by where they come from     |
+| [54](#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column)     | The Code section sets a dark theme over a light one in each column      |
 | [55](#55-windows-releases-ship-the-nsis-installer-only)                          | Windows releases ship the NSIS installer only                           |
 | [56](#56-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
 | [57](#57-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
@@ -1065,42 +1065,54 @@ how the editors look, since the keyword color dominates their code views.
 
 **Alternatives:** the classic minesweeper order in each scheme's nearest hues.
 
-## 53. Settings splits the themes into tabs by where they come from
+## 53. Themes get a page of their own, in sections by where they come from
 
-**Date:** 2026-11-03
+**Date:** 2026-11-08
 
-**Decision:** Appearance shows the themes on tabs named Signature, Code, and
-Custom. Signature holds the app's own looks, Code the editor themes (decision
-50), and Custom the player's themes. The Custom tab shows only when the themes
-folder holds a theme. `EDITOR_THEMES` in `builtin.ts` sends the editor themes to
-Code and the other built-in themes to Signature. Every player theme goes on
-Custom.
+**Decision:** Settings gives themes their own page. It lists every theme in one
+scroll, in sections named Signature, Code, and Custom, each with its count.
+Signature holds the app's own looks, Code the editor themes (decision 50), and
+Custom the player's themes; `EDITOR_THEMES` in `builtin.ts` sends each built-in
+theme to its section, and Custom shows only when the themes folder holds a
+theme. Above the sections sit a search field, source and mode chips, and
+Surprise me, then a row of the last five themes chosen. Cards draw a small hex
+board with the theme's own glyphs and light, carry a favorite star, and try the
+theme on the board behind Settings when the pointer rests on them. A setting
+switches to a random theme with each new game, from the favorites or from all
+themes. The shell keeps the recent list, and the window can't write it.
 
-**Why:** The owner wanted the settings under the theme grid in view without
-scrolling at the 800 by 600 minimum, and every theme in one grid pushes them
-out. The owner picked "Signature" and "Code", one short word each for where a
-look comes from. "Code" replaced the first pick, "Devs", which named the people
-rather than the source. Player themes get their own tab because a player looks
-for a theme they added in one place. Mixing them into the Signature tab would
-grow it past the height that keeps the settings in view. The group list lives in
-code, not in a `Group:` header line, because only built-in themes need a group
-and a player's theme always lands on Custom.
+**Why:** Ten signature themes brought the count to 31, and the owner wants room
+for many more. On the Appearance tabs the grid already scrolled and pushed the
+settings under it out of view. A page of its own scrolls freely, and search,
+chips, favorites, and recents keep any theme a few keystrokes away. The previews
+are drawn rather than cut from screenshots: a picture can't follow the accent,
+the light or dark mode, or the color filter, which Glossy, Swatch, and Frost all
+depend on, and it goes stale when a theme changes. A player's `preview.png`
+still replaces the drawn board. The owner approved the page from a mockup on
+2026-11-08, and picked the names "Signature" and "Code" earlier. Player themes
+get their own section because a player looks for a theme they added in one
+place. The group list lives in code, not in a `Group:` header line, because only
+built-in themes need a group.
 
-**Alternatives:** the longer tab names "Polymine" and "Code editors"; a `Group:`
-line in each `theme.css` read by the parser, which would add a header field
-players can't use; and putting player themes on the Signature tab, which hides
-them among the built-in ones.
+**Alternatives:** tabs on Appearance, which scroll at 31 themes and hide the
+other settings; preview pictures cut from the real board; a separate gallery
+window; loading a player theme's glyphs only once its card scrolls into view,
+which matters only with many player themes; and a `Group:` line in each
+`theme.css`.
 
-## 54. The Code tab pairs a dark theme over a light one in each column
+## 54. The Code section sets a dark theme over a light one in each column
 
-**Date:** 2026-11-07
+**Date:** 2026-11-08
 
-**Decision:** The Code tab has six columns, each a dark theme over a light one:
+**Decision:** The Code section's pairs each put a dark theme over a light one:
 Atom One Dark over Atom One Light, Dracula over Alucard, GitHub Dark over GitHub
 Light, One Dark Pro over Catppuccin Latte, Monokai over Monokai Light, and
-Solarized Dark over Solarized Light. `EDITOR_COLUMNS` in `builtin.ts` holds
-them, and a test checks each light theme sits under its dark one. The theme grid
-has six columns on every tab.
+Solarized Dark over Solarized Light. The grid has four columns on the Themes
+page, so the first four pairs fill two rows and the last two start a new pair of
+rows. `EDITOR_COLUMNS` in `builtin.ts` holds the pairs, `editorPlacement` gives
+each card its row and column, and a test checks each light theme sits under its
+dark one. A search or a chip drops the placement, so the cards that match close
+up.
 
 Alucard is the light theme in Dracula's spec, with Alucard Classic's palette
 from `dracula/dracula-theme` under that repository's MIT license, and counts in
@@ -1110,20 +1122,19 @@ background, and its syntax colors keep their hues and darken to 4.5:1. Solarized
 Dark relaxes `number-separation`, because Solarized's fixed accents run together
 for deuteranopes, and Monokai Light passes every check.
 
-**Why:** The owner asked for matching themes to sit one above the other and for
-the dark and light rows to balance. Six columns keep both tabs two rows tall, so
-the settings under the grid stay in view at 800 by 600 (decision 53). Cards
-shrink from about 94 to 78 pixels wide, which still fits every name in two
-lines. One Dark Pro ships dark variants only, so Catppuccin Latte, which has no
-dark sibling here, fills its column. Solarized Dark keeps Solarized's published
-accents rather than bending them apart, as decision 42 allows for a look kept on
-purpose; the owner asked that color-blind tuning go to the main themes first. A
-player who needs the separation turns on the color filter (decision 43).
+**Why:** The owner asked for matching themes to sit one above the other.
+Explicit rows and columns keep that at any column count, while the page's order
+stays the reading order for the keyboard and screen readers. One Dark Pro ships
+dark variants only, so Catppuccin Latte, which has no dark sibling here, fills
+its column. Solarized Dark keeps Solarized's published accents rather than
+bending them apart, as decision 42 allows for a look kept on purpose; the owner
+asked that color-blind tuning go to the main themes first. A player who needs
+the separation turns on the color filter (decision 43).
 
-**Alternatives:** five columns with a third row, which pushes the settings out
-of view; pairs side by side, two to a row, which needs three rows; a popular
-light theme with no dark sibling, such as Rosé Pine Dawn, under One Dark Pro;
-and Monokai Pro's light filter, which is commercial.
+**Alternatives:** pairs side by side, two to a row, which loses the column; six
+columns, which shrinks every card on the page; a popular light theme with no
+dark sibling, such as Rosé Pine Dawn, under One Dark Pro; and Monokai Pro's
+light filter, which is commercial.
 
 ## 55. Windows releases ship the NSIS installer only
 

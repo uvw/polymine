@@ -230,6 +230,7 @@ select option {
 }
 
 input[type="text"],
+input[type="search"],
 input[type="number"] {
   min-height: var(--control-height);
   padding: 0 10px;
@@ -243,6 +244,7 @@ input[type="number"] {
 }
 
 input[type="text"]:focus,
+input[type="search"]:focus,
 input[type="number"]:focus {
   outline: none;
   border-bottom: 2px solid var(--accent);
@@ -250,6 +252,7 @@ input[type="number"]:focus {
 }
 
 :root.platform-macos input[type="text"],
+:root.platform-macos input[type="search"],
 :root.platform-macos input[type="number"] {
   border-bottom: 1px solid var(--stroke-strong);
 }

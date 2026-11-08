@@ -86,11 +86,11 @@ eager, so `BUILT_IN_THEMES` in `catalog.ts` exists at startup.
 
 1. `BUILT_IN_ORDER` sets the order in Settings. Frost is first and is the
    default.
-2. `EDITOR_COLUMNS` lists the Code tab's columns as dark and light pairs.
-3. `EDITOR_ORDER` reads those pairs into the grid's two rows, dark first, so
-   each light theme sits under its dark one. `EDITOR_THEMES` is the same list as
-   a set.
-4. `THEME_GRID_COLUMNS` is the grid's width, six columns.
+2. `EDITOR_COLUMNS` lists the Code section's columns as dark and light pairs.
+3. `editorPlacement` gives each editor card its row and column, so each light
+   theme sits under its dark one, and `EDITOR_ORDER` lists them in reading
+   order. `EDITOR_THEMES` is the same list as a set.
+4. `THEME_GRID_COLUMNS` is the grid's width, four columns.
 
 `ui/src/themes` holds every built-in folder, experiments included.
 `EXPERIMENTAL_THEMES` in `builtin.ts` names the experiments, such as Ferrofluid.
@@ -762,4 +762,4 @@ target. To install a theme:
    it to a valid id that no built-in or renamed built-in theme uses.
 3. The UI picks it up the next time the window comes to the front, or call
    `ThemeLibrary.load` after a command finishes. The CSS is checked there, and a
-   theme that fails is listed at the bottom of Appearance in Settings.
+   theme that fails is listed at the bottom of Themes in Settings.

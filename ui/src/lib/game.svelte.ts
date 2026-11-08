@@ -22,6 +22,7 @@ import { formatDuration, formatPercent } from "./format";
 import { t } from "./i18n";
 import { BUILT_IN_THEMES, findTheme, themeFor } from "./themes/catalog";
 import { filterTheme } from "./themes/filter";
+import { pickTheme, rotationPool } from "./themes/gallery";
 import { ThemeLibrary } from "./themes/library.svelte";
 import type { ThemeEnv } from "./themes/resolve";
 import type { Theme, ThemeEntry } from "./themes/types";
@@ -78,10 +79,12 @@ export class GameStore {
     accent: this.settings?.accentTint === false ? null : this.accent,
     dark: this.dark.current,
   });
-  /** The chosen theme for the moment, through the player's color filter. */
+  /** A theme shown on the board for a look, without choosing it, or null. */
+  previewThemeId = $state<string | null>(null);
+  /** The theme for the moment, tried on or chosen, through the player's color filter. */
   readonly theme: Theme = $derived(
     filterTheme(
-      themeFor(findTheme(this.themes, this.settings?.theme), this.themeEnv),
+      themeFor(findTheme(this.themes, this.previewThemeId ?? this.settings?.theme), this.themeEnv),
       this.settings?.colorFilter,
     ),
   );
@@ -185,7 +188,8 @@ export class GameStore {
           const config = this.snapshot?.config;
           if (!config || config.tiling !== tiling || !this.refillable()) return;
           if (size.cols !== config.cols || size.rows !== config.rows) {
-            await this.start(tiling, "custom", size);
+            // A resize isn't a new game to the player, so the theme stays.
+            await this.start(tiling, "custom", size, false);
           }
         });
       })();
@@ -221,13 +225,30 @@ export class GameStore {
   }
 
   /** Starts a game right away; callers outside the queue go through `startGame`. */
-  private async start(tiling: TilingId, level: Level, custom?: CustomSize): Promise<void> {
+  private async start(
+    tiling: TilingId,
+    level: Level,
+    custom?: CustomSize,
+    rotate = true,
+  ): Promise<void> {
     let size = custom ?? (level === "custom" ? this.settings?.custom : undefined);
     if (level === "custom" && !custom && this.settings?.fillWindow) {
       size = (await this.fillSize(tiling, this.customDensity())) ?? size;
     }
     this.load(await api.newGame({ tiling, level, custom: size ?? null }));
     this.settings = await api.getSettings();
+    if (rotate) await this.rotateTheme();
+  }
+
+  /** Switches to another theme for the new game when the player asked for one each game. */
+  private async rotateTheme(): Promise<void> {
+    const settings = this.settings;
+    if (!settings) return;
+    const pool = rotationPool(this.themes, settings.themeRotation, settings.favoriteThemes);
+    const theme = pickTheme(pool, settings.theme);
+    if (!theme) return;
+    this.settings = await api.updateSettings({ ...settings, theme });
+    await this.library.loadGlyphs(theme);
   }
 
   primary(cell: number) {
@@ -309,6 +330,12 @@ export class GameStore {
   loadSave(name: string) {
     this.takeOverFromAutoplay();
     return this.run(async () => this.load(await api.loadSave(name)));
+  }
+
+  /** Shows theme `id` on the board without saving it, or the chosen one again for null. */
+  tryOn(id: string | null): void {
+    this.previewThemeId = id;
+    if (id) void this.library.loadGlyphs(id);
   }
 
   /** Reads the themes folder again, for themes added or edited while Polymine ran. */

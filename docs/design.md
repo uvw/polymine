@@ -552,41 +552,71 @@ or with Ctrl+S on Windows and Linux and Cmd+S on macOS.
 
 ### The Settings dialog
 
-Settings is a fixed-size dialog with a sidebar of three sections: General,
-Appearance, and Bot. General holds the player picker with Add and Remove, the
-active player's name, and the language, then the Rules and Window groups. The
-sidebar names the section, so the pane starts with its settings. Only the
-section's pane scrolls, and every section fits without scrolling at the window's
-800 by 600 minimum on macOS. The sidebar is a vertical tab list: arrow keys,
-Home, and End move between sections, and the dialog reopens on the last one.
+Settings is a fixed-size dialog, up to 900 by 700 pixels, with a sidebar of four
+sections: General, Appearance, Themes, and Bot. General holds the player picker
+with Add and Remove, the active player's name, and the language, then the Rules
+and Window groups. The sidebar names the section, so the pane starts with its
+settings. Only the section's pane scrolls. General, Appearance, and Bot fit
+without scrolling at the window's 800 by 600 minimum on macOS. The sidebar is a
+vertical tab list: arrow keys, Home, and End move between sections, and the
+dialog reopens on the last one.
 
 On/off settings are switches in rows, label left and switch right, with one line
 of help where a rule needs it. The color filter, the idle action, and the
 language are drop-downs. macOS groups rows in one inset box with hairline
 dividers; Windows draws each row as its own card with a Fluent toggle. Changes
-apply as they're made, and a language change reloads the window.
+apply as they're made, and a language change reloads the window. Appearance
+holds the accent tint switch and the color filter.
 
-Appearance splits the themes into tabs:
+### The Themes page
+
+Themes lists every theme in one scroll, in sections that each show their count
+([decision 53][decision-53]):
 
 1. Signature, for Polymine's own looks.
 2. Code, for the themes that take an editor's color scheme.
 3. Custom, for the player's themes, shown only when the themes folder holds one.
 
-`EDITOR_COLUMNS` in `builtin.ts` lists the Code tab's themes as columns of a
-dark theme over a light one, so the dark themes fill the first row and the light
-ones the second ([decision 54][decision-54]). The tab list is a Fluent selector
-bar on Windows and a segmented control on macOS. Appearance opens on the tab
-that holds the chosen theme.
+[decision-53]:
+  decisions.md#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
+
+The Code section sets each dark theme over its light one in four columns, and
+the pairs past the fourth start a new pair of rows ([decision 54][decision-54]).
+`EDITOR_COLUMNS` in `builtin.ts` lists the pairs, and `editorPlacement` gives
+each card its row and column. A filter drops the placement, so the cards that
+match close up.
 
 [decision-54]:
-  decisions.md#54-the-code-tab-pairs-a-dark-theme-over-a-light-one-in-each-column
+  decisions.md#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column
 
-Each tab shows its themes as a six-column grid of small board previews, so the
-settings under the grid stay in view at the 800 by 600 minimum. Previews take
-the accent while the tint switch is on, as the board does. They go through the
-chosen color filter and draw the theme's glare and shade. Color-only themes
-preview their counts as fills. Player themes show their `preview.png` when they
-have one.
+Above the sections:
+
+1. A search field matches every word typed against each theme's name,
+   description, and author.
+2. Chips pick a source: All, Signature, Code, Custom, or Favorites. Two more
+   pick a mode, Light or Dark, and a theme that follows the system matches
+   either.
+3. Surprise me chooses a random theme, other than the current one, from those
+   showing.
+
+A Recent row shows the last five themes chosen, newest first. The shell records
+them when the theme changes, and the row hides while a search or a chip is on. A
+search that matches nothing says so.
+
+Each theme is a card in a four-column grid. The card draws a small hex board in
+the theme's colors, with its glyphs, font, glare, and shade, and its name and
+description below. The board takes the accent while the tint switch is on, and
+goes through the chosen color filter, as the real board does. A player theme's
+`preview.png` replaces the drawn board, and its glyphs load when the page opens.
+A star on each card adds the theme to the favorites. Cards out of view skip
+layout and painting, so the grid stays quick at any length.
+
+Resting the pointer on a card for 300 ms, or reaching it by keyboard, tries the
+theme on: the board and the window behind Settings show it without choosing it.
+Leaving the cards, pressing Escape, or closing Settings puts the chosen theme
+back. Clicking a card chooses it. Arrow keys move between the cards and try each
+one on without choosing it, unlike a plain radio group, so a player can look
+through the themes from the keyboard; Space or Enter chooses.
 
 A theme's name, description, and author show in a flyout with an arrow. It opens
 after the pointer rests on the theme's card for half a second, or at once on
@@ -596,12 +626,14 @@ keyboard focus.
    and stays inside the dialog.
 2. It is a Fluent tooltip on Windows and an AppKit popover on macOS.
 3. The pointer can move onto it, and Escape closes it before the dialog.
-4. Each theme's radio takes the flyout's description line as its accessible
-   description.
+4. Each theme's radio takes its name as its accessible name and the flyout's
+   description line as its accessible description.
 
-An Open themes folder link at the end of the tab row opens the folder in Finder
-or Explorer. Themes that didn't load are listed below the settings with the
-reason.
+New theme each game, at the bottom of the page, can switch themes for every new
+game, the bot's included: Off, From favorites, or From all themes. Favorites
+need two or more to rotate, or every theme takes part. An Open themes folder
+link beside it opens the folder in Finder or Explorer. Themes that didn't load
+are listed below with the reason.
 
 ## Languages
 

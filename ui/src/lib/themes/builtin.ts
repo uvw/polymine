@@ -21,11 +21,11 @@ const PREVIEW: Files = import.meta.glob("../../themes/*/preview.png", {
   eager: true,
 });
 
-/** Columns in the Settings theme grid. `.theme-grid` in `SettingsDialog.svelte` must match. */
-export const THEME_GRID_COLUMNS = 6;
+/** Columns in the Themes page's grid. `.theme-grid` in `ThemesPane.svelte` must match. */
+export const THEME_GRID_COLUMNS = 4;
 
 /**
- * The Code tab's columns, each a dark theme over a light one. Most are one
+ * The Code section's columns, each a dark theme over a light one. Most are one
  * scheme's pair. One Dark Pro has no light variant, so Catppuccin Latte, which
  * has no dark one here, fills its column.
  */
@@ -38,11 +38,27 @@ export const EDITOR_COLUMNS: readonly (readonly [dark: string, light: string])[]
   ["solarized-dark", "solarized-light"],
 ];
 
-/** The Code tab in grid order: the dark themes fill the first row and the light ones the second. */
-export const EDITOR_ORDER: readonly string[] = [
-  ...EDITOR_COLUMNS.map(([dark]) => dark),
-  ...EDITOR_COLUMNS.map(([, light]) => light),
-];
+/**
+ * Where an editor theme sits in the Code section: its pair's column, the dark
+ * theme over the light one, with pairs past the grid's width on further rows.
+ */
+export function editorPlacement(id: string): { row: number; column: number } {
+  const pair = Math.max(
+    EDITOR_COLUMNS.findIndex((columns) => columns.includes(id)),
+    0,
+  );
+  const light = EDITOR_COLUMNS[pair]?.[1] === id;
+  return {
+    row: Math.floor(pair / THEME_GRID_COLUMNS) * 2 + (light ? 1 : 0),
+    column: pair % THEME_GRID_COLUMNS,
+  };
+}
+
+/** The Code section in reading order, row by row. */
+export const EDITOR_ORDER: readonly string[] = EDITOR_COLUMNS.flat().sort((a, b) => {
+  const [x, y] = [editorPlacement(a), editorPlacement(b)];
+  return x.row - y.row || x.column - y.column;
+});
 
 /** Settings shows the built-in themes in this order, `DEFAULT_THEME_ID` first. */
 export const BUILT_IN_ORDER = [

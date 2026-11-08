@@ -118,7 +118,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
      through the spikes in the fragment shader. It was built and tuned on
      WebView2 with an RTX 4090.
    - **Verify:** run `npm run tauri dev` as a named instance and pick
-     Ferrofluid, the last theme on the signature tab.
+     Ferrofluid, the last theme in the Signature section of Themes.
      1. Closed cells are glossy black domes with white highlights, not flat
         black or white: the half-float targets work.
      2. Move the pointer over the board: spikes rise around it and lean up the

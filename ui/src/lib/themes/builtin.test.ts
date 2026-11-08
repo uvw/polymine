@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import settings from "../../components/SettingsDialog.svelte?raw";
+import pane from "../../components/ThemesPane.svelte?raw";
 import {
   BUILT_IN_ORDER,
   EDITOR_ORDER,
   EDITOR_COLUMNS,
   EDITOR_THEMES,
   THEME_GRID_COLUMNS,
+  editorPlacement,
   themeGroup,
 } from "./builtin";
 import { BUILT_IN_THEMES } from "./catalog";
@@ -28,29 +29,39 @@ describe("themeGroup", () => {
   });
 });
 
-describe("the editor tab's grid", () => {
+describe("the Code section's grid", () => {
   const ids = BUILT_IN_THEMES.filter((entry) => themeGroup(entry) === "editor").map((e) => e.id);
-  const at = (id: string) => ({
-    row: Math.floor(ids.indexOf(id) / THEME_GRID_COLUMNS),
-    column: ids.indexOf(id) % THEME_GRID_COLUMNS,
-  });
+  const at = (id: string) => editorPlacement(id);
 
-  it("puts each light theme under the dark one its column pairs it with", () => {
+  it("puts each light theme right under the dark one its column pairs it with", () => {
     for (const [dark, light] of EDITOR_COLUMNS) {
-      expect(at(dark).row, dark).toBe(0);
-      expect(at(light), light).toEqual({ row: 1, column: at(dark).column });
+      expect(at(dark).row % 2, dark).toBe(0);
+      expect(at(light), light).toEqual({ row: at(dark).row + 1, column: at(dark).column });
     }
   });
 
-  it("puts every dark theme on the first row and every light one on the second", () => {
-    const editors = BUILT_IN_THEMES.filter((entry) => themeGroup(entry) === "editor");
-    for (const { id, css } of editors) {
-      expect(at(id).row, id).toBe(css.includes("--color-scheme: dark") ? 0 : 1);
-    }
+  it("fills each row from the left, no wider than the grid", () => {
+    const places = EDITOR_ORDER.map(at);
+    for (const place of places) expect(place.column).toBeLessThan(THEME_GRID_COLUMNS);
+    const key = (p: { row: number; column: number }) => p.row * THEME_GRID_COLUMNS + p.column;
+    expect(places.map(key)).toEqual([...places.map(key)].sort((x, y) => x - y));
+  });
+
+  it("lists the editor themes in reading order", () => {
     expect(ids).toEqual(EDITOR_ORDER);
+    expect(new Set(ids)).toEqual(new Set(EDITOR_COLUMNS.flat()));
   });
 
-  it("matches the column count Settings draws", () => {
-    expect(settings).toMatch(new RegExp(`\\.theme-grid \\{[^}]*repeat\\(${THEME_GRID_COLUMNS},`));
+  it("matches the column count the Themes page draws", () => {
+    expect(pane).toMatch(new RegExp(`\\.theme-grid \\{[^}]*repeat\\(${THEME_GRID_COLUMNS},`));
+  });
+});
+
+describe("the Themes page's cards", () => {
+  // Cards clip their paint to skip off-screen work, so rings must sit inside them.
+  it("draws the focus and selection rings inside the card", () => {
+    expect(pane).toMatch(/\.card \{[^}]*content-visibility: auto/);
+    expect(pane).toMatch(/\.theme:has\(input:focus-visible\) \{[^}]*outline-offset: -\d/);
+    expect(pane).toMatch(/\.theme\.on \{[^}]*box-shadow: inset/);
   });
 });

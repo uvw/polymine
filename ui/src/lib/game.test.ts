@@ -173,6 +173,18 @@ describe("loading", () => {
     expect(store.theme).toBe(plain);
   });
 
+  it("tries a theme on the board without saving it", () => {
+    const update = vi.spyOn(store, "updateSettings");
+    store.settings = settings({ theme: "graphite" });
+    store.tryOn("datum");
+    expect(store.previewThemeId).toBe("datum");
+    expect(store.theme.id).toBe("datum");
+    expect(store.settings.theme).toBe("graphite");
+    store.tryOn(null);
+    expect(store.theme.id).toBe("graphite");
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("derives the theme from settings, with a fallback", () => {
     expect(store.theme.id).toBe("graphite");
     store.settings = settings({ theme: "midnight" });
@@ -220,6 +232,34 @@ describe("loading", () => {
     expect(board.load).toHaveBeenLastCalledWith(store.snapshot);
   });
 
+  describe("a new theme each game", () => {
+    const start = async (over: Parameters<typeof settings>[0]) => {
+      api.newGame.mockResolvedValue(snapshot());
+      api.getSettings.mockResolvedValue(settings({ theme: "loop", ...over }));
+      api.updateSettings.mockImplementation((next) => Promise.resolve(next));
+      await store.newGame();
+      return store.settings?.theme;
+    };
+
+    it("switches to another theme from every theme", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(0);
+      expect(await start({ themeRotation: "all" })).not.toBe("loop");
+      expect(api.updateSettings).toHaveBeenCalled();
+    });
+
+    it("switches between two or more favorites", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.99);
+      expect(await start({ themeRotation: "favorites", favoriteThemes: ["loop", "facet"] })).toBe(
+        "facet",
+      );
+    });
+
+    it("keeps the theme while rotation is off", async () => {
+      expect(await start({ themeRotation: "off" })).toBe("loop");
+      expect(api.updateSettings).not.toHaveBeenCalled();
+    });
+  });
+
   it("sizes a board to fill the window, keeping the mine density", async () => {
     expect(await store.fillSize("square", 0.2)).toBeNull();
     store.boardArea = { width: 1000, height: 532 };
@@ -263,6 +303,17 @@ describe("loading", () => {
       expect(api.newGame).toHaveBeenCalledWith(
         expect.objectContaining({ level: "custom", custom: expect.objectContaining(fitted) }),
       );
+    });
+
+    it("keeps the theme when a resize refills the board, rotation or not", async () => {
+      api.getSettings.mockResolvedValue(settings({ fillWindow: true, themeRotation: "all" }));
+      api.updateSettings.mockClear();
+      api.fitBoard.mockResolvedValue(fitted);
+      api.newGame.mockResolvedValue(snapshot(5, 4, { config: { ...custom, ...fitted } }));
+      store.boardLayoutChanged();
+      await vi.advanceTimersByTimeAsync(400);
+      expect(api.newGame).toHaveBeenCalled();
+      expect(api.updateSettings).not.toHaveBeenCalled();
     });
 
     it("keeps a game the player started while the new size was worked out", async () => {

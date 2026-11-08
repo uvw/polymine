@@ -18,7 +18,9 @@
     | "check"
     | "restart"
     | "sliders"
-    | "palette";
+    | "palette"
+    | "swatches"
+    | "star";
 </script>
 
 <script lang="ts">
@@ -87,6 +89,13 @@
     <path d="M5 7h9m4 0h1M5 17h3m4 0h7" />
     <circle cx="16" cy="7" r="2" />
     <circle cx="10" cy="17" r="2" />
+  {:else if name === "swatches"}
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+  {:else if name === "star"}
+    <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z" />
   {:else if name === "palette"}
     <path
       d="M12 3a9 9 0 0 0 0 18c1 0 1.7-.7 1.7-1.6 0-.5-.2-.8-.5-1.1-.3-.3-.5-.7-.5-1.1 0-.9.8-1.6 1.7-1.6h2A5.6 5.6 0 0 0 21 10c0-3.9-4-7-9-7Z"
