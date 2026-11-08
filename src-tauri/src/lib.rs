@@ -17,6 +17,7 @@ mod saves;
 mod session;
 mod settings;
 mod sleep;
+mod taskbar_icon;
 mod themes;
 #[cfg(target_os = "macos")]
 mod traffic_lights;
@@ -194,6 +195,7 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             environment::set_material,
             accent::get_accent,
             foreground::window_in_front,
+            taskbar_icon::set_taskbar_icon,
             themes::list_themes,
             themes::read_theme,
             themes::open_themes_folder,

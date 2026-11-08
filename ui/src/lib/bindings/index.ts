@@ -88,6 +88,11 @@ export const commands = {
 	 */
 	windowInFront: () => __TAURI_INVOKE<boolean>("window_in_front"),
 	/**
+	 *  Sets the window's big icon to `rgba`, a `size` by `size` image. A failure
+	 *  is logged and leaves the icon as it was. Other platforms have no such icon.
+	 */
+	setTaskbarIcon: (rgba: number[], size: number) => __TAURI_INVOKE<void>("set_taskbar_icon", { rgba, size }),
+	/**
 	 *  Lists the player's themes. Folders that break the rules come back in
 	 *  `skipped`, and the log says why once.
 	 */
