@@ -362,8 +362,8 @@ give it a dark `--question-outline`, as Glossy does.
 
 ## Color filters
 
-Players can turn on a color filter in Settings, under Appearance: deuteranopia
-or protanopia for the two kinds of red-green color blindness, or tritanopia for
+Players can turn on a color filter in Settings, under Themes: deuteranopia or
+protanopia for the two kinds of red-green color blindness, or tritanopia for
 blue-yellow. It works on your theme too, with nothing to set up. The filter
 checks the colors a player has to tell apart as they look with that color
 blindness, and moves only those that fall short:

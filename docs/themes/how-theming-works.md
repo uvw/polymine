@@ -516,12 +516,12 @@ replaces the digit, and in a `colors` theme it sits on the fill.
 
 ## Color filters
 
-The Color filter setting in Appearance remaps the board's colors for
-deuteranopia, protanopia, or tritanopia. It runs after resolution, in
-`lib/themes/filter.ts`, so it works on every theme, built-in or not, and no
-theme needs tuning of its own. `filterTheme` returns the theme unchanged for
-`off`. Otherwise it returns a copy whose board went through `filterBoard`, with
-`BoardTheme.filter` naming the filter.
+The Color filter setting in Themes remaps the board's colors for deuteranopia,
+protanopia, or tritanopia. It runs after resolution, in `lib/themes/filter.ts`,
+so it works on every theme, built-in or not, and no theme needs tuning of its
+own. `filterTheme` returns the theme unchanged for `off`. Otherwise it returns a
+copy whose board went through `filterBoard`, with `BoardTheme.filter` naming the
+filter.
 
 ### Pairs and bars
 

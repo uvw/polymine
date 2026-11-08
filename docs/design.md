@@ -552,26 +552,26 @@ or with Ctrl+S on Windows and Linux and Cmd+S on macOS.
 
 ### The Settings dialog
 
-Settings is a fixed-size dialog, up to 900 by 700 pixels, with a sidebar of four
-sections: General, Appearance, Themes, and Bot. General holds the player picker
-with Add and Remove, the active player's name, and the language, then the Rules
-and Window groups. The sidebar names the section, so the pane starts with its
-settings. Only the section's pane scrolls. General, Appearance, and Bot fit
-without scrolling at the window's 800 by 600 minimum on macOS. The sidebar is a
-vertical tab list: arrow keys, Home, and End move between sections, and the
-dialog reopens on the last one.
+Settings is a fixed-size dialog, up to 900 by 700 pixels, with a sidebar of
+three sections: General, Themes, and Bot. General holds the player picker with
+Add and Remove, the active player's name, and the language, then the Rules and
+Window groups. The sidebar names the section, so the pane starts with its
+settings. Only the section's pane scrolls. General and Bot fit without scrolling
+at the window's 800 by 600 minimum on macOS. The sidebar is a vertical tab list:
+arrow keys, Home, and End move between sections, and the dialog reopens on the
+last one.
 
 On/off settings are switches in rows, label left and switch right, with one line
 of help where a rule needs it. The color filter, the idle action, and the
 language are drop-downs. macOS groups rows in one inset box with hairline
 dividers; Windows draws each row as its own card with a Fluent toggle. Changes
-apply as they're made, and a language change reloads the window. Appearance
-holds the accent tint switch and the color filter.
+apply as they're made, and a language change reloads the window.
 
 ### The Themes page
 
-Themes lists every theme in one scroll, in sections that each show their count
-([decision 53][decision-53]):
+Themes starts with the accent tint switch and the color filter, side by side,
+since both change every preview below. Then it lists every theme in one scroll,
+in sections that each show their count ([decision 53][decision-53]):
 
 1. Signature, for Polymine's own looks.
 2. Code, for the themes that take an editor's color scheme.
@@ -719,7 +719,7 @@ relaxations, and
 [decision 42](decisions.md#42-theme-tests-hold-every-built-in-theme-to-readability-bars)
 records why each theme relaxes what it does.
 
-A color filter in Appearance remaps any theme's board colors for deuteranopia,
+A color filter in Themes remaps any theme's board colors for deuteranopia,
 protanopia, or tritanopia. It is off by default. It moves the colors a player
 must tell apart until each pair clears the theme tests' bar under that
 deficiency, and leaves a board that already passes exactly as it is. SVG glyphs

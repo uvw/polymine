@@ -1069,17 +1069,19 @@ how the editors look, since the keyword color dominates their code views.
 
 **Date:** 2026-11-08
 
-**Decision:** Settings gives themes their own page. It lists every theme in one
-scroll, in sections named Signature, Code, and Custom, each with its count.
-Signature holds the app's own looks, Code the editor themes (decision 50), and
-Custom the player's themes; `EDITOR_THEMES` in `builtin.ts` sends each built-in
-theme to its section, and Custom shows only when the themes folder holds a
-theme. Above the sections sit a search field, source and mode chips, and
-Surprise me, then a row of the last five themes chosen. Cards draw a small hex
-board with the theme's own glyphs and light, carry a favorite star, and try the
-theme on the board behind Settings when the pointer rests on them. A setting
-switches to a random theme with each new game, from the favorites or from all
-themes. The shell keeps the recent list, and the window can't write it.
+**Decision:** Settings gives themes their own page, which replaces Appearance.
+It starts with the accent tint switch and the color filter, side by side, since
+both change every preview. Then it lists every theme in one scroll, in sections
+named Signature, Code, and Custom, each with its count. Signature holds the
+app's own looks, Code the editor themes (decision 50), and Custom the player's
+themes; `EDITOR_THEMES` in `builtin.ts` sends each built-in theme to its
+section, and Custom shows only when the themes folder holds a theme. Above the
+sections sit a search field, source and mode chips, and Surprise me, then a row
+of the last five themes chosen. Cards draw a small hex board with the theme's
+own glyphs and light, carry a favorite star, and try the theme on the board
+behind Settings when the pointer rests on them. A setting switches to a random
+theme with each new game, from the favorites or from all themes. The shell keeps
+the recent list, and the window can't write it.
 
 **Why:** Ten signature themes brought the count to 31, and the owner wants room
 for many more. On the Appearance tabs the grid already scrolled and pushed the
@@ -1094,11 +1096,12 @@ get their own section because a player looks for a theme they added in one
 place. The group list lives in code, not in a `Group:` header line, because only
 built-in themes need a group.
 
-**Alternatives:** tabs on Appearance, which scroll at 31 themes and hide the
-other settings; preview pictures cut from the real board; a separate gallery
-window; loading a player theme's glyphs only once its card scrolls into view,
-which matters only with many player themes; and a `Group:` line in each
-`theme.css`.
+**Alternatives:** keeping Appearance as its own section for the tint and the
+filter, which left two switches on a page; tabs on Appearance, which scroll at
+31 themes and hide the other settings; preview pictures cut from the real board;
+a separate gallery window; loading a player theme's glyphs only once its card
+scrolls into view, which matters only with many player themes; and a `Group:`
+line in each `theme.css`.
 
 ## 54. The Code section sets a dark theme over a light one in each column
 

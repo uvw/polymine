@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick, untrack } from "svelte";
-  import type { ColorFilter, IdleAction, Settings } from "../lib/bindings";
+  import type { IdleAction, Settings } from "../lib/bindings";
   import { formatNumber } from "../lib/format";
   import { game } from "../lib/game.svelte";
   import {
@@ -18,20 +18,12 @@
 
   let { open = $bindable(false) }: { open?: boolean } = $props();
 
-  type Pane = "general" | "appearance" | "themes" | "bot";
+  type Pane = "general" | "themes" | "bot";
 
   const PANES: readonly { id: Pane; label: MessageKey; icon: IconName }[] = [
     { id: "general", label: "settings.general", icon: "gear" },
-    { id: "appearance", label: "settings.appearance", icon: "palette" },
-    { id: "themes", label: "settings.themes", icon: "swatches" },
+    { id: "themes", label: "settings.themes", icon: "palette" },
     { id: "bot", label: "settings.assistant", icon: "robot" },
-  ];
-
-  const COLOR_FILTERS: readonly { value: ColorFilter; label: MessageKey }[] = [
-    { value: "off", label: "settings.colorFilterOff" },
-    { value: "deuteranopia", label: "settings.colorFilterDeuteranopia" },
-    { value: "protanopia", label: "settings.colorFilterProtanopia" },
-    { value: "tritanopia", label: "settings.colorFilterTritanopia" },
   ];
 
   const IDLE_ACTIONS: readonly { value: IdleAction; label: MessageKey }[] = [
@@ -307,26 +299,6 @@
             <Switch label={t("settings.fillWindow")} bind:checked={draft.fillWindow} />
             <Switch label={t("settings.hideToolbar")} bind:checked={draft.hideToolbar} />
           </div>
-        {:else if pane === "appearance"}
-          <div class="setting-group">
-            <Switch label={t("settings.accentTint")} bind:checked={draft.accentTint} />
-            <div class="setting-row">
-              <span class="setting-text">
-                <label for="{id}-filter">{t("settings.colorFilter")}</label>
-                <small id="{id}-filter-help">{t("settings.colorFilterHelp")}</small>
-              </span>
-              <select
-                id="{id}-filter"
-                class="fit"
-                aria-describedby="{id}-filter-help"
-                bind:value={draft.colorFilter}
-              >
-                {#each COLOR_FILTERS as filter (filter.value)}
-                  <option value={filter.value}>{t(filter.label)}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
         {:else if pane === "themes"}
           <ThemesPane bind:draft idPrefix={id} bounds={root} {scrolled} />
         {:else if pane === "bot"}
@@ -516,11 +488,5 @@
   .setting-row input[type="text"] {
     width: 200px;
     flex: none;
-  }
-
-  /* Wide enough for its longest option, such as "Deuteranopia (red-green)". */
-  .setting-row select.fit {
-    width: auto;
-    min-width: 200px;
   }
 </style>

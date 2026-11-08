@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Settings, ThemeRotation } from "../lib/bindings";
+  import type { ColorFilter, Settings, ThemeRotation } from "../lib/bindings";
   import { formatNumber } from "../lib/format";
   import { game } from "../lib/game.svelte";
   import { t, type MessageKey } from "../lib/i18n";
@@ -17,6 +17,7 @@
   import type { ThemeEntry } from "../lib/themes/types";
   import Flyout from "./Flyout.svelte";
   import Icon from "./Icon.svelte";
+  import Switch from "./Switch.svelte";
   import ThemePreview from "./ThemePreview.svelte";
 
   let {
@@ -38,6 +39,13 @@
     editor: "settings.themesEditor",
     player: "settings.themesPlayer",
   };
+
+  const COLOR_FILTERS: readonly { value: ColorFilter; label: MessageKey }[] = [
+    { value: "off", label: "settings.colorFilterOff" },
+    { value: "deuteranopia", label: "settings.colorFilterDeuteranopia" },
+    { value: "protanopia", label: "settings.colorFilterProtanopia" },
+    { value: "tritanopia", label: "settings.colorFilterTritanopia" },
+  ];
 
   const ROTATIONS: readonly { value: ThemeRotation; label: MessageKey }[] = [
     { value: "off", label: "settings.rotationOff" },
@@ -197,6 +205,25 @@
   }
 </script>
 
+<div class="setting-group look">
+  <Switch label={t("settings.accentTint")} bind:checked={draft.accentTint} />
+  <div class="setting-row">
+    <span class="setting-text">
+      <label for="{idPrefix}-filter">{t("settings.colorFilter")}</label>
+      <small id="{idPrefix}-filter-help">{t("settings.colorFilterHelp")}</small>
+    </span>
+    <select
+      id="{idPrefix}-filter"
+      aria-describedby="{idPrefix}-filter-help"
+      bind:value={draft.colorFilter}
+    >
+      {#each COLOR_FILTERS as filter (filter.value)}
+        <option value={filter.value}>{t(filter.label)}</option>
+      {/each}
+    </select>
+  </div>
+</div>
+
 <div class="bar">
   <input
     type="search"
@@ -345,6 +372,20 @@
 {/if}
 
 <style>
+  /* The two settings that change every preview, side by side so the cards stay in view. */
+  .look {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .look select {
+    width: auto;
+    min-width: 0;
+    flex: none;
+  }
+
   .bar {
     display: flex;
     flex-wrap: wrap;

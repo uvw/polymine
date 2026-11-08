@@ -19,7 +19,6 @@
     | "restart"
     | "sliders"
     | "palette"
-    | "swatches"
     | "star";
 </script>
 
@@ -89,11 +88,6 @@
     <path d="M5 7h9m4 0h1M5 17h3m4 0h7" />
     <circle cx="16" cy="7" r="2" />
     <circle cx="10" cy="17" r="2" />
-  {:else if name === "swatches"}
-    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
-    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
-    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
-    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
   {:else if name === "star"}
     <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z" />
   {:else if name === "palette"}

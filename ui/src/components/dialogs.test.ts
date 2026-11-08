@@ -146,21 +146,13 @@ describe("SettingsDialog", () => {
     const user = userEvent.setup();
     open();
     const tabs = screen.getAllByRole("tab");
-    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual([
-      "General",
-      "Appearance",
-      "Themes",
-      "Bot",
-    ]);
+    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual(["General", "Themes", "Bot"]);
     await vi.waitFor(() => expect(tabs[0]).toHaveFocus());
     expect(screen.getByRole("tabpanel")).toHaveAccessibleName("General");
     await user.keyboard("{ArrowDown}");
-    expect(screen.getByRole("tab", { name: "Appearance" })).toHaveFocus();
-    expect(screen.getByRole("tab", { name: "Appearance" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    expect(screen.getByRole("tabpanel", { name: "Appearance" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Themes" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "Themes" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "Themes" })).toBeInTheDocument();
     await user.keyboard("{ArrowUp}{ArrowUp}");
     expect(screen.getByRole("tab", { name: "Bot" })).toHaveFocus();
     await user.keyboard("{Home}");
@@ -213,14 +205,18 @@ describe("SettingsDialog", () => {
   };
   const radioNames = () => screen.queryAllByRole("radio").map((r) => r.getAttribute("value"));
 
-  it("gives themes a page of their own, and Appearance keeps the tint and the filter", async () => {
+  it("puts the tint and the color filter above the themes", async () => {
     const user = userEvent.setup();
     await openThemes(user);
-    expect(screen.getByRole("radio", { name: /Graphite/ })).toBeInTheDocument();
-    await user.click(screen.getByRole("tab", { name: "Appearance" }));
-    expect(screen.queryAllByRole("radio")).toEqual([]);
-    expect(screen.getByRole("switch", { name: /Tint the theme/ })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Color filter" })).toBeInTheDocument();
+    const tint = screen.getByRole("switch", { name: /Tint the theme/ });
+    const filter = screen.getByRole("combobox", { name: "Color filter" });
+    const search = screen.getByRole("searchbox");
+    const first = screen.getByRole("radio", { name: /Graphite/ });
+    for (const below of [search, first]) {
+      expect(tint.compareDocumentPosition(below) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(filter.compareDocumentPosition(below) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+    expect(screen.queryByRole("tab", { name: "Appearance" })).not.toBeInTheDocument();
   });
 
   it("lists every theme in sections, each with its count", async () => {
@@ -494,13 +490,11 @@ describe("SettingsDialog", () => {
         ?.querySelector<HTMLElement>('[data-cell="1"]')?.style.color;
     const plain = one();
     expect(plain).toBeTruthy();
-    await user.click(screen.getByRole("tab", { name: "Appearance" }));
     const filter = screen.getByRole("combobox", { name: "Color filter" });
     expect(filter).toHaveValue("off");
     expect(filter).toHaveAccessibleDescription("Shifts board colors for color-blind players.");
     expect(screen.getByRole("option", { name: "Tritanopia (blue-yellow)" })).toBeInTheDocument();
     await user.selectOptions(filter, "deuteranopia");
-    await user.click(screen.getByRole("tab", { name: "Themes" }));
     expect(one()).not.toBe(plain);
     await vi.waitFor(() =>
       expect(update).toHaveBeenLastCalledWith(
