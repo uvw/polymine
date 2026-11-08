@@ -124,10 +124,11 @@ editing it rather than wrapping by hand.
 
 ## App icon
 
-`ui/public/icon.svg` is the only source of the app icon. The favicon and the
-About dialog use it as is. After changing it, run
-`npx tauri icon ui/public/icon.svg` to regenerate the window, installer, and
-store icons in `src-tauri/icons`, and commit them with the SVG.
+`ui/public/icon.svg` is the source of the app icon, and
+`ui/public/icon-small.svg` is its simpler form for 16 and 24 pixels, where the
+full mine blurs. The favicon and the About dialog use `icon.svg` as is. After
+changing either, run `node scripts/app-icon.mjs` to regenerate the window,
+installer, and store icons in `src-tauri/icons`, and commit them with the SVGs.
 
 ## Clean-room rule
 

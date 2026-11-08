@@ -787,8 +787,9 @@ alpha.
 ### Window icon
 
 The app icon in `ui/public/icon.svg` is a steel mine on a dark plate with a
-faint triangle lattice. `npx tauri icon` turns it into the installer,
-executable, and bundle icons.
+faint triangle lattice. `scripts/app-icon.mjs` turns it into the installer,
+executable, and bundle icons, with `ui/public/icon-small.svg`, four thick spikes
+and no shading, in the `.ico`'s 16 and 24 pixel images.
 
 While Polymine runs, `ui/src/lib/themes/icon.ts` draws the same mine, without
 the lattice, in the active theme's colors. The window shows it through Tauri's
