@@ -96,19 +96,34 @@
     }
   }
 
+  const tilesOf = (grid: Element) => [
+    ...grid.querySelectorAll<HTMLButtonElement>("[role^='menuitem']"),
+  ];
+
   /**
    * Index of the item a vertical arrow reaches from a grid tile: the tile
-   * above or below, or the item just past the grid's edge.
+   * above or below, or the item just past the grid's edge. When that item sits
+   * in another grid, the move lands in the same column of its nearest row, as
+   * from the levels down to the tilings.
    */
   function verticalFromGrid(list: HTMLButtonElement[], index: number, step: 1 | -1) {
     const grid = list[index]?.closest<HTMLElement>("[data-columns]");
     if (!grid) return index + step;
-    const tiles = [...grid.querySelectorAll<HTMLButtonElement>("[role^='menuitem']")];
+    const tiles = tilesOf(grid);
+    const columns = Number(grid.dataset.columns);
     const at = tiles.indexOf(list[index] as HTMLButtonElement);
-    const target = tiles[at + step * Number(grid.dataset.columns)];
+    const target = tiles[at + step * columns];
     if (target) return list.indexOf(target);
     const edge = step > 0 ? tiles.at(-1) : tiles[0];
-    return list.indexOf(edge as HTMLButtonElement) + step;
+    const past = (list.indexOf(edge as HTMLButtonElement) + step + list.length) % list.length;
+    const next = list[past]?.closest<HTMLElement>("[data-columns]");
+    if (!next) return past;
+    const nextTiles = tilesOf(next);
+    const nextColumns = Number(next.dataset.columns);
+    const rowStart = step > 0 ? 0 : Math.floor((nextTiles.length - 1) / nextColumns) * nextColumns;
+    const rowLength = Math.min(nextColumns, nextTiles.length - rowStart);
+    const column = Math.min(at % columns, rowLength - 1);
+    return list.indexOf(nextTiles[rowStart + column] as HTMLButtonElement);
   }
 
   function onMenuKey(event: KeyboardEvent) {
