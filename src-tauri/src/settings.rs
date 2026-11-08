@@ -41,6 +41,13 @@ pub struct Settings {
     pub hide_toolbar: bool,
     /// Remap the board's colors for a color vision deficiency.
     pub color_filter: ColorFilter,
+    /// Theme ids the player starred.
+    pub favorite_themes: Vec<String>,
+    /// The themes chosen last, newest first. The shell keeps this list; what
+    /// the window sends back is ignored.
+    pub recent_themes: Vec<String>,
+    /// Which themes a new game may switch to.
+    pub theme_rotation: ThemeRotation,
     /// Top-level keys this build doesn't know, such as ones a newer build
     /// wrote. They're saved back as they were, and the window never sees them.
     #[serde(flatten)]
@@ -60,6 +67,43 @@ pub enum ColorFilter {
     Protanopia,
     /// Blue-yellow: no blue-sensitive cones.
     Tritanopia,
+}
+
+/// Which themes a new game may switch to.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub enum ThemeRotation {
+    /// Keep the chosen theme.
+    #[default]
+    Off,
+    /// Any of the player's favorites.
+    Favorites,
+    /// Any theme.
+    All,
+}
+
+/// How many themes the recent list holds.
+pub const RECENT_THEMES: usize = 5;
+
+/// `recent` after `theme` was chosen: `theme` first, then the rest, no longer
+/// than `RECENT_THEMES`.
+pub fn recent_after(recent: &[String], theme: &str) -> Vec<String> {
+    std::iter::once(theme)
+        .chain(recent.iter().map(String::as_str).filter(|&id| id != theme))
+        .take(RECENT_THEMES)
+        .map(str::to_owned)
+        .collect()
+}
+
+/// Trimmed, blank-free, and without repeats, in their first order.
+fn distinct(ids: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = Vec::with_capacity(ids.len());
+    for id in ids.iter().map(|id| id.trim()) {
+        if !id.is_empty() && !out.iter().any(|seen| seen == id) {
+            out.push(id.to_owned());
+        }
+    }
+    out
 }
 
 /// What the assistant does once the player has been idle for a while.
@@ -122,6 +166,9 @@ impl Default for Settings {
             language: "system".to_owned(),
             hide_toolbar: false,
             color_filter: ColorFilter::Off,
+            favorite_themes: Vec::new(),
+            recent_themes: Vec::new(),
+            theme_rotation: ThemeRotation::Off,
             extra: Map::new(),
         }
     }
@@ -208,6 +255,8 @@ impl Settings {
 
     /// Trims the names, drops blank and repeated profiles, falls back to the
     /// default name when the active one is blank, and lists the active one.
+    /// Theme lists lose blanks and repeats, and the recent one its oldest past
+    /// `RECENT_THEMES`.
     #[must_use]
     pub fn normalized(mut self) -> Self {
         self.player_name = self.player_name.trim().to_owned();
@@ -224,6 +273,9 @@ impl Settings {
             profiles.insert(0, self.player_name.clone());
         }
         self.profiles = profiles;
+        self.favorite_themes = distinct(&self.favorite_themes);
+        self.recent_themes = distinct(&self.recent_themes);
+        self.recent_themes.truncate(RECENT_THEMES);
         self
     }
 }
@@ -313,6 +365,44 @@ mod tests {
         assert_eq!(loaded.tiling, TilingId::Hexagon);
         assert_eq!(loaded.rules, Rules::default());
         assert!(loaded.pause_on_focus_loss);
+    }
+
+    #[test]
+    fn old_settings_load_with_no_favorites_recents_or_rotation() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("settings.json");
+        fs::write(&path, r#"{ "theme": "datum" }"#).unwrap();
+        let (loaded, error) = Settings::load(&path);
+        assert!(error.is_none());
+        assert_eq!(loaded.favorite_themes, Vec::<String>::new());
+        assert_eq!(loaded.recent_themes, Vec::<String>::new());
+        assert_eq!(loaded.theme_rotation, ThemeRotation::Off);
+    }
+
+    #[test]
+    fn normalizing_dedupes_favorites_and_caps_recents() {
+        let names = |list: &[&str]| list.iter().map(|&s| s.to_owned()).collect::<Vec<_>>();
+        let settings = Settings {
+            favorite_themes: names(&["facet", " facet ", "", "loop", "facet"]),
+            recent_themes: names(&["a", "b", "a", "c", "d", "e", "f", "g"]),
+            ..Settings::default()
+        }
+        .normalized();
+        assert_eq!(settings.favorite_themes, names(&["facet", "loop"]));
+        assert_eq!(settings.recent_themes, names(&["a", "b", "c", "d", "e"]));
+    }
+
+    #[test]
+    fn recent_after_moves_the_theme_to_the_front() {
+        let names = |list: &[&str]| list.iter().map(|&s| s.to_owned()).collect::<Vec<_>>();
+        assert_eq!(
+            recent_after(&names(&["a", "b", "c"]), "b"),
+            names(&["b", "a", "c"])
+        );
+        assert_eq!(
+            recent_after(&names(&["a", "b", "c", "d", "e"]), "f"),
+            names(&["f", "a", "b", "c", "d"])
+        );
     }
 
     #[test]
