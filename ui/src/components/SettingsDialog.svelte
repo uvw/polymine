@@ -741,6 +741,11 @@
   }
 
   .theme-name {
+    /* Room for two lines on every card, so the settings below the grid stay
+       put when the tabs switch between short and long names. */
+    display: grid;
+    place-items: center;
+    min-height: calc(2 * 1.25em + 2px);
     padding: 0 2px 2px;
     font-size: var(--font-caption);
     font-weight: 600;
