@@ -8,17 +8,16 @@ when it's done. When an item settles a question, record the choice in
 
 1. **Tune Charcoal, Frost, Pride, and Spectrum** once the owner has played with
    them. Frost and Pride already got a measured pass; what's left is taste.
-2. **A 16-pixel app icon.** At 16 pixels the mine turns into a dark blob with a
-   dot. Draw a small-size variant with four thick spikes and no shading, for the
-   `.ico` and the window icon in `ui/src/lib/themes/icon.ts`.
-3. **The macOS Dock icon.** The window icon follows the theme on Windows and
+2. **The macOS Dock icon.** The window icon follows the theme on Windows and
    Linux only (decision 56). The Dock could follow it too, through
    `NSApplication.applicationIconImage` while the app runs.
-4. **A freeze after Hint, then Bot.** Twice on Windows, after opening a few
-   cells, asking for a hint and then the bot froze the game. Nobody has
-   reproduced it since.
-5. **TypeScript 7.** Dependabot ignores TypeScript majors until `svelte-check`
+3. **TypeScript 7.** Dependabot ignores TypeScript majors until `svelte-check`
    supports TypeScript 7; lift the ignore in `.github/dependabot.yml` then.
+4. **A command that panics hangs the game.** A Tauri command that panics never
+   answers, so `GameStore.run()` waits forever and every later click queues
+   behind it. Catch the panic in the command layer, or time the call out.
+5. **A pinned hint over the Paused card.** The hint's label stays on top when
+   the game pauses.
 
 ## Gameplay and features
 
@@ -88,10 +87,7 @@ when it's done. When an item settles a question, record the choice in
    first.
 2. **One Dark Pro variant.** The owner runs One Dark Darker with Vivid and
    italics and may switch the theme to that variant later.
-3. **Picker columns.** Up and Down between the level row and the tiling grid
-   land on the first column, or wrap to the last tiling, instead of keeping the
-   column (`ui/src/components/MenuButton.svelte`).
-4. **Ferrofluid cleanup.** Leaving the theme destroys textures its blur shaders
+3. **Ferrofluid cleanup.** Leaving the theme destroys textures its blur shaders
    still hold, and leaves those shaders and the quad geometry for Pixi's garbage
    collector; each round trip logs two binding warnings.
 
@@ -246,15 +242,9 @@ in. No theme editor UI for now.
    `crates/polymine-ipc/src/themes.rs` always passes on Windows, and a hard link
    to a file outside the folder reads fine. Open with
    `FILE_FLAG_OPEN_REPARSE_POINT` and compare file IDs.
-8. **A restored window that fits its monitor.** `window_state.rs` checks only a
-   32-pixel strip, so a window saved on a 4K screen can open larger than a 1080p
-   one. Clamp the size to the work area.
-9. **Visible startup failures on Windows.** Release builds use the `windows`
-   subsystem, so a failed start or a bad instance name exits silently. Show a
-   native message box, and name WebView2 in the portable download's notes.
-10. **A sturdier installer test.** A locked file in the `finally` block of
-    `scripts/windows-installer-test.ps1` stops the remaining restores. Wrap each
-    restore on its own and print the backup path on any error.
-11. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
-    `--timeout` floor, the player's guide's minimal theme, and the tiling table
-    in `docs/design.md` can drift without a test failing.
+8. **A sturdier installer test.** A locked file in the `finally` block of
+   `scripts/windows-installer-test.ps1` stops the remaining restores. Wrap each
+   restore on its own and print the backup path on any error.
+9. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
+   `--timeout` floor, the player's guide's minimal theme, and the tiling table
+   in `docs/design.md` can drift without a test failing.
