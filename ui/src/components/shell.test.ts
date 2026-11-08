@@ -376,6 +376,27 @@ describe("BoardCanvas", () => {
     expect(label.style.left).toBe("50px");
   });
 
+  it("rebuilds the board for a new theme only, not for a hint", async () => {
+    const { BoardView } = await import("../lib/board/BoardView");
+    // A real rebuild reports its new layout, which moves the hint label.
+    fakeBoard.setTheme.mockImplementation(() =>
+      vi.mocked(BoardView.create).mock.lastCall?.[2].layoutChanged(),
+    );
+    try {
+      render(BoardCanvas);
+      await vi.waitFor(() => expect(fakeBoard.setTheme).toHaveBeenCalled());
+      fakeBoard.setTheme.mockClear();
+      game.hint = { cell: 0, text: "Safe to open", anchor: null };
+      flushSync();
+      expect(fakeBoard.setTheme).not.toHaveBeenCalled();
+      game.settings = settings({ theme: "pride" });
+      flushSync();
+      expect(fakeBoard.setTheme).toHaveBeenCalledOnce();
+    } finally {
+      fakeBoard.setTheme.mockImplementation(() => undefined);
+    }
+  });
+
   it("keys every count the board can show, inked with the token that reads best", () => {
     game.settings = settings({ theme: "spectrum" });
     render(BoardCanvas);

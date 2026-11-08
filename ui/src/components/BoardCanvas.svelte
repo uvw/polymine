@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { fade } from "svelte/transition";
   import { hasShell } from "../lib/api";
   import { BoardView } from "../lib/board/BoardView";
@@ -56,7 +56,12 @@
   });
 
   $effect(() => {
-    view?.setTheme(game.theme.board);
+    const current = view;
+    const theme = game.theme.board;
+    // A rebuild reports its layout to the game, which reads and rewrites the
+    // hint. Tracked here, that would rebuild the board for every hint, and
+    // the rewrite would make the effect run itself until Svelte gives up.
+    untrack(() => current?.setTheme(theme));
   });
 
   const board = $derived(game.theme.board);
