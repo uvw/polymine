@@ -17,6 +17,8 @@ export interface GalleryFilter {
   mode: "light" | "dark" | null;
   /** Only black and white themes. */
   mono: boolean;
+  /** Only themes the desktop shows through. */
+  seeThrough: boolean;
   favorites: readonly string[];
 }
 
@@ -31,6 +33,21 @@ const chroma = (hex: number) => {
 };
 
 const monochrome = new WeakMap<ThemeEntry, boolean>();
+const seeThrough = new WeakMap<ThemeEntry, boolean>();
+
+/** Whether the desktop shows through the theme in either mode: a frosted window, or a tray or cells less than solid. */
+export function isSeeThrough(entry: ThemeEntry): boolean {
+  let known = seeThrough.get(entry);
+  if (known === undefined) {
+    known = [false, true].some((dark) => {
+      const theme = themeFor(entry, { accent: null, dark });
+      const { plateAlpha, closedAlpha, openAlpha } = theme.board;
+      return theme.material === "frosted" || Math.min(plateAlpha, closedAlpha, openAlpha) < 1;
+    });
+    seeThrough.set(entry, known);
+  }
+  return known;
+}
 
 /** Whether the theme's cells are gray and its counts nearly so, in both modes. */
 export function isMonochrome(entry: ThemeEntry): boolean {
@@ -65,6 +82,7 @@ export function filterThemes(entries: readonly ThemeEntry[], filter: GalleryFilt
       return false;
     }
     if (filter.mono && !isMonochrome(entry)) return false;
+    if (filter.seeThrough && !isSeeThrough(entry)) return false;
     if (filter.mode) {
       const mode = themeMode(entry);
       if (mode !== "both" && mode !== filter.mode) return false;

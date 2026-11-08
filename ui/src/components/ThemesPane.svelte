@@ -69,6 +69,7 @@
   let source = $state<ThemeSource>("all");
   let mode = $state<"light" | "dark" | null>(null);
   let mono = $state(false);
+  let glass = $state(false);
   /** The theme whose flyout shows, and the card it points at. */
   let tip = $state<{ id: string; card: HTMLElement } | null>(null);
   let tipTimer: ReturnType<typeof setTimeout> | undefined;
@@ -86,10 +87,19 @@
     { value: "favorites", label: "settings.themesFavorites" },
   ] as { value: ThemeSource; label: MessageKey }[]);
   const shown = $derived(
-    filterThemes(game.themes, { query, source, mode, mono, favorites: draft.favoriteThemes }),
+    filterThemes(game.themes, {
+      query,
+      source,
+      mode,
+      mono,
+      seeThrough: glass,
+      favorites: draft.favoriteThemes,
+    }),
   );
   const sections = $derived(gallerySections(shown));
-  const filtering = $derived(query.trim() !== "" || source !== "all" || mode !== null || mono);
+  const filtering = $derived(
+    query.trim() !== "" || source !== "all" || mode !== null || mono || glass,
+  );
   const recent = $derived(
     knownIds(game.themes, draft.recentThemes).flatMap(
       (id) => game.themes.find((e) => e.id === id) ?? [],
@@ -254,6 +264,9 @@
     {/each}
     <button type="button" class="chip" aria-pressed={mono} onclick={() => (mono = !mono)}
       >{t("settings.themesMono")}</button
+    >
+    <button type="button" class="chip" aria-pressed={glass} onclick={() => (glass = !glass)}
+      >{t("settings.themesSeeThrough")}</button
     >
   </div>
   <button type="button" class="surprise" disabled={shown.length < 2} onclick={surprise}

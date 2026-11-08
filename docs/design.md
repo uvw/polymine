@@ -596,7 +596,9 @@ Above the sections:
 2. Chips pick a source: All, Signature, Code, Custom, or Favorites. Two more
    pick a mode, Light or Dark, and a theme that follows the system matches
    either. B&W keeps the black and white themes: gray cells in both modes, and
-   counts in near-black or near-gray inks with at most a faint tint.
+   counts in near-black or near-gray inks with at most a faint tint. See-through
+   keeps the themes the desktop shows through: a frosted window, or a tray or
+   cells less than solid.
 3. Surprise me chooses a random theme, other than the current one, from those
    showing.
 

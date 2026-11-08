@@ -5,6 +5,7 @@ import {
   filterThemes,
   gallerySections,
   isMonochrome,
+  isSeeThrough,
   knownIds,
   pickTheme,
   rotationPool,
@@ -31,6 +32,7 @@ const filter = (over: Partial<GalleryFilter>): GalleryFilter => ({
   source: "all",
   mode: null,
   mono: false,
+  seeThrough: false,
   favorites: [],
   ...over,
 });
@@ -48,6 +50,13 @@ describe("isMonochrome", () => {
   it("finds the black and white themes: gray cells and near-gray inks", () => {
     const mono = BUILT_IN_THEMES.filter(isMonochrome).map((entry) => entry.id);
     expect(mono.sort()).toEqual(["datum", "elevation", "interference", "umbra"]);
+  });
+});
+
+describe("isSeeThrough", () => {
+  it("finds the themes the desktop shows through", () => {
+    const glass = BUILT_IN_THEMES.filter(isSeeThrough).map((entry) => entry.id);
+    expect(glass.sort()).toEqual(["frost", "glass"]);
   });
 });
 
@@ -74,6 +83,10 @@ describe("filterThemes", () => {
     expect(
       ids(filterThemes(ALL, filter({ source: "favorites", favorites: ["loop", "dusk"] }))),
     ).toEqual(["loop", "dusk"]);
+  });
+
+  it("keeps only see-through themes when asked", () => {
+    expect(ids(filterThemes(ALL, filter({ seeThrough: true }))).sort()).toEqual(["frost", "glass"]);
   });
 
   it("keeps only black and white themes when asked", () => {

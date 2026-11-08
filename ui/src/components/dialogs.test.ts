@@ -282,6 +282,15 @@ describe("SettingsDialog", () => {
     expect(radioNames()).toContain("pride");
   });
 
+  it("narrows to see-through themes with the See-through chip", async () => {
+    const user = userEvent.setup();
+    await openThemes(user);
+    const glass = screen.getByRole("button", { name: "See-through" });
+    await user.click(glass);
+    expect(glass).toHaveAttribute("aria-pressed", "true");
+    expect(radioNames()).toEqual(["frost", "glass"]);
+  });
+
   it("stars favorites and lists only them under Favorites", async () => {
     const user = userEvent.setup();
     const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
