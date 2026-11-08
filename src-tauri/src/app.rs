@@ -1045,12 +1045,12 @@ mod tests {
         let mut next = app.settings();
         next.player_name = "  bob  ".to_owned();
         next.rules.question_marks = false;
-        next.theme = "charcoal".to_owned();
+        next.theme = "datum".to_owned();
         let saved = app.update_settings(next).unwrap();
         assert_eq!(saved.player_name, "bob");
         assert!(!lock(&app.session).game().rules().question_marks);
         let (reloaded, _) = Settings::load(&dir.path().join("config").join("settings.json"));
-        assert_eq!(reloaded.theme, "charcoal");
+        assert_eq!(reloaded.theme, "datum");
     }
 
     #[test]

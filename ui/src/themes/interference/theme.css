@@ -1,0 +1,77 @@
+/*
+ * Name: Interference
+ * Author: Polymine
+ * Description: Hairline moiré on pale blue paper
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Pale blue paper and one ink. Counts are glyphs filled with hairlines at a
+   * pitch near the screen's, so they shimmer into moiré, and the mine is two
+   * sets of rings just out of step.
+   */
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #101820;
+  --text-dim: #5b6670;
+  --accent: #101820;
+  --accent-hover: #26323d;
+  --on-accent: #f4f7f9;
+  --on-menu-highlight: var(--on-accent);
+  --window: #e6edf2;
+  --window-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    rgb(16 24 32 / 4%) 0 1px,
+    transparent 1px 7px
+  );
+  --control: #f4f7f9;
+  --control-hover: #eaf0f4;
+  --control-pressed: #dfe7ed;
+  --surface: #f4f7f9;
+  --layer: rgb(244 247 249 / 95%);
+  --stroke: rgb(16 24 32 / 14%);
+  --stroke-strong: rgb(16 24 32 / 28%);
+  --divider: rgb(16 24 32 / 12%);
+
+  --board-plate: #d3dde4;
+  --board-gap: 2px;
+  --board-font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --board-font-weight: 300;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #828f9a;
+  --cell-closed-hover: #8d9aa5;
+  --cell-closed-pressed: #76838e;
+  --cell-closed-edge: #7a8792;
+  --cell-open: #f4f7f9;
+  --cell-open-edge: #e3e9ee;
+  --cell-exploded: #e2553a;
+
+  --flag: #101820;
+  --flag-outline: #f4f7f9;
+  --flag-pole: #101820;
+  --question: #101820;
+  --mine: #101820;
+  --mine-spark: #f4f7f9;
+  --hint: #101820;
+  --focus: #000000;
+  --win: #ffffff;
+
+  --number-1: #101820;
+  --number-2: #0a1018;
+  --number-3: #192029;
+  --number-4: #07243e;
+  --number-5: #05090c;
+  --number-6: #262732;
+  --number-7: #022f45;
+  --number-8: #010405;
+  --number-9: #357685;
+  --number-10: #1d506b;
+  --number-11: #000000;
+  --number-12: #3e3e3e;
+}

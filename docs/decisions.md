@@ -782,8 +782,12 @@ what relaxing it lowers.
 
 Midnight relaxes `cell-contrast` and `number-separation` to keep the game's
 first look. Pride and Spectrum relax `cell-contrast`, since their tiles stay
-dark under the count colors. Frost, Swatch, Glass, and the editor themes give
-their reasons in decisions 46, 47, 49, 51, and 54.
+dark under the count colors. Datum relaxes `number-separation`: its near-black
+inks sit too close for some pairs, and the dot-matrix glyph's shape carries the
+count. Rupture and Diode relax `cell-contrast` for dark tiles on a black board,
+which their rim light or dome highlight sets apart, and Deboss for one khaki
+card pressed up and in. Frost, Swatch, Glass, and the editor themes give their
+reasons in decisions 46, 47, 49, 51, and 54.
 
 **Why:** Testing themes as data keeps a new theme from regressing legibility.
 Digits need only side-by-side separation, about one just-noticeable step. A
@@ -903,7 +907,7 @@ other Frost check still applies, and the other themes keep the full check.
 
 **Why:** The owner wants Frost to look like glass. A dark tint on open cells or
 a halo around each digit kept the numbers readable but made the theme look
-opaque. Players who need the contrast can pick Graphite or Charcoal.
+opaque. Players who need the contrast can pick Graphite or Datum.
 
 ## 47. Swatch fills closed cells with the system accent
 

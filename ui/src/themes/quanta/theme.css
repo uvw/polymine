@@ -1,0 +1,73 @@
+/*
+ * Name: Quanta
+ * Author: Polymine
+ * Description: White type on electric blue, with barcode stickers
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Everything is one electric blue in three depths, and counts are set in pale
+   * monospace type like a spec sheet. A flag is a barcode sticker and a mine is
+   * a sticker with a black dot.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #ffffff;
+  --text-dim: #b8dcff;
+  --accent: #ffffff;
+  --accent-hover: #e6f2ff;
+  --on-accent: #0068b8;
+  --on-menu-highlight: var(--on-accent);
+  --window: #0a7ad0;
+  --window-image: none;
+  --control: #0a6cb8;
+  --control-hover: #0b76c8;
+  --control-pressed: #095fa2;
+  --surface: #0a6cb8;
+  --layer: rgb(10 108 184 / 96%);
+  --stroke: rgb(255 255 255 / 20%);
+  --stroke-strong: rgb(255 255 255 / 38%);
+  --divider: rgb(255 255 255 / 16%);
+
+  --board-plate: #0a7ad0;
+  --board-gap: 2px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 400;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #1690e8;
+  --cell-closed-hover: #2a9cf0;
+  --cell-closed-pressed: #1280d0;
+  --cell-closed-edge: #1488dc;
+  --cell-open: #063a66;
+  --cell-open-edge: #0a4475;
+  --cell-exploded: #05080c;
+
+  --flag: #ffffff;
+  --flag-outline: #05080c;
+  --flag-pole: #ffffff;
+  --question: #ffffff;
+  --mine: #05080c;
+  --mine-spark: #ffffff;
+  --hint: #ffffff;
+  --focus: #ffffff;
+  --win: #ffffff;
+
+  --number-1: #fefefe;
+  --number-2: #dafd47;
+  --number-3: #ffcfe4;
+  --number-4: #b8f2fd;
+  --number-5: #f9e987;
+  --number-6: #e0d2fd;
+  --number-7: #c9fed3;
+  --number-8: #fbc0a0;
+  --number-9: #dfe7ca;
+  --number-10: #c1dfce;
+  --number-11: #f6f2b4;
+  --number-12: #edbaf8;
+}

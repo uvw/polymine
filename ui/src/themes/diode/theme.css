@@ -1,0 +1,92 @@
+/*
+ * Name: Diode
+ * Author: Polymine
+ * Description: An LED wall in a dark room
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  /*
+   * Closed cells are unlit LED lenses with a dome highlight that flares under
+   * the pointer. Counts are 5 by 7 lamp matrices: the dark lamps stay faintly
+   * visible, and the lit ones bloom in hot stage colors over a magenta and cyan
+   * wash.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #f2f4ff;
+  --text-dim: #8a8ea3;
+  --accent: #2ee6ff;
+  --accent-hover: #6ff0ff;
+  --on-accent: #000000;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #ff2e63;
+  --warning: #ffb31a;
+  --window: #000000;
+  --window-image:
+    radial-gradient(1300px 520px at 50% 115%, rgb(255 46 99 / 16%), transparent 62%),
+    radial-gradient(1000px 420px at 50% -15%, rgb(46 230 255 / 11%), transparent 60%);
+  --control: #101216;
+  --control-hover: #181b22;
+  --control-pressed: #0a0b0e;
+  --subtle-hover: rgb(255 255 255 / 6%);
+  --subtle-pressed: rgb(255 255 255 / 4%);
+  --stroke: rgb(255 255 255 / 9%);
+  --stroke-strong: rgb(255 255 255 / 18%);
+  --divider: rgb(255 255 255 / 8%);
+  --surface: #08090c;
+  --layer: rgb(8 9 12 / 92%);
+  --shadow: 0 0 24px rgb(46 230 255 / 10%), 0 16px 44px rgb(0 0 0 / 70%);
+
+  --board-plate: #000000;
+  --board-gap: 3px;
+  --board-font: "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0.3;
+  --cell-bevel: 0.08;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #353a46;
+  --cell-closed-hover: #3a3f4b;
+  --cell-closed-pressed: #262a33;
+  --cell-closed-edge: #353a46;
+  --cell-open: #050506;
+  --cell-open-edge: #0c0d10;
+  --cell-exploded: #3a0612;
+  --cell-light-angle: 330deg;
+  --cell-gloss: #ffffff;
+  --cell-gloss-opacity: 0.12;
+  --cell-gloss-fade: 0;
+  --cell-gloss-extent: 0.4;
+  --cell-gloss-shape: spot;
+  --cell-glint-opacity: 0.3;
+  --cell-shade-opacity: 0.2;
+  --cell-shade-depth: 0.6;
+
+  --flag: #ff8ae6;
+  --flag-outline: #000000;
+  --flag-pole: #ffffff;
+  --question: #ffb31a;
+  --mine: #000000;
+  --mine-spark: #ff2e63;
+  --mine-spikes: 8;
+  --hint: #2ee6ff;
+  --focus: #ffffff;
+  --win: #39ff7a;
+
+  --number-1: #28e3fd;
+  --number-2: #44fd84;
+  --number-3: #fb245b;
+  --number-4: #af55fd;
+  --number-5: #ffb22f;
+  --number-6: #4bfcf3;
+  --number-7: #fc52cf;
+  --number-8: #fefefe;
+  --number-9: #fdf044;
+  --number-10: #528def;
+  --number-11: #fb7d21;
+  --number-12: #a6ec4b;
+}

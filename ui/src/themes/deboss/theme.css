@@ -1,0 +1,84 @@
+/*
+ * Name: Deboss
+ * Author: Polymine
+ * Description: Blind-pressed khaki card with one black label
+ * Version: 1.0.0
+ * Format: 1
+ * Relaxed: cell-contrast
+ */
+:root {
+  /*
+   * One khaki card, no ink: closed cells are pressed up and open cells pressed
+   * in, and counts are blind-pressed glyphs. The only print is a small black
+   * label, which marks a flag and a mine.
+   */
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #2b2a1c;
+  --text-dim: #5d5c44;
+  --accent: #111111;
+  --accent-hover: #2a2a2a;
+  --on-accent: #f2f2f2;
+  --on-menu-highlight: var(--on-accent);
+  --window: #9b9a78;
+  --window-image: none;
+  --control: #a6a583;
+  --control-hover: #afae8c;
+  --control-pressed: #929170;
+  --surface: #a6a583;
+  --layer: rgb(166 165 131 / 96%);
+  --stroke: rgb(43 42 28 / 16%);
+  --stroke-strong: rgb(43 42 28 / 30%);
+  --divider: rgb(43 42 28 / 14%);
+
+  --board-plate: #9b9a78;
+  --board-gap: 3px;
+  --board-font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0.1;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #bfbd9b;
+  --cell-closed-hover: #c8c6a4;
+  --cell-closed-pressed: #afad8b;
+  --cell-closed-edge: #bfbd9b;
+  --cell-open: #8e8d6a;
+  --cell-open-edge: #8e8d6a;
+  --cell-exploded: #111111;
+  --cell-light-angle: 315deg;
+  --cell-rim: #f2f1dc;
+  --cell-rim-opacity: 0.55;
+  --cell-rim-width: 2px;
+  --cell-rim-angle: 315deg;
+  --cell-shade: #3e3d2a;
+  --cell-shade-opacity: 0.12;
+  --cell-shade-depth: 0.25;
+  --cell-open-shade: #3e3d2a;
+  --cell-open-shade-opacity: 0;
+
+  --flag: #111111;
+  --flag-outline: #f2f2f2;
+  --flag-pole: #111111;
+  --question: #2b2a1c;
+  --mine: #111111;
+  --mine-spark: #f2f2f2;
+  --hint: #111111;
+  --focus: #111111;
+  --win: #f2f1dc;
+
+  --number-1: #000000;
+  --number-2: #0a1b4a;
+  --number-3: #3a0800;
+  --number-4: #01001e;
+  --number-5: #180100;
+  --number-6: #1e1124;
+  --number-7: #040005;
+  --number-8: #040332;
+  --number-9: #270409;
+  --number-10: #2c1a1f;
+  --number-11: #0c030b;
+  --number-12: #11081a;
+}

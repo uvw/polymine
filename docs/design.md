@@ -633,7 +633,7 @@ and [How theming works](themes/how-theming-works.md) covers the code.
 
 ### Built-in themes
 
-Polymine has 21 built-in themes, folders in `ui/src/themes` read at build time.
+Polymine has 31 built-in themes, folders in `ui/src/themes` read at build time.
 Experimental themes are folders there too, named in `EXPERIMENTAL_THEMES`. Only
 development builds, and release builds made with `VITE_EXPERIMENTS=1`, list
 them, after the rest, and the theme tests skip them ([decision
@@ -642,29 +642,39 @@ them, after the rest, and the theme tests skip them ([decision
 [decision-41]:
   decisions.md#41-experimental-themes-show-only-in-development-builds
 
-| Theme            | Chrome                                        | Board                                                      |
-| ---------------- | --------------------------------------------- | ---------------------------------------------------------- |
-| Frost, default   | System, with a light Acrylic or vibrancy      | Faint glass cells over the blurred desktop                 |
-| Glossy           | System: follows light or dark mode            | Glazed tiles in the accent, with a glare and a rim light   |
-| Glass            | System, with a light Acrylic or vibrancy      | Clear glass cells with a bright glare and an accent rim    |
-| Graphite         | System: follows light or dark mode            | Recessed graphite tray, color-blind-checked numbers        |
-| Charcoal         | System: follows light or dark mode            | Flat, hairline gaps, pastel mono numbers, star mines       |
-| Swatch           | System: follows light or dark mode            | Flat tiles in the system accent itself, classic digits     |
-| Pride            | System: follows light or dark mode            | Indigo tiles; open cells show counts as rainbow fills      |
-| Spectrum         | System: follows light or dark mode            | Slate tiles; fills in spectrum order, red to violet        |
-| Midnight         | Always dark navy with glows and gradients     | The game's first look, deep navy with neon numbers         |
-| Atom One Dark    | Always One Dark's tab-bar slate, blue buttons | Border-color pits, purple-first syntax digits, an atom     |
-| Dracula          | Always Dracula purple-gray, purple-to-pink    | Darkest-panel pits, pink-first candy digits, a bat mine    |
-| GitHub Dark      | Always inky canvas, green buttons             | Inset-canvas wells, red-first code-review digits           |
-| One Dark Pro     | Always flat slate, gray buttons               | Sidebar pits, purple-first Vivid digits, a breakpoint flag |
-| Monokai          | Always warm charcoal with a neon glow         | Tray-color pits, pink-first 2006 neon digits               |
-| Solarized Dark   | Always base03 teal                            | Base02 tiles, green-first Solarized accents, a sun mine    |
-| Atom One Light   | Always pale gray, blue buttons                | Pale pane tiles, purple-first One Light digits, an atom    |
-| Alucard          | Always Alucard cream, purple-to-pink          | Panel tiles, pink-first deep candy digits, a bat mine      |
-| GitHub Light     | Always white, green buttons                   | Pale inset tiles, red-first review digits                  |
-| Catppuccin Latte | Always Latte mantle, mauve buttons            | Crust tiles, mauve-first Latte accents, paw flags          |
-| Monokai Light    | Always Monokai's foreground, pink buttons     | Tray tiles, pink-first deepened 2006 digits                |
-| Solarized Light  | Always base3 cream                            | Base2 tiles, green-first Solarized accents, a sun mine     |
+| Theme            | Chrome                                        | Board                                                       |
+| ---------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| Frost, default   | System, with a light Acrylic or vibrancy      | Faint glass cells over the blurred desktop                  |
+| Glossy           | System: follows light or dark mode            | Glazed tiles in the accent, with a glare and a rim light    |
+| Glass            | System, with a light Acrylic or vibrancy      | Clear glass cells with a bright glare and an accent rim     |
+| Graphite         | System: follows light or dark mode            | Recessed graphite tray, color-blind-checked numbers         |
+| Datum            | Always black, with a faint grid               | Black and paper white, dot-matrix digits with a slipped row |
+| Swatch           | System: follows light or dark mode            | Flat tiles in the system accent itself, classic digits      |
+| Pride            | System: follows light or dark mode            | Indigo tiles; open cells show counts as rainbow fills       |
+| Spectrum         | System: follows light or dark mode            | Slate tiles; fills in spectrum order, red to violet         |
+| Midnight         | Always dark navy with glows and gradients     | The game's first look, deep navy with neon numbers          |
+| Elevation        | Always pale mint with gray planes             | Gray planes, black block digits in an oblique extrusion     |
+| Facet            | Always white                                  | Teal chrome tiles with a hard glare, a chrome-shard mine    |
+| Quanta           | Always electric blue                          | Deep blue wells, pale monospace digits, barcode flags       |
+| Loop             | Follows the mode: flat dark or light gray     | Flat gray, hot or acid digits, a twisted ribbon mine        |
+| Umbra            | Always charcoal                               | Black block tiles, black block digits with gray gaps        |
+| Deboss           | Always khaki card                             | Pressed khaki, inked deboss digits, black label marks       |
+| Interference     | Always pale blue paper                        | Hairline-filled digits that shimmer into moiré              |
+| Diode            | Always dark, with a magenta and cyan wash     | Unlit LED lenses, glowing lamp-matrix digits                |
+| Rupture          | Always black with scanlines                   | Steel tiles, sliced digits with split color ghosts          |
+| Corrode          | Always grimy dark under scanlines             | Worn tiles, warped and grain-eaten smeared digits           |
+| Atom One Dark    | Always One Dark's tab-bar slate, blue buttons | Border-color pits, purple-first syntax digits, an atom      |
+| Dracula          | Always Dracula purple-gray, purple-to-pink    | Darkest-panel pits, pink-first candy digits, a bat mine     |
+| GitHub Dark      | Always inky canvas, green buttons             | Inset-canvas wells, red-first code-review digits            |
+| One Dark Pro     | Always flat slate, gray buttons               | Sidebar pits, purple-first Vivid digits, a breakpoint flag  |
+| Monokai          | Always warm charcoal with a neon glow         | Tray-color pits, pink-first 2006 neon digits                |
+| Solarized Dark   | Always base03 teal                            | Base02 tiles, green-first Solarized accents, a sun mine     |
+| Atom One Light   | Always pale gray, blue buttons                | Pale pane tiles, purple-first One Light digits, an atom     |
+| Alucard          | Always Alucard cream, purple-to-pink          | Panel tiles, pink-first deep candy digits, a bat mine       |
+| GitHub Light     | Always white, green buttons                   | Pale inset tiles, red-first review digits                   |
+| Catppuccin Latte | Always Latte mantle, mauve buttons            | Crust tiles, mauve-first Latte accents, paw flags           |
+| Monokai Light    | Always Monokai's foreground, pink buttons     | Tray tiles, pink-first deepened 2006 digits                 |
+| Solarized Light  | Always base3 cream                            | Base2 tiles, green-first Solarized accents, a sun mine      |
 
 ### Readability
 

@@ -1,0 +1,73 @@
+/*
+ * Name: Umbra
+ * Author: Polymine
+ * Description: Black blocks on charcoal
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Tonal and nearly colorless: closed cells are black blocks, open cells a
+   * dull charcoal, and counts are black block glyphs with a few blocks dropped
+   * back to gray.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #d6d4cc;
+  --text-dim: #85837c;
+  --accent: #b8b6ae;
+  --accent-hover: #cfcdc5;
+  --on-accent: #0b0b0a;
+  --on-menu-highlight: var(--on-accent);
+  --window: #262624;
+  --window-image: none;
+  --control: #1c1c1b;
+  --control-hover: #2a2a28;
+  --control-pressed: #141413;
+  --surface: #1c1c1b;
+  --layer: rgb(28 28 27 / 94%);
+  --stroke: rgb(255 255 255 / 8%);
+  --stroke-strong: rgb(255 255 255 / 16%);
+  --divider: rgb(255 255 255 / 7%);
+
+  --board-plate: #2a2a28;
+  --board-gap: 2px;
+  --board-font: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --board-font-weight: 800;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #121211;
+  --cell-closed-hover: #1f1f1d;
+  --cell-closed-pressed: #0a0a09;
+  --cell-closed-edge: #191918;
+  --cell-open: #94938b;
+  --cell-open-edge: #8a8981;
+  --cell-exploded: #b8b6ae;
+
+  --flag: #b8b6ae;
+  --flag-outline: #0b0b0a;
+  --flag-pole: #b8b6ae;
+  --question: #b8b6ae;
+  --mine: #0b0b0a;
+  --mine-spark: #7d7c75;
+  --hint: #d6d4cc;
+  --focus: #ffffff;
+  --win: #d6d4cc;
+
+  --number-1: #0a0a0a;
+  --number-2: #12120d;
+  --number-3: #03111b;
+  --number-4: #040503;
+  --number-5: #0f0110;
+  --number-6: #0d191e;
+  --number-7: #050105;
+  --number-8: #1e1601;
+  --number-9: #000000;
+  --number-10: #07284e;
+  --number-11: #302807;
+  --number-12: #411535;
+}

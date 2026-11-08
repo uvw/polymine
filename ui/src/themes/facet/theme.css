@@ -1,0 +1,86 @@
+/*
+ * Name: Facet
+ * Author: Polymine
+ * Description: Glossy teal-chrome shards on white
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * A wide white margin, and closed cells as dark teal chrome with a hard glare
+   * across them. Open cells are white with dark teal counts, and the mine is a
+   * chrome shard.
+   */
+  --color-scheme: light;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #0c2a2c;
+  --text-dim: #5a7072;
+  --accent: #1f5a5d;
+  --accent-hover: #2a6c70;
+  --on-accent: #ffffff;
+  --on-menu-highlight: var(--on-accent);
+  --window: #ffffff;
+  --window-image: none;
+  --control: #f2f5f5;
+  --control-hover: #e8eded;
+  --control-pressed: #dde4e4;
+  --surface: #ffffff;
+  --layer: rgb(255 255 255 / 96%);
+  --stroke: rgb(12 42 44 / 12%);
+  --stroke-strong: rgb(12 42 44 / 26%);
+  --divider: rgb(12 42 44 / 10%);
+
+  --board-plate: #ffffff;
+  --board-gap: 3px;
+  --board-font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --board-font-weight: 600;
+
+  --cell-rounding: 0;
+  --cell-bevel: 0;
+  --cell-sheen: rgb(255 255 255 / 0%);
+  --cell-closed: #1f4f52;
+  --cell-closed-hover: #2a6164;
+  --cell-closed-pressed: #163c3e;
+  --cell-closed-edge: #163c3e;
+  --cell-open: #f4f6f6;
+  --cell-open-edge: #e3e8e8;
+  --cell-exploded: #0c2a2c;
+  --cell-light-angle: -35deg;
+  --cell-gloss: #e9f3f2;
+  --cell-gloss-opacity: 0.6;
+  --cell-gloss-fade: 0.05;
+  --cell-gloss-extent: 0.42;
+  --cell-gloss-shape: band;
+  --cell-glint-opacity: 0.5;
+  --cell-rim: #8fc2c0;
+  --cell-rim-opacity: 0.6;
+  --cell-rim-width: 1px;
+  --cell-shade: #000000;
+  --cell-shade-opacity: 0.45;
+  --cell-shade-depth: 0.55;
+
+  --flag: #e9f3f2;
+  --flag-outline: #0c2a2c;
+  --flag-pole: #0c2a2c;
+  --question: #e9f3f2;
+  --mine: #0c2a2c;
+  --mine-spark: #8fc2c0;
+  --hint: #0c2a2c;
+  --focus: #0c2a2c;
+  --win: #2a8a8d;
+
+  --number-1: #205b5e;
+  --number-2: #366d39;
+  --number-3: #87302d;
+  --number-4: #3c388f;
+  --number-5: #7d4a06;
+  --number-6: #106f73;
+  --number-7: #662b6a;
+  --number-8: #072b2d;
+  --number-9: #656613;
+  --number-10: #444d7d;
+  --number-11: #74370c;
+  --number-12: #4a4a4a;
+}

@@ -1,0 +1,90 @@
+/*
+ * Name: Corrode
+ * Author: Polymine
+ * Description: Grimy, noisy, and smeared like old tape
+ * Version: 1.0.0
+ * Format: 1
+ */
+:root {
+  /*
+   * Grimy brown-gray tiles under scanlines, and counts that look photocopied
+   * too many times: warped, eaten by grain, and smeared sideways like worn
+   * tape.
+   */
+  --color-scheme: dark;
+  --window-material: none;
+  --number-style: digits;
+
+  --text: #e6dcc6;
+  --text-dim: #8f8778;
+  --accent: #b5c95a;
+  --accent-hover: #c6d86c;
+  --on-accent: #14110f;
+  --on-menu-highlight: var(--on-accent);
+  --danger: #e0704a;
+  --warning: #d9a441;
+  --window: #0d0b0a;
+  --window-image:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 30%) 0 1px, transparent 1px 3px),
+    radial-gradient(900px 600px at 30% 20%, rgb(181 201 90 / 6%), transparent 60%),
+    radial-gradient(1200px 900px at 50% 50%, transparent 40%, rgb(0 0 0 / 55%));
+  --control: #1d1a17;
+  --control-hover: #27231f;
+  --control-pressed: #151310;
+  --subtle-hover: rgb(230 220 198 / 6%);
+  --subtle-pressed: rgb(230 220 198 / 4%);
+  --stroke: rgb(230 220 198 / 10%);
+  --stroke-strong: rgb(230 220 198 / 20%);
+  --divider: rgb(230 220 198 / 8%);
+  --surface: #14110f;
+  --layer: rgb(20 17 15 / 92%);
+  --shadow: 0 16px 44px rgb(0 0 0 / 65%), 0 2px 8px rgb(0 0 0 / 40%);
+
+  --board-plate: #1a1714;
+  --board-gap: 2px;
+  --board-font: "Courier New", ui-monospace, monospace;
+  --board-font-weight: 700;
+
+  --cell-rounding: 0.14;
+  --cell-bevel: 0.06;
+  --cell-sheen: rgb(255 240 210 / 0%);
+  --cell-closed: #6c685f;
+  --cell-closed-hover: #78746a;
+  --cell-closed-pressed: #5a564e;
+  --cell-closed-edge: #78746a;
+  --cell-open: #16120f;
+  --cell-open-edge: #221d19;
+  --cell-exploded: #8a2a1c;
+  --cell-light-angle: -20deg;
+  --cell-gloss: #fff4dc;
+  --cell-gloss-opacity: 0.14;
+  --cell-gloss-extent: 0.45;
+  --cell-gloss-shape: band;
+  --cell-shade-opacity: 0;
+  --cell-shade-depth: 0.6;
+  --cell-open-shade-opacity: 0.4;
+
+  --flag: #e0507a;
+  --flag-outline: #0a0807;
+  --flag-pole: #e6dcc6;
+  --question: #e6dcc6;
+  --mine: #0c0b0a;
+  --mine-spark: #cfc6b0;
+  --mine-spikes: 8;
+  --hint: #b5c95a;
+  --focus: #e6dcc6;
+  --win: #b5c95a;
+
+  --number-1: #a2c1d1;
+  --number-2: #b0c95a;
+  --number-3: #dd7550;
+  --number-4: #af8ada;
+  --number-5: #d4a44b;
+  --number-6: #74c1b2;
+  --number-7: #e4849b;
+  --number-8: #ebddc1;
+  --number-9: #f8da64;
+  --number-10: #88d5e8;
+  --number-11: #c4a281;
+  --number-12: #ade190;
+}
