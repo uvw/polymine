@@ -8,6 +8,7 @@ mod commands;
 mod edge_fit;
 mod environment;
 mod error;
+mod fatal;
 mod files;
 mod foreground;
 mod history;
@@ -53,10 +54,7 @@ fn startup_instance() -> InstanceName {
     let value = from_args
         .or_else(|| std::env::var(INSTANCE_ENV).ok())
         .or_else(|| cfg!(debug_assertions).then(|| DEV_INSTANCE.to_owned()));
-    InstanceName::from_option(value.as_deref()).unwrap_or_else(|e| {
-        eprintln!("polymine: {e}");
-        std::process::exit(2);
-    })
+    InstanceName::from_option(value.as_deref()).unwrap_or_else(|e| fatal::exit(&e.to_string(), 2))
 }
 
 /// Starts the app. Blocks until the last window closes.
@@ -159,7 +157,7 @@ pub fn run() {
         })
         .invoke_handler(specta.invoke_handler())
         .build(tauri::generate_context!())
-        .expect("failed to start Polymine");
+        .unwrap_or_else(|e| fatal::start_failed(&e));
     app.run(move |handle, event| {
         if let tauri::RunEvent::Exit = event {
             if let Some(placement) = &placement {
