@@ -16,7 +16,7 @@ file current.
 | [5](#5-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
 | [6](#6-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
 | [7](#7-logs-go-through-log-and-tauri-plugin-log)                                 | Logs go through `log` and `tauri-plugin-log`                            |
-| [8](#8-seven-modules-may-use-unsafe-code)                                        | Seven modules may use unsafe code                                       |
+| [8](#8-eight-modules-may-use-unsafe-code)                                        | Eight modules may use unsafe code                                       |
 | [9](#9-third-party-notices-ship-in-the-about-window)                             | Third-party notices ship in the About window                            |
 | [10](#10-tilings-are-data)                                                       | Tilings are data                                                        |
 | [11](#11-chacha8-for-mine-placement)                                             | ChaCha8 for mine placement                                              |
@@ -164,12 +164,12 @@ lost. Release builds have no devtools either, so UI warnings and errors would
 never reach a file. The official plugin needs only the `log:default` permission,
 where a custom command would add app code and generated bindings.
 
-## 8. Seven modules may use unsafe code
+## 8. Eight modules may use unsafe code
 
 **Date:** 2026-11-05
 
 **Decision:** The workspace lints deny `unsafe_code` instead of forbidding it.
-Seven modules allow it, each for platform calls that no safe crate wraps, and
+Eight modules allow it, each for platform calls that no safe crate wraps, and
 each `unsafe` block carries a `SAFETY` comment:
 
 1. `windows_user` in `crates/polymine-ipc/src/transport.rs` reads the user's SID
@@ -187,6 +187,9 @@ each `unsafe` block carries a `SAFETY` comment:
    keep the traffic lights centered on the 40 pt toolbar.
 7. `message_box` in `src-tauri/src/fatal.rs` shows a startup failure on Windows,
    where a release build has no console for the error.
+8. `windows_icon` in `src-tauri/src/taskbar_icon.rs` gives the window its big
+   icon, which the taskbar and Alt+Tab draw. Tauri's `set_icon` sets only the
+   small one.
 
 A new `allow(unsafe_code)` gets a line here in the same change.
 

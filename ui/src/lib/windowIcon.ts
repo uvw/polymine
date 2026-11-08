@@ -2,6 +2,7 @@
 
 import { Image } from "@tauri-apps/api/image";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { api } from "./api";
 import { iconColors, iconPixels, iconSvg } from "./themes/icon";
 import type { Theme } from "./themes/types";
 
@@ -22,4 +23,6 @@ export async function applyWindowIcon(theme: Theme, current = () => true): Promi
   } finally {
     await image.close();
   }
+  // Tauri sets only the small icon; the taskbar and Alt+Tab draw the big one.
+  await api.setTaskbarIcon(Array.from(rgba), WINDOW_ICON_SIZE);
 }

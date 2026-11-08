@@ -7,9 +7,11 @@ const setIcon = vi.fn();
 const close = vi.fn();
 const imageNew = vi.fn();
 const pixels = vi.fn();
+const setTaskbarIcon = vi.fn();
 
 vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ setIcon }) }));
 vi.mock("@tauri-apps/api/image", () => ({ Image: { new: imageNew } }));
+vi.mock("./api", () => ({ api: { setTaskbarIcon } }));
 vi.mock("./themes/icon", async (original) => ({
   ...(await original<typeof import("./themes/icon")>()),
   iconPixels: pixels,
@@ -34,6 +36,13 @@ describe("applyWindowIcon", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it("gives the taskbar the same icon, which Tauri's own call leaves out", async () => {
+    const rgba = new Uint8Array([1, 2, 3, 4]);
+    pixels.mockResolvedValue(rgba);
+    await applyWindowIcon(theme);
+    expect(setTaskbarIcon).toHaveBeenCalledWith([1, 2, 3, 4], WINDOW_ICON_SIZE);
+  });
+
   it("frees the image when the window refuses it", async () => {
     pixels.mockResolvedValue(new Uint8Array(4));
     setIcon.mockRejectedValueOnce(new Error("no"));
@@ -46,6 +55,7 @@ describe("applyWindowIcon", () => {
     await applyWindowIcon(theme, () => false);
     expect(imageNew).not.toHaveBeenCalled();
     expect(setIcon).not.toHaveBeenCalled();
+    expect(setTaskbarIcon).not.toHaveBeenCalled();
   });
 
   it("leaves the icon alone without a canvas", async () => {
