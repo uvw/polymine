@@ -460,6 +460,20 @@ export type Settings_Deserialize = {
 	hideToolbar?: boolean,
 	/**  Remap the board's colors for a color vision deficiency. */
 	colorFilter?: ColorFilter,
+	/**  Theme ids the player starred. */
+	favoriteThemes?: string[],
+	/**
+	 *  The themes chosen last, newest first. The shell keeps this list; what
+	 *  the window sends back is ignored.
+	 */
+	recentThemes?: string[],
+	/**  Which themes a new game may switch to. */
+	themeRotation?: ThemeRotation,
+	/**
+	 *  Show the key under the board that names each count's color, on themes
+	 *  that draw counts as colors. Off makes a harder game.
+	 */
+	showCountKey?: boolean,
 };
 
 export type Settings_Serialize = {
@@ -489,6 +503,20 @@ export type Settings_Serialize = {
 	hideToolbar: boolean,
 	/**  Remap the board's colors for a color vision deficiency. */
 	colorFilter: ColorFilter,
+	/**  Theme ids the player starred. */
+	favoriteThemes: string[],
+	/**
+	 *  The themes chosen last, newest first. The shell keeps this list; what
+	 *  the window sends back is ignored.
+	 */
+	recentThemes: string[],
+	/**  Which themes a new game may switch to. */
+	themeRotation: ThemeRotation,
+	/**
+	 *  Show the key under the board that names each count's color, on themes
+	 *  that draw counts as colors. Off makes a harder game.
+	 */
+	showCountKey: boolean,
 };
 
 /**  A theme folder that can't be used, and why, in words for the player. */
@@ -558,6 +586,15 @@ export type ThemeList_Serialize = {
 	themes: ThemeSummary_Serialize[],
 	skipped: SkippedTheme[],
 };
+
+/**  Which themes a new game may switch to. */
+export type ThemeRotation = 
+/**  Keep the chosen theme. */
+"off" | 
+/**  Any of the player's favorites. */
+"favorites" | 
+/**  Any theme. */
+"all";
 
 /**  A usable theme, without its SVG files, which `read_theme` brings. */
 export type ThemeSummary = ThemeSummary_Serialize;

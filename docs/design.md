@@ -552,13 +552,14 @@ or with Ctrl+S on Windows and Linux and Cmd+S on macOS.
 
 ### The Settings dialog
 
-Settings is a fixed-size dialog with a sidebar of three sections: General,
-Appearance, and Bot. General holds the player picker with Add and Remove, the
-active player's name, and the language, then the Rules and Window groups. The
-sidebar names the section, so the pane starts with its settings. Only the
-section's pane scrolls, and every section fits without scrolling at the window's
-800 by 600 minimum on macOS. The sidebar is a vertical tab list: arrow keys,
-Home, and End move between sections, and the dialog reopens on the last one.
+Settings is a fixed-size dialog, up to 900 by 700 pixels, with a sidebar of
+three sections: General, Themes, and Bot. General holds the player picker with
+Add and Remove, the active player's name, and the language, then the Rules and
+Window groups. The sidebar names the section, so the pane starts with its
+settings. Only the section's pane scrolls. General and Bot fit without scrolling
+at the window's 800 by 600 minimum on macOS. The sidebar is a vertical tab list:
+arrow keys, Home, and End move between sections, and the dialog reopens on the
+last one.
 
 On/off settings are switches in rows, label left and switch right, with one line
 of help where a rule needs it. The color filter, the idle action, and the
@@ -566,42 +567,70 @@ language are drop-downs. macOS groups rows in one inset box with hairline
 dividers; Windows draws each row as its own card with a Fluent toggle. Changes
 apply as they're made, and a language change reloads the window.
 
-Appearance splits the themes into tabs:
+### The Themes page
+
+Themes opens on the current theme ([decision 53][decision-53]): a large preview,
+its name with a star that makes it a favorite, and its description and author.
+Beside it sit the options that change how the board reads:
+
+1. The accent tint switch.
+2. The count key switch, which hides the key under color themes for a harder
+   game.
+3. The color filter.
+4. New theme each game: Off, From favorites, or From all themes. It switches
+   themes for every new game, the bot's included. Favorites need two or more to
+   rotate, or every theme takes part.
+
+[decision-53]:
+  decisions.md#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
+
+Below, the All themes heading carries a search field and Surprise me. The search
+matches every word typed against each theme's name, description, and author.
+Surprise me chooses a random theme, other than the current one, from those
+showing. One row of chips picks what the grid shows, one at a time:
+
+1. All.
+2. Recent: the last five themes chosen. The shell records them when the theme
+   changes, and the chip shows once there are any.
+3. Favorites.
+4. Light or Dark. A theme that follows the system matches either.
+5. B&W: gray cells in both modes, and counts in near-black or near-gray inks
+   with at most a faint tint.
+6. See-through: the themes the desktop shows through, a frosted window or a tray
+   or cells less than solid.
+
+A search that matches nothing says so. The grid lists the themes in one scroll,
+in sections that each show their count:
 
 1. Signature, for Polymine's own looks.
 2. Code, for the themes that take an editor's color scheme.
 3. Custom, for the player's themes, shown only when the themes folder holds one.
 
-`EDITOR_COLUMNS` in `builtin.ts` lists the Code tab's themes as columns of a
-dark theme over a light one, so the dark themes fill the first row and the light
-ones the second ([decision 54][decision-54]). The tab list is a Fluent selector
-bar on Windows and a segmented control on macOS. Appearance opens on the tab
-that holds the chosen theme.
+The Code section sets each dark theme over its light one in five columns, and
+the pairs past the fifth start a new pair of rows ([decision 54][decision-54]).
+`EDITOR_COLUMNS` in `builtin.ts` lists the pairs, and `editorPlacement` gives
+each card its row and column. A filter drops the placement, so the cards that
+match close up.
 
 [decision-54]:
-  decisions.md#54-the-code-tab-pairs-a-dark-theme-over-a-light-one-in-each-column
+  decisions.md#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column
 
-Each tab shows its themes as a six-column grid of small board previews, so the
-settings under the grid stay in view at the 800 by 600 minimum. Previews take
-the accent while the tint switch is on, as the board does. They go through the
-chosen color filter and draw the theme's glare and shade. Color-only themes
-preview their counts as fills. Player themes show their `preview.png` when they
-have one.
+Each theme is a card in a five-column grid: a small hex board in the theme's
+colors, with its glyphs, font, glare, and shade, and its name below. The chosen
+card has an accent ring and a check, and a favorite has a star by its name. The
+boards take the accent while the tint switch is on, and go through the chosen
+color filter, as the real board does. A player theme's `preview.png` replaces
+the drawn board, and its glyphs load when the page opens. Cards out of view skip
+layout and painting, so the grid stays quick at any length.
 
-A theme's name, description, and author show in a flyout with an arrow. It opens
-after the pointer rests on the theme's card for half a second, or at once on
-keyboard focus.
+A click chooses a theme, and nothing changes while the pointer rests on a card.
+Arrow keys move between the cards without choosing, unlike a plain radio group,
+since each choice redraws the board; Space or Enter chooses. Each theme's radio
+takes its name as its accessible name and its description as its accessible
+description.
 
-1. The flyout opens below the card, or above it when only that side has room,
-   and stays inside the dialog.
-2. It is a Fluent tooltip on Windows and an AppKit popover on macOS.
-3. The pointer can move onto it, and Escape closes it before the dialog.
-4. Each theme's radio takes the flyout's description line as its accessible
-   description.
-
-An Open themes folder link at the end of the tab row opens the folder in Finder
-or Explorer. Themes that didn't load are listed below the settings with the
-reason.
+An Open themes folder link at the bottom opens the folder in Finder or Explorer.
+Themes that didn't load are listed below it with the reason.
 
 ## Languages
 
@@ -687,7 +716,7 @@ relaxations, and
 [decision 42](decisions.md#42-theme-tests-hold-every-built-in-theme-to-readability-bars)
 records why each theme relaxes what it does.
 
-A color filter in Appearance remaps any theme's board colors for deuteranopia,
+A color filter in Themes remaps any theme's board colors for deuteranopia,
 protanopia, or tritanopia. It is off by default. It moves the colors a player
 must tell apart until each pair clears the theme tests' bar under that
 deficiency, and leaves a board that already passes exactly as it is. SVG glyphs
@@ -704,7 +733,8 @@ middle stays open, which reads on every cell shape.
 
 A key under the board shows each count the board can reach, one to 14 on
 Crosses, and never covers a cell. The cell under the pointer or the keyboard
-focus shows its count as a digit, and its chip in the key lights up.
+focus shows its count as a digit, and its chip in the key lights up. The Show
+the count key switch on the Themes page hides the key for a harder game.
 
 ### Light on cells
 

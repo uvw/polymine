@@ -116,6 +116,10 @@ export function settings(overrides: Partial<Settings> = {}): Settings {
     language: "system",
     hideToolbar: false,
     colorFilter: "off",
+    favoriteThemes: [],
+    recentThemes: [],
+    themeRotation: "off",
+    showCountKey: true,
     ...overrides,
   };
 }

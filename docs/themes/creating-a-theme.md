@@ -7,12 +7,12 @@ the colors, the shapes, and a few switches with CSS variables. You don't need to
 know the code, and a theme can't break Polymine: a theme that breaks the rules
 is skipped, and Settings says why.
 
-1. Open Settings, choose Appearance, and select **Open themes folder**.
+1. Open Settings, choose Themes, and select **Open themes folder**.
 2. Make a folder for your theme in it, such as `dusk`.
 3. Save a `theme.css` in that folder. [A minimal theme](#a-minimal-theme) has
    one to copy.
-4. Switch back to Polymine. Your theme appears on the Custom tab, in folder-name
-   order.
+4. Switch back to Polymine. Your theme appears in the Custom section of Themes
+   in Settings, in folder-name order.
 
 Optional files replace the drawn mine, flag, question mark, and numbers with
 your own SVG images, and a `preview.png` shows in the theme list.
@@ -95,7 +95,7 @@ theme can be this short. Save it as `themes/dusk/theme.css`:
 The comment at the top is the header. Polymine needs all five lines:
 
 1. **Name:** shown in Settings, up to 40 characters.
-2. **Author:** shown under the description, up to 80 characters.
+2. **Author:** shown after the description, up to 80 characters.
 3. **Description:** shown in Settings, up to 120 characters.
 4. **Version:** your theme's own version, up to 20 characters.
 5. **Format:** the theme format, which is `1`. If a future Polymine changes the
@@ -180,7 +180,7 @@ Graphite, the built-in theme that most others started from:
 4. Change a few colors. For a green board, try `--cell-closed: #4f7a5c;`,
    `--cell-closed-pressed: #3d5f47;`, and `--board-plate: #0f1a13;`.
 5. Save the file, switch back to Polymine, and open Settings. Pick your theme in
-   Appearance.
+   Themes.
 6. Keep editing. Each time you click back into Polymine, it reads the file
    again.
 
@@ -248,8 +248,8 @@ The built-in themes show a few ways to use it:
    own colors.
 
 A theme that sets no `--accent` of its own also gets the system accent on its
-buttons and selections. Settings draws each theme's preview with the accent, as
-the board would.
+buttons and selections. The Themes page draws each theme's preview with the
+accent, as the board would.
 
 ## See-through themes and alpha
 
@@ -321,10 +321,12 @@ SVG files in the theme's folder replace the drawn marks and numbers:
 
 ### The preview
 
-`preview.png` replaces the drawn preview in the Settings theme grid. It shows at
-about 70 by 40 pixels and is cropped to fill, so an image of 280 by 160 pixels
-stays sharp on high-density screens. Without it, Settings draws a small board in
-your theme's colors.
+Each card on the Themes page draws a small hex board in your theme's colors,
+with your SVG glyphs, font, glare, and shade, so most themes need no preview
+image. `preview.png` replaces that drawn board. It shows at about 160 by 92
+pixels and is cropped to fill, so an image of 320 by 184 pixels stays sharp on
+high-density screens. A picture doesn't follow the accent, the light or dark
+mode, or the color filter, so leave it out when your theme depends on them.
 
 ## Keep the board readable
 
@@ -360,8 +362,8 @@ give it a dark `--question-outline`, as Glossy does.
 
 ## Color filters
 
-Players can turn on a color filter in Settings, under Appearance: deuteranopia
-or protanopia for the two kinds of red-green color blindness, or tritanopia for
+Players can turn on a color filter in Settings, under Themes: deuteranopia or
+protanopia for the two kinds of red-green color blindness, or tritanopia for
 blue-yellow. It works on your theme too, with nothing to set up. The filter
 checks the colors a player has to tell apart as they look with that color
 blindness, and moves only those that fall short:
@@ -581,7 +583,8 @@ Polymine ignores `--number-15` and up, and the log says so.
    color means 9. A ring and a fill can share a color; counts drawn alike can't.
 5. With `colors`, a key under the board shows every count the board can reach.
    The cell under the pointer or the keyboard focus shows its count as a digit,
-   and its entry in the key lights up.
+   and its entry in the key lights up. A player can turn the key off in Settings
+   for a harder game.
 6. `--number-shadow` and `--number-shadow-opacity`, `#000000` and `0` by
    default, put a soft shadow under each digit, away from the light. A white one
    in a light theme reads as an engraved digit.
@@ -644,8 +647,8 @@ These limits keep a theme small, fast to read, and harmless.
 
 ## What gets refused
 
-A theme is skipped when any of these is true. Appearance in Settings lists it at
-the bottom, as "dusk didn't load:" and the reason.
+A theme is skipped when any of these is true. Themes in Settings lists it at the
+bottom, as "dusk didn't load:" and the reason.
 
 1. **Files other than the ones above.** Names must match exactly, case included:
    `Theme.css` or `notes.txt` is refused. Hidden files, such as `.DS_Store`, and
@@ -678,8 +681,8 @@ That variable takes its default, and the log says so.
 
 When a theme doesn't show up, or looks wrong:
 
-1. Open Settings, then Appearance. The bottom of the pane names each skipped
-   folder and why.
+1. Open Settings, then Themes. The bottom of the page names each skipped folder
+   and why.
 2. Make sure the folder sits directly inside `themes`, not inside another
    folder, and that its name is lowercase.
 3. Read the log for the details, such as a variable that took its default. Lines

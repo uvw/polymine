@@ -385,6 +385,11 @@ impl App {
         let mut current = lock(&self.settings);
         // The window never sees keys from a newer build, so they come from here.
         settings.extra = std::mem::take(&mut current.extra);
+        settings.recent_themes = if settings.theme == current.theme {
+            std::mem::take(&mut current.recent_themes)
+        } else {
+            crate::settings::recent_after(&current.recent_themes, &settings.theme)
+        };
         *current = settings;
         self.save_settings(&current)?;
         Ok(current.clone())
@@ -1051,6 +1056,41 @@ mod tests {
         assert!(!lock(&app.session).game().rules().question_marks);
         let (reloaded, _) = Settings::load(&dir.path().join("config").join("settings.json"));
         assert_eq!(reloaded.theme, "datum");
+    }
+
+    #[test]
+    fn changing_the_theme_records_it_as_recent() {
+        let dir = tempfile::tempdir().unwrap();
+        let app = app(&dir);
+        let mut next = app.settings();
+        next.theme = "datum".to_owned();
+        // The window can't write the recents; the shell keeps them.
+        next.recent_themes = vec!["made-up".to_owned()];
+        let saved = app.update_settings(next).unwrap();
+        assert_eq!(saved.recent_themes, vec!["datum".to_owned()]);
+        let mut next = saved.clone();
+        next.theme = "facet".to_owned();
+        let saved = app.update_settings(next).unwrap();
+        assert_eq!(
+            saved.recent_themes,
+            vec!["facet".to_owned(), "datum".to_owned()]
+        );
+    }
+
+    #[test]
+    fn keeping_the_theme_keeps_the_recents() {
+        let dir = tempfile::tempdir().unwrap();
+        let app = app(&dir);
+        let mut next = app.settings();
+        next.theme = "datum".to_owned();
+        let saved = app.update_settings(next).unwrap();
+        let mut next = saved.clone();
+        next.accent_tint = !next.accent_tint;
+        next.recent_themes = Vec::new();
+        assert_eq!(
+            app.update_settings(next).unwrap().recent_themes,
+            saved.recent_themes
+        );
     }
 
     #[test]
