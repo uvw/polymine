@@ -270,6 +270,18 @@ describe("SettingsDialog", () => {
     expect(radioNames()).toContain("dracula");
   });
 
+  it("narrows to black and white themes with the B&W chip", async () => {
+    const user = userEvent.setup();
+    await openThemes(user);
+    const mono = screen.getByRole("button", { name: "B&W" });
+    await user.click(mono);
+    expect(mono).toHaveAttribute("aria-pressed", "true");
+    expect(radioNames()).toContain("datum");
+    expect(radioNames()).not.toContain("pride");
+    await user.click(mono);
+    expect(radioNames()).toContain("pride");
+  });
+
   it("stars favorites and lists only them under Favorites", async () => {
     const user = userEvent.setup();
     const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);

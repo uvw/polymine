@@ -595,7 +595,8 @@ Above the sections:
    description, and author.
 2. Chips pick a source: All, Signature, Code, Custom, or Favorites. Two more
    pick a mode, Light or Dark, and a theme that follows the system matches
-   either.
+   either. B&W keeps the black and white themes: gray cells in both modes, and
+   counts in near-black or near-gray inks with at most a faint tint.
 3. Surprise me chooses a random theme, other than the current one, from those
    showing.
 

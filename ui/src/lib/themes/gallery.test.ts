@@ -4,6 +4,7 @@ import { themeEntry } from "./entry";
 import {
   filterThemes,
   gallerySections,
+  isMonochrome,
   knownIds,
   pickTheme,
   rotationPool,
@@ -29,6 +30,7 @@ const filter = (over: Partial<GalleryFilter>): GalleryFilter => ({
   query: "",
   source: "all",
   mode: null,
+  mono: false,
   favorites: [],
   ...over,
 });
@@ -39,6 +41,13 @@ describe("themeMode", () => {
     expect(themeMode(byId("datum"))).toBe("dark");
     expect(themeMode(byId("elevation"))).toBe("light");
     expect(themeMode(byId("frost"))).toBe("both");
+  });
+});
+
+describe("isMonochrome", () => {
+  it("finds the black and white themes: gray cells and near-gray inks", () => {
+    const mono = BUILT_IN_THEMES.filter(isMonochrome).map((entry) => entry.id);
+    expect(mono.sort()).toEqual(["datum", "elevation", "interference", "umbra"]);
   });
 });
 
@@ -65,6 +74,15 @@ describe("filterThemes", () => {
     expect(
       ids(filterThemes(ALL, filter({ source: "favorites", favorites: ["loop", "dusk"] }))),
     ).toEqual(["loop", "dusk"]);
+  });
+
+  it("keeps only black and white themes when asked", () => {
+    expect(ids(filterThemes(ALL, filter({ mono: true }))).sort()).toEqual([
+      "datum",
+      "elevation",
+      "interference",
+      "umbra",
+    ]);
   });
 
   it("keeps themes that show the mode, both-mode themes included", () => {
