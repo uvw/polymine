@@ -3,9 +3,10 @@
 ## Summary
 
 `ui/public/icon.svg` is the app icon: a steel mine on a dark plate with a faint
-triangle lattice. `npx tauri icon ui/public/icon.svg` regenerates the platform
-icons in `src-tauri/icons` from it. While Polymine runs, the window shows the
-same mine in the active theme's colors, drawn by `ui/src/lib/themes/icon.ts`.
+triangle lattice, with `ui/public/icon-small.svg` for 16 and 24 pixels.
+`node scripts/app-icon.mjs` regenerates the platform icons in `src-tauri/icons`
+from both. While Polymine runs, the window shows the same mine in the active
+theme's colors, drawn by `ui/src/lib/themes/icon.ts`.
 [Design](../design.md#window-icon) explains how, and
 [Creating a theme](../themes/creating-a-theme.md#app-icon) lists the variables a
 theme can set.
