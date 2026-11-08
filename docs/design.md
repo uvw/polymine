@@ -569,9 +569,9 @@ apply as they're made, and a language change reloads the window.
 
 ### The Themes page
 
-Themes starts with the accent tint switch and the color filter, side by side,
-since both change every preview below. Then it lists every theme in one scroll,
-in sections that each show their count ([decision 53][decision-53]):
+Themes starts with the accent tint switch, the count key switch, and the color
+filter, since all three change how the board reads. Then it lists every theme in
+one scroll, in sections that each show their count ([decision 53][decision-53]):
 
 1. Signature, for Polymine's own looks.
 2. Code, for the themes that take an editor's color scheme.
@@ -739,7 +739,8 @@ middle stays open, which reads on every cell shape.
 
 A key under the board shows each count the board can reach, one to 14 on
 Crosses, and never covers a cell. The cell under the pointer or the keyboard
-focus shows its count as a digit, and its chip in the key lights up.
+focus shows its count as a digit, and its chip in the key lights up. The Show
+the count key switch on the Themes page hides the key for a harder game.
 
 ### Light on cells
 

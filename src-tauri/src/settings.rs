@@ -48,6 +48,9 @@ pub struct Settings {
     pub recent_themes: Vec<String>,
     /// Which themes a new game may switch to.
     pub theme_rotation: ThemeRotation,
+    /// Show the key under the board that names each count's color, on themes
+    /// that draw counts as colors. Off makes a harder game.
+    pub show_count_key: bool,
     /// Top-level keys this build doesn't know, such as ones a newer build
     /// wrote. They're saved back as they were, and the window never sees them.
     #[serde(flatten)]
@@ -169,6 +172,7 @@ impl Default for Settings {
             favorite_themes: Vec::new(),
             recent_themes: Vec::new(),
             theme_rotation: ThemeRotation::Off,
+            show_count_key: true,
             extra: Map::new(),
         }
     }
@@ -377,6 +381,7 @@ mod tests {
         assert_eq!(loaded.favorite_themes, Vec::<String>::new());
         assert_eq!(loaded.recent_themes, Vec::<String>::new());
         assert_eq!(loaded.theme_rotation, ThemeRotation::Off);
+        assert!(loaded.show_count_key);
     }
 
     #[test]

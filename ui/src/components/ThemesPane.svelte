@@ -218,6 +218,11 @@
 
 <div class="setting-group look">
   <Switch label={t("settings.accentTint")} bind:checked={draft.accentTint} />
+  <Switch
+    label={t("settings.countKey")}
+    help={t("settings.countKeyHelp")}
+    bind:checked={draft.showCountKey}
+  />
   <div class="setting-row">
     <span class="setting-text">
       <label for="{idPrefix}-filter">{t("settings.colorFilter")}</label>

@@ -474,6 +474,11 @@ export type Settings_Deserialize = {
 	recentThemes?: string[],
 	/**  Which themes a new game may switch to. */
 	themeRotation?: ThemeRotation,
+	/**
+	 *  Show the key under the board that names each count's color, on themes
+	 *  that draw counts as colors. Off makes a harder game.
+	 */
+	showCountKey?: boolean,
 };
 
 export type Settings_Serialize = {
@@ -512,6 +517,11 @@ export type Settings_Serialize = {
 	recentThemes: string[],
 	/**  Which themes a new game may switch to. */
 	themeRotation: ThemeRotation,
+	/**
+	 *  Show the key under the board that names each count's color, on themes
+	 *  that draw counts as colors. Off makes a harder game.
+	 */
+	showCountKey: boolean,
 };
 
 /**  A theme folder that can't be used, and why, in words for the player. */

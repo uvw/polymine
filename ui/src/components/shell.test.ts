@@ -408,6 +408,12 @@ describe("BoardCanvas", () => {
     }
   });
 
+  it("hides the key for a harder game when the player turns it off", () => {
+    game.settings = settings({ theme: "spectrum", showCountKey: false });
+    render(BoardCanvas);
+    expect(document.querySelector(".key")).toBeNull();
+  });
+
   it("lights the key chip for the inspected count", async () => {
     game.settings = settings({ theme: "pride" });
     render(BoardCanvas);

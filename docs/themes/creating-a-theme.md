@@ -583,7 +583,8 @@ Polymine ignores `--number-15` and up, and the log says so.
    color means 9. A ring and a fill can share a color; counts drawn alike can't.
 5. With `colors`, a key under the board shows every count the board can reach.
    The cell under the pointer or the keyboard focus shows its count as a digit,
-   and its entry in the key lights up.
+   and its entry in the key lights up. A player can turn the key off in Settings
+   for a harder game.
 6. `--number-shadow` and `--number-shadow-opacity`, `#000000` and `0` by
    default, put a soft shadow under each digit, away from the light. A white one
    in a light theme reads as an engraved digit.

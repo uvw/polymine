@@ -72,7 +72,11 @@
     (game.snapshot?.cells ?? []).reduce((most, cell) => Math.max(most, cell.neighbors.length), 0),
   );
   /** Color-only themes show a key of every count this board can show, below the cells. */
-  const key = $derived(board.numberStyle === "colors" ? countKey(board, maxCount) : []);
+  const key = $derived(
+    board.numberStyle === "colors" && game.settings?.showCountKey !== false
+      ? countKey(board, maxCount)
+      : [],
+  );
   const ink = (color: number) =>
     prefersDarkInk(color) ? "var(--legend-ink-dark)" : "var(--legend-ink-light)";
 

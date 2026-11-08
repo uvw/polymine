@@ -161,6 +161,8 @@
   "settings.idleSecondsValue": "{seconds} s",
   "settings.done": "Done",
   "settings.pauseOnFocusLoss": "Pause when Polymine loses focus",
+  "settings.countKey": "Show the count key",
+  "settings.countKeyHelp": "Off for a harder game: color themes leave each count's color to memory.",
   "settings.accentTint": "Tint the theme with the system accent color",
   "settings.colorFilter": "Color filter",
   "settings.colorFilterHelp": "Shifts board colors for color-blind players.",

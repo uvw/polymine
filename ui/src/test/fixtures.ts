@@ -119,6 +119,7 @@ export function settings(overrides: Partial<Settings> = {}): Settings {
     favoriteThemes: [],
     recentThemes: [],
     themeRotation: "off",
+    showCountKey: true,
     ...overrides,
   };
 }

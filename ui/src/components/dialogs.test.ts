@@ -270,6 +270,18 @@ describe("SettingsDialog", () => {
     expect(radioNames()).toContain("dracula");
   });
 
+  it("turns the count key of color themes off and on", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openThemes(user);
+    const key = screen.getByRole("switch", { name: "Show the count key" });
+    expect(key).toBeChecked();
+    await user.click(key);
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ showCountKey: false })),
+    );
+  });
+
   it("narrows to black and white themes with the B&W chip", async () => {
     const user = userEvent.setup();
     await openThemes(user);
