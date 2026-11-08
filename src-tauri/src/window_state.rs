@@ -46,14 +46,26 @@ impl WindowState {
     /// Whether a strip of the window's top edge lies on one of `monitors`, so
     /// a window saved on a monitor that's gone doesn't open out of reach.
     pub fn reachable(&self, monitors: &[Area]) -> bool {
+        self.home(monitors).is_some()
+    }
+
+    /// The index of the monitor in `monitors` that holds a strip of the
+    /// window's top edge.
+    pub fn home(&self, monitors: &[Area]) -> Option<usize> {
         let (x, y) = (i64::from(self.x), i64::from(self.y));
         let right = x + i64::from(self.width);
-        monitors.iter().any(|m| {
+        monitors.iter().position(|m| {
             let (mx, my) = (i64::from(m.x), i64::from(m.y));
             let overlap = right.min(mx + i64::from(m.width)) - x.max(mx);
             let top_inside = y >= my && y + GRIP <= my + i64::from(m.height);
             overlap >= GRIP * 2 && top_inside
         })
+    }
+
+    /// The saved size, shrunk where needed to fit `area`, so a window saved on
+    /// a larger monitor opens whole on a smaller one.
+    pub fn fitted_size(&self, area: Area) -> (u32, u32) {
+        (self.width.min(area.width), self.height.min(area.height))
     }
 }
 
@@ -70,23 +82,32 @@ pub fn store(dir: &Path, state: &WindowState) -> io::Result<()> {
 
 /// Applies the saved state to `window`. The position only applies while it
 /// is still reachable on a monitor; otherwise the window keeps its centered
-/// place.
+/// place. The size shrinks to fit the work area of the monitor the window
+/// lands on.
 pub fn restore(window: &Window, dir: &Path) {
     let Some(state) = load(dir) else { return };
-    let monitors: Vec<Area> = window
-        .available_monitors()
-        .unwrap_or_default()
-        .iter()
-        .map(|m| monitor_area(*m.position(), *m.size(), m.scale_factor(), state.logical))
-        .collect();
+    let available = window.available_monitors().unwrap_or_default();
+    let area = |m: &tauri::Monitor| {
+        monitor_area(*m.position(), *m.size(), m.scale_factor(), state.logical)
+    };
+    let work = |m: &tauri::Monitor| {
+        let rect = m.work_area();
+        monitor_area(rect.position, rect.size, m.scale_factor(), state.logical)
+    };
+    let monitors: Vec<Area> = available.iter().map(area).collect();
+    let landing = match state.home(&monitors) {
+        Some(i) => available.get(i).map(work),
+        None => window.current_monitor().ok().flatten().as_ref().map(work),
+    };
+    let (width, height) = landing.map_or((state.width, state.height), |a| state.fitted_size(a));
     let (size, position): (Size, Position) = if state.logical {
         (
-            LogicalSize::new(f64::from(state.width), f64::from(state.height)).into(),
+            LogicalSize::new(f64::from(width), f64::from(height)).into(),
             LogicalPosition::new(f64::from(state.x), f64::from(state.y)).into(),
         )
     } else {
         (
-            PhysicalSize::new(state.width, state.height).into(),
+            PhysicalSize::new(width, height).into(),
             PhysicalPosition::new(state.x, state.y).into(),
         )
     };
@@ -254,6 +275,30 @@ mod tests {
         };
         assert!(at(-2000, 200).reachable(&[SCREEN, left]));
         assert!(!at(-2000, 200).reachable(&[SCREEN]));
+    }
+
+    #[test]
+    fn the_home_monitor_is_the_one_under_the_top_edge() {
+        let left = Area {
+            x: -2560,
+            y: 0,
+            width: 2560,
+            height: 1440,
+        };
+        assert_eq!(at(-2000, 200).home(&[SCREEN, left]), Some(1));
+        assert_eq!(at(100, 100).home(&[SCREEN, left]), Some(0));
+        assert_eq!(at(3000, 100).home(&[SCREEN, left]), None);
+    }
+
+    #[test]
+    fn a_window_saved_on_a_larger_monitor_shrinks_to_fit() {
+        let big = WindowState {
+            width: 3800,
+            height: 2100,
+            ..at(0, 0)
+        };
+        assert_eq!(big.fitted_size(SCREEN), (1920, 1080));
+        assert_eq!(at(0, 0).fitted_size(SCREEN), (1100, 800));
     }
 
     #[test]
