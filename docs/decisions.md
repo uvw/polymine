@@ -644,7 +644,8 @@ all Chromium builds do. WKWebView sends a pinch as WebKit gesture events
 instead, since wry leaves `allowsMagnification` off. Letting one side stop at
 its limit while the other carries on keeps the ratio between the screen's and
 the minimum's. The scale is measured from the frame when the input began, so
-turning back within one gesture restores the ratio.
+turning back within one gesture restores the ratio. A mouse wheel notch resizes
+by 4%: at 10% each notch jumped too far, the owner found on 2026-11-14.
 
 **Alternatives:** a modifier for the wheel, which the owner turned down;
 anchoring at the pointer or a corner instead of the center; fixed 25% steps; and
