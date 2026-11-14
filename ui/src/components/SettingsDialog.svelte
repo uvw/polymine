@@ -40,18 +40,14 @@
   const id = $props.id();
   let pane = $state<Pane>("general");
   let panel = $state<HTMLElement>();
-  let root = $state<HTMLElement>();
   let draft = $state<Settings | null>(null);
   let name = $state("");
-  /** Bumped on each scroll of the pane, which closes a theme's flyout. */
-  let scrolled = $state(0);
   /** The saved settings the draft started from, to tell the player's changes from others'. */
   let base: Settings | null = null;
   $effect(() => {
     if (!open) {
       untrack(flush);
       draft = null;
-      game.tryOn(null);
       return;
     }
     if (!untrack(() => draft) && game.settings) {
@@ -182,7 +178,7 @@
 
 <Modal title={t("settings.title")} bind:open wide fixed>
   {#if draft}
-    <div class="settings" bind:this={root}>
+    <div class="settings">
       <div
         class="sidebar"
         role="tablist"
@@ -212,7 +208,6 @@
         id="{id}-panel"
         aria-labelledby="{id}-tab-{pane}"
         bind:this={panel}
-        onscroll={() => scrolled++}
       >
         {#if pane === "general"}
           <div class="setting-group">
@@ -300,7 +295,7 @@
             <Switch label={t("settings.hideToolbar")} bind:checked={draft.hideToolbar} />
           </div>
         {:else if pane === "themes"}
-          <ThemesPane bind:draft idPrefix={id} bounds={root} {scrolled} />
+          <ThemesPane bind:draft idPrefix={id} />
         {:else if pane === "bot"}
           <div class="setting-group">
             <div class="setting-row">

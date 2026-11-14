@@ -90,7 +90,7 @@ eager, so `BUILT_IN_THEMES` in `catalog.ts` exists at startup.
 3. `editorPlacement` gives each editor card its row and column, so each light
    theme sits under its dark one, and `EDITOR_ORDER` lists them in reading
    order. `EDITOR_THEMES` is the same list as a set.
-4. `THEME_GRID_COLUMNS` is the grid's width, four columns.
+4. `THEME_GRID_COLUMNS` is the grid's width, five columns.
 
 `ui/src/themes` holds every built-in folder, experiments included.
 `EXPERIMENTAL_THEMES` in `builtin.ts` names the experiments, such as Ferrofluid.

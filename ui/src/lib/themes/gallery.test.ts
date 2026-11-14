@@ -29,11 +29,9 @@ const ALL = [...BUILT_IN_THEMES, player];
 const ids = (list: readonly { id: string }[]) => list.map((entry) => entry.id);
 const filter = (over: Partial<GalleryFilter>): GalleryFilter => ({
   query: "",
-  source: "all",
-  mode: null,
-  mono: false,
-  seeThrough: false,
+  show: "all",
   favorites: [],
+  recent: [],
   ...over,
 });
 
@@ -76,21 +74,25 @@ describe("filterThemes", () => {
     expect(filterThemes(ALL, filter({ query: "nothing like this" }))).toEqual([]);
   });
 
-  it("keeps one source, or the favorites", () => {
-    expect(ids(filterThemes(ALL, filter({ source: "player" })))).toEqual(["dusk"]);
-    expect(ids(filterThemes(ALL, filter({ source: "editor" })))).toContain("dracula");
-    expect(ids(filterThemes(ALL, filter({ source: "polymine" })))).not.toContain("dracula");
+  it("keeps the favorites, or the recent themes", () => {
     expect(
-      ids(filterThemes(ALL, filter({ source: "favorites", favorites: ["loop", "dusk"] }))),
+      ids(filterThemes(ALL, filter({ show: "favorites", favorites: ["loop", "dusk"] }))),
     ).toEqual(["loop", "dusk"]);
+    expect(ids(filterThemes(ALL, filter({ show: "recent", recent: ["dusk", "datum"] })))).toEqual([
+      "datum",
+      "dusk",
+    ]);
   });
 
   it("keeps only see-through themes when asked", () => {
-    expect(ids(filterThemes(ALL, filter({ seeThrough: true }))).sort()).toEqual(["frost", "glass"]);
+    expect(ids(filterThemes(ALL, filter({ show: "seeThrough" }))).sort()).toEqual([
+      "frost",
+      "glass",
+    ]);
   });
 
   it("keeps only black and white themes when asked", () => {
-    expect(ids(filterThemes(ALL, filter({ mono: true }))).sort()).toEqual([
+    expect(ids(filterThemes(ALL, filter({ show: "mono" }))).sort()).toEqual([
       "datum",
       "elevation",
       "interference",
@@ -99,10 +101,11 @@ describe("filterThemes", () => {
   });
 
   it("keeps themes that show the mode, both-mode themes included", () => {
-    const light = ids(filterThemes(ALL, filter({ mode: "light" })));
+    const light = ids(filterThemes(ALL, filter({ show: "light" })));
     expect(light).toContain("elevation");
     expect(light).toContain("frost");
     expect(light).not.toContain("datum");
+    expect(ids(filterThemes(ALL, filter({ show: "dark" })))).not.toContain("elevation");
   });
 });
 

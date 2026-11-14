@@ -22,7 +22,7 @@ const PREVIEW: Files = import.meta.glob("../../themes/*/preview.png", {
 });
 
 /** Columns in the Themes page's grid. `.theme-grid` in `ThemesPane.svelte` must match. */
-export const THEME_GRID_COLUMNS = 4;
+export const THEME_GRID_COLUMNS = 5;
 
 /**
  * The Code section's columns, each a dark theme over a light one. Most are one

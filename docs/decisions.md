@@ -1073,38 +1073,47 @@ how the editors look, since the keyword color dominates their code views.
 **Date:** 2026-11-08
 
 **Decision:** Settings gives themes their own page, which replaces Appearance.
-It starts with the accent tint switch and the color filter, side by side, since
-both change every preview. Then it lists every theme in one scroll, in sections
-named Signature, Code, and Custom, each with its count. Signature holds the
-app's own looks, Code the editor themes (decision 50), and Custom the player's
-themes; `EDITOR_THEMES` in `builtin.ts` sends each built-in theme to its
-section, and Custom shows only when the themes folder holds a theme. Above the
-sections sit a search field, source and mode chips, and Surprise me, then a row
-of the last five themes chosen. Cards draw a small hex board with the theme's
-own glyphs and light, carry a favorite star, and try the theme on the board
-behind Settings when the pointer rests on them. A setting switches to a random
-theme with each new game, from the favorites or from all themes. The shell keeps
-the recent list, and the window can't write it.
+It opens on the current theme: a large preview with its full description and
+author, a star to make it a favorite, and beside it the options that change how
+it draws. Those are the accent tint, the count key, the color filter, and New
+theme each game, which switches to a random theme with each new game, from the
+favorites or from all themes. Below, a heading carries the search field and
+Surprise me, and one row of chips picks what the grid shows: All, Recent,
+Favorites, Light, Dark, B&W, or See-through, one at a time. The grid lists every
+theme in one scroll, in sections named Signature, Code, and Custom, each with
+its count. Signature holds the app's own looks, Code the editor themes (decision
+50), and Custom the player's themes; `EDITOR_THEMES` in `builtin.ts` sends each
+built-in theme to its section, and Custom shows only when the themes folder
+holds a theme. A card draws a small hex board with the theme's own glyphs and
+light, and its name. A click chooses the theme, and nothing happens on hover.
+The shell keeps the recent list, and the window can't write it.
 
 **Why:** Ten signature themes brought the count to 31, and the owner wants room
-for many more. On the Appearance tabs the grid already scrolled and pushed the
-settings under it out of view. A page of its own scrolls freely, and search,
-chips, favorites, and recents keep any theme a few keystrokes away. The previews
-are drawn rather than cut from screenshots: a picture can't follow the accent,
-the light or dark mode, or the color filter, which Glossy, Swatch, and Frost all
-depend on, and it goes stale when a theme changes. A player's `preview.png`
-still replaces the drawn board. The owner approved the page from a mockup on
-2026-11-08, and picked the names "Signature" and "Code" earlier. Player themes
-get their own section because a player looks for a theme they added in one
-place. The group list lives in code, not in a `Group:` header line, because only
-built-in themes need a group.
+for many more. A page of its own scrolls freely, and search, chips, and
+favorites keep any theme a few clicks away. The first version stacked three
+option cards, a search, and two rows of chips above the grid, so one row of
+themes showed. Its cards cut each description off mid-word. Hover flyouts and a
+try-on that redrew the board behind Settings made the page lag. The owner
+rejected that version on 2026-11-14, and approved this one from a mockup. The
+current theme leads because the dialog covers the board, so the page is the only
+place to see what's chosen, and the options sit beside it so their effect shows
+at once. Source chips went because the sections already name the source. The
+previews are drawn rather than cut from screenshots: a picture can't follow the
+accent, the light or dark mode, or the color filter, which Glossy, Swatch, and
+Frost all depend on, and it goes stale when a theme changes. A player's
+`preview.png` still replaces the drawn board. Player themes get their own
+section because a player looks for a theme they added in one place. The group
+list lives in code, not in a `Group:` header line, because only built-in themes
+need a group.
 
-**Alternatives:** keeping Appearance as its own section for the tint and the
-filter, which left two switches on a page; tabs on Appearance, which scroll at
-31 themes and hide the other settings; preview pictures cut from the real board;
-a separate gallery window; loading a player theme's glyphs only once its card
-scrolls into view, which matters only with many player themes; and a `Group:`
-line in each `theme.css`.
+**Alternatives:** keeping Appearance as its own section, which left two switches
+on a page; tabs on Appearance, which scroll at 31 themes and hide the other
+settings; trying a theme on while the pointer rests on its card, which lagged;
+flyouts with each theme's description; a Recent row, which took a row for what a
+chip shows; source chips and mode toggles that combine; preview pictures cut
+from the real board; a separate gallery window; loading a player theme's glyphs
+only once its card scrolls into view, which matters only with many player
+themes; and a `Group:` line in each `theme.css`.
 
 ## 54. The Code section sets a dark theme over a light one in each column
 
@@ -1113,12 +1122,12 @@ line in each `theme.css`.
 **Decision:** The Code section's pairs each put a dark theme over a light one:
 Atom One Dark over Atom One Light, Dracula over Alucard, GitHub Dark over GitHub
 Light, One Dark Pro over Catppuccin Latte, Monokai over Monokai Light, and
-Solarized Dark over Solarized Light. The grid has four columns on the Themes
-page, so the first four pairs fill two rows and the last two start a new pair of
-rows. `EDITOR_COLUMNS` in `builtin.ts` holds the pairs, `editorPlacement` gives
-each card its row and column, and a test checks each light theme sits under its
-dark one. A search or a chip drops the placement, so the cards that match close
-up.
+Solarized Dark over Solarized Light. The grid has five columns on the Themes
+page, so the first five pairs fill two rows and the last one starts a new pair
+of rows. `EDITOR_COLUMNS` in `builtin.ts` holds the pairs, `editorPlacement`
+gives each card its row and column, and a test checks each light theme sits
+under its dark one. A search or a chip drops the placement, so the cards that
+match close up.
 
 Alucard is the light theme in Dracula's spec, with Alucard Classic's palette
 from `dracula/dracula-theme` under that repository's MIT license, and counts in

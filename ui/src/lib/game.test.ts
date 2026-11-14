@@ -173,18 +173,6 @@ describe("loading", () => {
     expect(store.theme).toBe(plain);
   });
 
-  it("tries a theme on the board without saving it", () => {
-    const update = vi.spyOn(store, "updateSettings");
-    store.settings = settings({ theme: "graphite" });
-    store.tryOn("datum");
-    expect(store.previewThemeId).toBe("datum");
-    expect(store.theme.id).toBe("datum");
-    expect(store.settings.theme).toBe("graphite");
-    store.tryOn(null);
-    expect(store.theme.id).toBe("graphite");
-    expect(update).not.toHaveBeenCalled();
-  });
-
   it("derives the theme from settings, with a fallback", () => {
     expect(store.theme.id).toBe("graphite");
     store.settings = settings({ theme: "midnight" });

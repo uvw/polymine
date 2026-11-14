@@ -4,35 +4,22 @@
   import { formatNumber } from "../lib/format";
   import { game } from "../lib/game.svelte";
   import { t, type MessageKey } from "../lib/i18n";
-  import { editorPlacement, themeGroup, type ThemeGroup } from "../lib/themes/builtin";
-  import { themeFor } from "../lib/themes/catalog";
+  import { editorPlacement, type ThemeGroup } from "../lib/themes/builtin";
+  import { findTheme, themeFor } from "../lib/themes/catalog";
   import { filterTheme } from "../lib/themes/filter";
   import {
     filterThemes,
     gallerySections,
     knownIds,
     pickTheme,
-    type ThemeSource,
+    type ThemeShow,
   } from "../lib/themes/gallery";
   import type { ThemeEntry } from "../lib/themes/types";
-  import Flyout from "./Flyout.svelte";
   import Icon from "./Icon.svelte";
   import Switch from "./Switch.svelte";
   import ThemePreview from "./ThemePreview.svelte";
 
-  let {
-    draft = $bindable(),
-    idPrefix,
-    bounds,
-    scrolled = 0,
-  }: {
-    draft: Settings;
-    idPrefix: string;
-    /** What flyouts stay inside. */
-    bounds?: HTMLElement;
-    /** Bumped when the page scrolls, which leaves a flyout pointing at nothing. */
-    scrolled?: number;
-  } = $props();
+  let { draft = $bindable(), idPrefix }: { draft: Settings; idPrefix: string } = $props();
 
   const GROUP_LABELS: Record<ThemeGroup, MessageKey> = {
     polymine: "settings.themesPolymine",
@@ -53,58 +40,29 @@
     { value: "all", label: "settings.rotationAll" },
   ];
 
-  const MODES: readonly { value: "light" | "dark"; label: MessageKey }[] = [
+  const CHIPS: readonly { value: ThemeShow; label: MessageKey }[] = [
+    { value: "all", label: "settings.themesAll" },
+    { value: "recent", label: "settings.themesRecent" },
+    { value: "favorites", label: "settings.themesFavorites" },
     { value: "light", label: "settings.themesLight" },
     { value: "dark", label: "settings.themesDark" },
+    { value: "mono", label: "settings.themesMono" },
+    { value: "seeThrough", label: "settings.themesSeeThrough" },
   ];
 
-  /** How long the pointer rests on a theme before its flyout shows. */
-  const TIP_DELAY_MS = 500;
-  /** Lets the pointer cross from a theme to its flyout, so the flyout's text can be selected. */
-  const TIP_GRACE_MS = 150;
-  /** How long the pointer rests on a card before the board behind the dialog tries it on. */
-  const TRY_ON_DELAY_MS = 300;
-
   let query = $state("");
-  let source = $state<ThemeSource>("all");
-  let mode = $state<"light" | "dark" | null>(null);
-  let mono = $state(false);
-  let glass = $state(false);
-  /** The theme whose flyout shows, and the card it points at. */
-  let tip = $state<{ id: string; card: HTMLElement } | null>(null);
-  let tipTimer: ReturnType<typeof setTimeout> | undefined;
-  /** Whether the last key went to a theme, so an arrow moving focus counts as the keyboard's. */
-  let viaKeys = false;
-  let tryOnTimer: ReturnType<typeof setTimeout> | undefined;
+  let show = $state<ThemeShow>("all");
   let gallery = $state<HTMLElement>();
 
-  const hasPlayerThemes = $derived(game.themes.some((e) => themeGroup(e) === "player"));
-  const sources = $derived([
-    { value: "all", label: "settings.themesAll" },
-    { value: "polymine", label: "settings.themesPolymine" },
-    { value: "editor", label: "settings.themesEditor" },
-    ...(hasPlayerThemes ? [{ value: "player", label: "settings.themesPlayer" }] : []),
-    { value: "favorites", label: "settings.themesFavorites" },
-  ] as { value: ThemeSource; label: MessageKey }[]);
+  const recent = $derived(knownIds(game.themes, draft.recentThemes));
+  const chips = $derived(CHIPS.filter((chip) => chip.value !== "recent" || recent.length > 0));
   const shown = $derived(
-    filterThemes(game.themes, {
-      query,
-      source,
-      mode,
-      mono,
-      seeThrough: glass,
-      favorites: draft.favoriteThemes,
-    }),
+    filterThemes(game.themes, { query, show, favorites: draft.favoriteThemes, recent }),
   );
   const sections = $derived(gallerySections(shown));
-  const filtering = $derived(
-    query.trim() !== "" || source !== "all" || mode !== null || mono || glass,
-  );
-  const recent = $derived(
-    knownIds(game.themes, draft.recentThemes).flatMap(
-      (id) => game.themes.find((e) => e.id === id) ?? [],
-    ),
-  );
+  const filtering = $derived(query.trim() !== "" || show !== "all");
+  const current = $derived(findTheme(game.themes, draft.theme));
+  const favorite = (id: string) => draft.favoriteThemes.includes(id);
 
   /** Previews resolve as the board does, with the accent while the tint is on. */
   const previewEnv = $derived({
@@ -119,25 +77,10 @@
     for (const entry of game.themes) {
       if (!entry.builtIn) void game.library.loadGlyphs(entry.id);
     }
-    return () => {
-      clearTimeout(tipTimer);
-      clearTimeout(tryOnTimer);
-      game.tryOn(null);
-    };
-  });
-
-  $effect(() => {
-    if (scrolled) hideTip();
-  });
-
-  // Leaving every card puts the chosen theme back on the board.
-  $effect(() => {
-    gallery?.addEventListener("pointerleave", stopTryingOn);
-    return () => gallery?.removeEventListener("pointerleave", stopTryingOn);
   });
 
   function toggleFavorite(id: string) {
-    draft.favoriteThemes = draft.favoriteThemes.includes(id)
+    draft.favoriteThemes = favorite(id)
       ? draft.favoriteThemes.filter((f) => f !== id)
       : [...draft.favoriteThemes, id];
   }
@@ -145,39 +88,6 @@
   function surprise() {
     const id = pickTheme(shown, draft.theme);
     if (id) draft.theme = id;
-  }
-
-  function tryOnLater(id: string) {
-    clearTimeout(tryOnTimer);
-    tryOnTimer = setTimeout(() => game.tryOn(id), TRY_ON_DELAY_MS);
-  }
-
-  function stopTryingOn() {
-    clearTimeout(tryOnTimer);
-    if (game.previewThemeId !== null) game.tryOn(null);
-  }
-
-  /** Shows a theme's flyout after `delay`, or at once while another theme's is open. */
-  function showTip(themeId: string, card: HTMLElement, delay: number) {
-    clearTimeout(tipTimer);
-    if (tip?.id === themeId) return;
-    if (delay === 0 || tip) tip = { id: themeId, card };
-    else tipTimer = setTimeout(() => (tip = { id: themeId, card }), delay);
-  }
-
-  function hideTip(delay = 0) {
-    clearTimeout(tipTimer);
-    if (delay === 0) tip = null;
-    else tipTimer = setTimeout(() => (tip = null), delay);
-  }
-
-  function focusTip(event: FocusEvent & { currentTarget: HTMLInputElement }, themeId: string) {
-    const card = event.currentTarget.closest("label");
-    if (card && (viaKeys || event.currentTarget.matches(":focus-visible"))) {
-      showTip(themeId, card, 0);
-      clearTimeout(tryOnTimer);
-      game.tryOn(themeId);
-    }
   }
 
   /** Arrow keys step through the cards in reading order. */
@@ -189,58 +99,81 @@
   };
 
   /**
-   * Arrow keys move between cards and try each one on without choosing it,
-   * unlike a plain radio group; Space or Enter chooses. Escape closes an open
-   * flyout, and drops a try-on, before it closes the dialog.
+   * Arrow keys move between cards without choosing, unlike a plain radio
+   * group, since each choice redraws the board. Space or Enter chooses.
    */
   function onThemeKeydown(event: KeyboardEvent & { currentTarget: HTMLInputElement }) {
-    viaKeys = true;
     const step = ARROW_STEPS[event.key];
     if (step) {
       event.preventDefault();
       const radios = [...(gallery?.querySelectorAll<HTMLInputElement>("input[name=theme]") ?? [])];
       const at = radios.indexOf(event.currentTarget);
       radios[(at + step + radios.length) % radios.length]?.focus();
-      return;
-    }
-    if (event.key === "Enter") {
+    } else if (event.key === "Enter") {
       event.preventDefault();
       draft.theme = event.currentTarget.value;
-      return;
     }
-    if (event.key !== "Escape" || (!tip && game.previewThemeId === null)) return;
-    event.preventDefault();
-    event.stopPropagation();
-    hideTip();
-    stopTryingOn();
   }
 </script>
 
-<div class="setting-group look">
-  <Switch label={t("settings.accentTint")} bind:checked={draft.accentTint} />
-  <Switch
-    label={t("settings.countKey")}
-    help={t("settings.countKeyHelp")}
-    bind:checked={draft.showCountKey}
-  />
-  <div class="setting-row">
-    <span class="setting-text">
-      <label for="{idPrefix}-filter">{t("settings.colorFilter")}</label>
-      <small id="{idPrefix}-filter-help">{t("settings.colorFilterHelp")}</small>
-    </span>
-    <select
-      id="{idPrefix}-filter"
-      aria-describedby="{idPrefix}-filter-help"
-      bind:value={draft.colorFilter}
-    >
-      {#each COLOR_FILTERS as filter (filter.value)}
-        <option value={filter.value}>{t(filter.label)}</option>
-      {/each}
-    </select>
+<div class="top">
+  <div class="current" role="group" aria-label={t("settings.themesCurrent")}>
+    {#if current.preview}
+      <img class="preview picture" src={current.preview} alt="" />
+    {:else}
+      <ThemePreview board={boardOf(current)} />
+    {/if}
+    <div class="current-name">
+      <strong>{current.sheet.meta.name}</strong>
+      <button
+        type="button"
+        class="star"
+        aria-label={t("settings.favorite", { name: current.sheet.meta.name })}
+        aria-pressed={favorite(current.id)}
+        onclick={() => toggleFavorite(current.id)}
+      >
+        <Icon name="star" size={16} />
+      </button>
+    </div>
+    <p class="current-line">{current.sheet.meta.description}</p>
+    <p class="current-line">{t("settings.themeAuthor", { author: current.sheet.meta.author })}</p>
+  </div>
+
+  <div class="setting-group options">
+    <Switch label={t("settings.accentTint")} bind:checked={draft.accentTint} />
+    <Switch
+      label={t("settings.countKey")}
+      help={t("settings.countKeyHelp")}
+      bind:checked={draft.showCountKey}
+    />
+    <div class="setting-row">
+      <span class="setting-text">
+        <label for="{idPrefix}-filter">{t("settings.colorFilter")}</label>
+        <small id="{idPrefix}-filter-help">{t("settings.colorFilterHelp")}</small>
+      </span>
+      <select
+        id="{idPrefix}-filter"
+        aria-describedby="{idPrefix}-filter-help"
+        bind:value={draft.colorFilter}
+      >
+        {#each COLOR_FILTERS as filter (filter.value)}
+          <option value={filter.value}>{t(filter.label)}</option>
+        {/each}
+      </select>
+    </div>
+    <div class="setting-row">
+      <label for="{idPrefix}-rotation">{t("settings.rotation")}</label>
+      <select id="{idPrefix}-rotation" bind:value={draft.themeRotation}>
+        {#each ROTATIONS as rotation (rotation.value)}
+          <option value={rotation.value}>{t(rotation.label)}</option>
+        {/each}
+      </select>
+    </div>
   </div>
 </div>
 
 <div class="bar">
+  <h4 class="setting-heading">{t("settings.themesHeading")}</h4>
   <input
     type="search"
     class="search"
@@ -248,53 +181,20 @@
     placeholder={t("settings.themesSearch", { count: game.themes.length })}
     bind:value={query}
   />
-  <div class="chips" role="group" aria-label={t("settings.themesShow")}>
-    {#each sources as chip (chip.value)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={source === chip.value}
-        onclick={() => (source = chip.value)}>{t(chip.label)}</button
-      >
-    {/each}
-  </div>
-  <div class="chips" role="group" aria-label={t("settings.themesMode")}>
-    {#each MODES as chip (chip.value)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={mode === chip.value}
-        onclick={() => (mode = mode === chip.value ? null : chip.value)}>{t(chip.label)}</button
-      >
-    {/each}
-    <button type="button" class="chip" aria-pressed={mono} onclick={() => (mono = !mono)}
-      >{t("settings.themesMono")}</button
-    >
-    <button type="button" class="chip" aria-pressed={glass} onclick={() => (glass = !glass)}
-      >{t("settings.themesSeeThrough")}</button
-    >
-  </div>
-  <button type="button" class="surprise" disabled={shown.length < 2} onclick={surprise}
+  <button type="button" disabled={shown.length < 2} onclick={surprise}
     >{t("settings.surprise")}</button
   >
 </div>
-
-{#if !filtering && recent.length > 0}
-  <h4 class="setting-heading" id="{idPrefix}-recent">{t("settings.themesRecent")}</h4>
-  <div class="recent" role="group" aria-labelledby="{idPrefix}-recent">
-    {#each recent as entry (entry.id)}
-      <button
-        type="button"
-        class="recent-card"
-        aria-pressed={draft.theme === entry.id}
-        onclick={() => (draft.theme = entry.id)}
-      >
-        <ThemePreview board={boardOf(entry)} />
-        <span>{entry.sheet.meta.name}</span>
-      </button>
-    {/each}
-  </div>
-{/if}
+<div class="chips" role="group" aria-label={t("settings.themesShow")}>
+  {#each chips as chip (chip.value)}
+    <button
+      type="button"
+      class="chip"
+      aria-pressed={show === chip.value}
+      onclick={() => (show = chip.value)}>{t(chip.label)}</button
+    >
+  {/each}
+</div>
 
 <div class="gallery" bind:this={gallery}>
   {#each sections as section (section.group)}
@@ -310,25 +210,14 @@
           style:grid-row={place ? place.row + 1 : null}
           style:grid-column={place ? place.column + 1 : null}
         >
-          <label
-            class="theme"
-            class:on={draft.theme === theme.id}
-            onpointerdown={() => (viaKeys = false)}
-            onpointerenter={(e) => {
-              showTip(theme.id, e.currentTarget, TIP_DELAY_MS);
-              tryOnLater(theme.id);
-            }}
-            onpointerleave={() => hideTip(TIP_GRACE_MS)}
-          >
+          <label class="theme" class:on={draft.theme === theme.id}>
             <input
               type="radio"
               name="theme"
               value={theme.id}
               aria-labelledby="{idPrefix}-name-{theme.id}"
-              aria-describedby="{idPrefix}-theme-{theme.id}"
+              aria-describedby="{idPrefix}-line-{theme.id}"
               bind:group={draft.theme}
-              onfocus={(e) => focusTip(e, theme.id)}
-              onblur={() => hideTip()}
               onkeydown={onThemeKeydown}
             />
             {#if theme.preview}
@@ -336,34 +225,20 @@
             {:else}
               <ThemePreview board={boardOf(theme)} />
             {/if}
-            <span class="theme-name" id="{idPrefix}-name-{theme.id}">{theme.sheet.meta.name}</span>
-            <span class="theme-line">{theme.sheet.meta.description}</span>
+            {#if draft.theme === theme.id}
+              <span class="check" aria-hidden="true"><Icon name="check" size={12} /></span>
+            {/if}
+            <span class="theme-name">
+              <span id="{idPrefix}-name-{theme.id}">{theme.sheet.meta.name}</span>
+              {#if favorite(theme.id)}
+                <span class="mark" role="img" aria-label={t("settings.favoriteMark")}
+                  ><Icon name="star" size={12} /></span
+                >
+              {/if}
+            </span>
+            <span class="line" id="{idPrefix}-line-{theme.id}">{theme.sheet.meta.description}</span>
           </label>
-          <button
-            type="button"
-            class="star"
-            aria-label={t("settings.favorite", { name: theme.sheet.meta.name })}
-            aria-pressed={draft.favoriteThemes.includes(theme.id)}
-            onclick={() => toggleFavorite(theme.id)}
-          >
-            <Icon name="star" size={16} />
-          </button>
         </div>
-        <Flyout
-          id="{idPrefix}-tip-{theme.id}"
-          anchor={tip?.id === theme.id ? tip.card : null}
-          {bounds}
-          onpointerenter={() => clearTimeout(tipTimer)}
-          onpointerleave={() => hideTip(TIP_GRACE_MS)}
-        >
-          <strong class="tip-name">{theme.sheet.meta.name}</strong>
-          <span class="tip-line" id="{idPrefix}-theme-{theme.id}"
-            >{theme.sheet.meta.description}</span
-          >
-          <span class="tip-line tip-author"
-            >{t("settings.themeAuthor", { author: theme.sheet.meta.author })}</span
-          >
-        </Flyout>
       {/each}
     </div>
   {:else}
@@ -371,19 +246,9 @@
   {/each}
 </div>
 
-<div class="foot">
-  <label class="rotation">
-    <span>{t("settings.rotation")}</span>
-    <select bind:value={draft.themeRotation}>
-      {#each ROTATIONS as rotation (rotation.value)}
-        <option value={rotation.value}>{t(rotation.label)}</option>
-      {/each}
-    </select>
-  </label>
-  <button type="button" class="folder" onclick={() => void game.openThemesFolder()}
-    >{t("settings.openThemes")}</button
-  >
-</div>
+<button type="button" class="folder" onclick={() => void game.openThemesFolder()}
+  >{t("settings.openThemes")}</button
+>
 
 {#if game.library.skipped.length > 0}
   <ul class="skipped" aria-label={t("settings.skippedThemes")}>
@@ -394,42 +259,109 @@
 {/if}
 
 <style>
-  /* The two settings that change every preview, side by side so the cards stay in view. */
-  .look {
+  /* The chosen theme, large, beside the options that change how it draws. */
+  .top {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 12px;
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px;
+    background: var(--control);
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius-lg);
   }
 
-  .look select {
-    width: auto;
+  .current {
+    min-width: 0;
+  }
+
+  .current :global(.preview) {
+    height: 132px;
+  }
+
+  .current-name {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: calc(var(--font-size) + 2px);
+  }
+
+  .current-line {
+    margin: 2px 0 0;
+    color: var(--text-dim);
+    font-size: var(--font-caption);
+  }
+
+  .star {
+    min-height: 0;
+    padding: 3px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-dim);
+  }
+
+  .star[aria-pressed="true"] {
+    color: var(--accent);
+  }
+
+  .star[aria-pressed="true"] :global(path),
+  .mark :global(path) {
+    fill: currentColor;
+  }
+
+  /* One list of plain rows, with lines between them, inside the panel's frame. */
+  .options {
+    gap: 0;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  .options > :global(.setting-row) {
+    min-height: 44px;
+    padding: 6px 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  .options > :global(.setting-row + .setting-row) {
+    border-top: 1px solid var(--stroke);
+  }
+
+  .options select {
+    width: 160px;
     min-width: 0;
     flex: none;
   }
 
   .bar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px 12px;
-    margin-bottom: 4px;
+    gap: 8px;
+    margin: 16px 0 8px;
+  }
+
+  .bar .setting-heading {
+    margin: 0 auto 0 0;
   }
 
   .search {
-    flex: 1 1 200px;
+    flex: 0 1 220px;
     min-width: 0;
   }
 
   .chips {
     display: flex;
+    flex-wrap: wrap;
     gap: 4px;
   }
 
   .chip {
-    min-height: 28px;
+    min-height: 26px;
     padding: 0 12px;
-    border-radius: 14px;
+    border-radius: 13px;
     font-size: var(--font-caption);
   }
 
@@ -437,39 +369,6 @@
     background: var(--accent);
     border-color: transparent;
     color: var(--on-accent);
-  }
-
-  .surprise {
-    margin-inline-start: auto;
-  }
-
-  .recent {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .recent-card {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    min-height: 0;
-    padding: 4px;
-    border-radius: var(--radius-lg);
-    font-size: var(--font-caption);
-    font-weight: 600;
-  }
-
-  .recent-card[aria-pressed="true"] {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-  }
-
-  /* Inset, since a card clips whatever paints outside it. */
-  .theme.on {
-    border-color: var(--accent);
-    box-shadow: inset 0 0 0 1px var(--accent);
   }
 
   .section .count {
@@ -480,26 +379,24 @@
 
   .theme-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
   }
 
   /* Off-screen cards skip layout and painting, so the grid stays quick at any length. */
   .card {
-    position: relative;
     content-visibility: auto;
-    contain-intrinsic-size: auto 150px;
+    contain-intrinsic-size: auto 100px;
   }
 
   .theme {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 2px;
     height: 100%;
-    padding: 4px 4px 8px;
+    padding: 3px 3px 4px;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--stroke);
-    background: var(--control);
+    border: 1px solid transparent;
     cursor: default;
   }
 
@@ -507,14 +404,19 @@
     background: var(--control-hover);
   }
 
+  /* Inset, since a card clips whatever paints outside it. */
+  .theme.on {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
   .theme:has(input:focus-visible) {
     outline: 2px solid var(--text);
-    outline-offset: -4px;
+    outline-offset: -2px;
   }
 
   :global(.platform-macos) .theme:has(input:focus-visible) {
     outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent);
-    outline-offset: -4px;
   }
 
   .theme input {
@@ -524,7 +426,7 @@
   }
 
   .theme :global(.preview) {
-    height: 92px;
+    height: 72px;
   }
 
   .preview.picture {
@@ -534,38 +436,42 @@
     border-radius: var(--radius);
   }
 
-  .theme-name {
-    margin: 4px 4px 0;
-    font-weight: 600;
+  .check {
+    position: absolute;
+    top: 7px;
+    inset-inline-end: 7px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
   }
 
-  .theme-line {
-    margin: 0 4px;
+  .theme-name {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 4px 2px 0;
     overflow: hidden;
-    color: var(--text-dim);
     font-size: var(--font-caption);
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .star {
-    position: absolute;
-    top: 8px;
-    inset-inline-end: 8px;
-    min-height: 0;
-    padding: 3px;
-    border: none;
-    border-radius: 50%;
-    background: var(--layer);
-    color: var(--text-dim);
-  }
-
-  .star[aria-pressed="true"] {
+  .mark {
+    display: inline-flex;
     color: var(--accent);
   }
 
-  .star[aria-pressed="true"] :global(path) {
-    fill: currentColor;
+  /* The description stays for screen readers, which read it after the name. */
+  .line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .none {
@@ -574,26 +480,14 @@
     text-align: center;
   }
 
-  .foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .rotation {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
   /*
    * A text link. The accent can fall below 4.5:1 on the surface at caption
    * size, so the link takes the text color.
    */
   .folder {
+    display: block;
     min-height: 0;
+    margin: 16px 0 0 auto;
     padding: 0;
     border: none;
     background: none;
@@ -607,20 +501,6 @@
   .folder:hover:not(:disabled) {
     background: none;
     color: var(--text-dim);
-  }
-
-  .tip-name {
-    display: block;
-    font-weight: 600;
-  }
-
-  .tip-line {
-    display: block;
-    color: var(--text-dim);
-  }
-
-  .tip-author {
-    margin-top: 4px;
   }
 
   .skipped {

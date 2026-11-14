@@ -95,7 +95,7 @@ theme can be this short. Save it as `themes/dusk/theme.css`:
 The comment at the top is the header. Polymine needs all five lines:
 
 1. **Name:** shown in Settings, up to 40 characters.
-2. **Author:** shown under the description, up to 80 characters.
+2. **Author:** shown after the description, up to 80 characters.
 3. **Description:** shown in Settings, up to 120 characters.
 4. **Version:** your theme's own version, up to 20 characters.
 5. **Format:** the theme format, which is `1`. If a future Polymine changes the

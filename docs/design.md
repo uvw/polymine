@@ -569,19 +569,45 @@ apply as they're made, and a language change reloads the window.
 
 ### The Themes page
 
-Themes starts with the accent tint switch, the count key switch, and the color
-filter, since all three change how the board reads. Then it lists every theme in
-one scroll, in sections that each show their count ([decision 53][decision-53]):
+Themes opens on the current theme ([decision 53][decision-53]): a large preview,
+its name with a star that makes it a favorite, and its description and author.
+Beside it sit the options that change how the board reads:
+
+1. The accent tint switch.
+2. The count key switch, which hides the key under color themes for a harder
+   game.
+3. The color filter.
+4. New theme each game: Off, From favorites, or From all themes. It switches
+   themes for every new game, the bot's included. Favorites need two or more to
+   rotate, or every theme takes part.
+
+[decision-53]:
+  decisions.md#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
+
+Below, the All themes heading carries a search field and Surprise me. The search
+matches every word typed against each theme's name, description, and author.
+Surprise me chooses a random theme, other than the current one, from those
+showing. One row of chips picks what the grid shows, one at a time:
+
+1. All.
+2. Recent: the last five themes chosen. The shell records them when the theme
+   changes, and the chip shows once there are any.
+3. Favorites.
+4. Light or Dark. A theme that follows the system matches either.
+5. B&W: gray cells in both modes, and counts in near-black or near-gray inks
+   with at most a faint tint.
+6. See-through: the themes the desktop shows through, a frosted window or a tray
+   or cells less than solid.
+
+A search that matches nothing says so. The grid lists the themes in one scroll,
+in sections that each show their count:
 
 1. Signature, for Polymine's own looks.
 2. Code, for the themes that take an editor's color scheme.
 3. Custom, for the player's themes, shown only when the themes folder holds one.
 
-[decision-53]:
-  decisions.md#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
-
-The Code section sets each dark theme over its light one in four columns, and
-the pairs past the fourth start a new pair of rows ([decision 54][decision-54]).
+The Code section sets each dark theme over its light one in five columns, and
+the pairs past the fifth start a new pair of rows ([decision 54][decision-54]).
 `EDITOR_COLUMNS` in `builtin.ts` lists the pairs, and `editorPlacement` gives
 each card its row and column. A filter drops the placement, so the cards that
 match close up.
@@ -589,54 +615,22 @@ match close up.
 [decision-54]:
   decisions.md#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column
 
-Above the sections:
-
-1. A search field matches every word typed against each theme's name,
-   description, and author.
-2. Chips pick a source: All, Signature, Code, Custom, or Favorites. Two more
-   pick a mode, Light or Dark, and a theme that follows the system matches
-   either. B&W keeps the black and white themes: gray cells in both modes, and
-   counts in near-black or near-gray inks with at most a faint tint. See-through
-   keeps the themes the desktop shows through: a frosted window, or a tray or
-   cells less than solid.
-3. Surprise me chooses a random theme, other than the current one, from those
-   showing.
-
-A Recent row shows the last five themes chosen, newest first. The shell records
-them when the theme changes, and the row hides while a search or a chip is on. A
-search that matches nothing says so.
-
-Each theme is a card in a four-column grid. The card draws a small hex board in
-the theme's colors, with its glyphs, font, glare, and shade, and its name and
-description below. The board takes the accent while the tint switch is on, and
-goes through the chosen color filter, as the real board does. A player theme's
-`preview.png` replaces the drawn board, and its glyphs load when the page opens.
-A star on each card adds the theme to the favorites. Cards out of view skip
+Each theme is a card in a five-column grid: a small hex board in the theme's
+colors, with its glyphs, font, glare, and shade, and its name below. The chosen
+card has an accent ring and a check, and a favorite has a star by its name. The
+boards take the accent while the tint switch is on, and go through the chosen
+color filter, as the real board does. A player theme's `preview.png` replaces
+the drawn board, and its glyphs load when the page opens. Cards out of view skip
 layout and painting, so the grid stays quick at any length.
 
-Resting the pointer on a card for 300 ms, or reaching it by keyboard, tries the
-theme on: the board and the window behind Settings show it without choosing it.
-Leaving the cards, pressing Escape, or closing Settings puts the chosen theme
-back. Clicking a card chooses it. Arrow keys move between the cards and try each
-one on without choosing it, unlike a plain radio group, so a player can look
-through the themes from the keyboard; Space or Enter chooses.
+A click chooses a theme, and nothing changes while the pointer rests on a card.
+Arrow keys move between the cards without choosing, unlike a plain radio group,
+since each choice redraws the board; Space or Enter chooses. Each theme's radio
+takes its name as its accessible name and its description as its accessible
+description.
 
-A theme's name, description, and author show in a flyout with an arrow. It opens
-after the pointer rests on the theme's card for half a second, or at once on
-keyboard focus.
-
-1. The flyout opens below the card, or above it when only that side has room,
-   and stays inside the dialog.
-2. It is a Fluent tooltip on Windows and an AppKit popover on macOS.
-3. The pointer can move onto it, and Escape closes it before the dialog.
-4. Each theme's radio takes its name as its accessible name and the flyout's
-   description line as its accessible description.
-
-New theme each game, at the bottom of the page, can switch themes for every new
-game, the bot's included: Off, From favorites, or From all themes. Favorites
-need two or more to rotate, or every theme takes part. An Open themes folder
-link beside it opens the folder in Finder or Explorer. Themes that didn't load
-are listed below with the reason.
+An Open themes folder link at the bottom opens the folder in Finder or Explorer.
+Themes that didn't load are listed below it with the reason.
 
 ## Languages
 

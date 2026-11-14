@@ -205,18 +205,42 @@ describe("SettingsDialog", () => {
   };
   const radioNames = () => screen.queryAllByRole("radio").map((r) => r.getAttribute("value"));
 
-  it("puts the tint and the color filter above the themes", async () => {
+  it("puts the board options beside the current theme, above the gallery", async () => {
     const user = userEvent.setup();
     await openThemes(user);
-    const tint = screen.getByRole("switch", { name: /Tint the theme/ });
-    const filter = screen.getByRole("combobox", { name: "Color filter" });
+    const current = screen.getByRole("group", { name: "Current theme" });
+    const options = [
+      screen.getByRole("switch", { name: /Tint the theme/ }),
+      screen.getByRole("switch", { name: "Show the count key" }),
+      screen.getByRole("combobox", { name: "Color filter" }),
+      screen.getByRole("combobox", { name: "New theme each game" }),
+    ];
     const search = screen.getByRole("searchbox");
     const first = screen.getByRole("radio", { name: /Graphite/ });
-    for (const below of [search, first]) {
-      expect(tint.compareDocumentPosition(below) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-      expect(filter.compareDocumentPosition(below) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    for (const above of [current, ...options]) {
+      for (const below of [search, first]) {
+        expect(
+          above.compareDocumentPosition(below) & Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      }
     }
     expect(screen.queryByRole("tab", { name: "Appearance" })).not.toBeInTheDocument();
+  });
+
+  it("shows the chosen theme with its whole description and author, and follows a click", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    await openThemes(user);
+    const current = screen.getByRole("group", { name: "Current theme" });
+    expect(current).toHaveTextContent("Graphite");
+    expect(current).toHaveTextContent("Matches light or dark mode");
+    await user.click(screen.getByRole("radio", { name: "Rupture" }));
+    expect(current).toHaveTextContent("Rupture");
+    expect(current).toHaveTextContent("Sliced glyphs and split color on cold steel");
+    expect(current).toHaveTextContent("By Polymine");
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ theme: "rupture" })),
+    );
   });
 
   it("lists every theme in sections, each with its count", async () => {
@@ -253,21 +277,28 @@ describe("SettingsDialog", () => {
     expect(screen.getByText("No themes match.")).toBeVisible();
   });
 
-  it("filters by source and by mode, a pressed chip showing which", async () => {
+  it("filters with one chip at a time, the pressed chip showing which", async () => {
     const user = userEvent.setup();
     await openThemes(user);
-    const code = screen.getByRole("button", { name: "Code" });
-    await user.click(code);
-    expect(code).toHaveAttribute("aria-pressed", "true");
-    expect(radioNames()).toContain("dracula");
-    expect(radioNames()).not.toContain("frost");
-    const light = screen.getByRole("button", { name: "Light" });
-    await user.click(light);
+    const chip = (name: string) => screen.getByRole("button", { name });
+    expect(chip("All")).toHaveAttribute("aria-pressed", "true");
+    await user.click(chip("Light"));
+    expect(chip("Light")).toHaveAttribute("aria-pressed", "true");
+    expect(chip("All")).toHaveAttribute("aria-pressed", "false");
     expect(radioNames()).toContain("alucard");
     expect(radioNames()).not.toContain("dracula");
-    await user.click(light);
-    expect(light).toHaveAttribute("aria-pressed", "false");
+    await user.click(chip("Dark"));
+    expect(chip("Light")).toHaveAttribute("aria-pressed", "false");
     expect(radioNames()).toContain("dracula");
+    expect(radioNames()).not.toContain("alucard");
+    await user.click(chip("B&W"));
+    expect(radioNames()).toContain("datum");
+    expect(radioNames()).not.toContain("pride");
+    await user.click(chip("See-through"));
+    expect(radioNames()).toEqual(["frost", "glass"]);
+    await user.click(chip("All"));
+    expect(radioNames()).toContain("pride");
+    expect(screen.queryByRole("button", { name: "Code" })).not.toBeInTheDocument();
   });
 
   it("turns the count key of color themes off and on", async () => {
@@ -282,31 +313,11 @@ describe("SettingsDialog", () => {
     );
   });
 
-  it("narrows to black and white themes with the B&W chip", async () => {
-    const user = userEvent.setup();
-    await openThemes(user);
-    const mono = screen.getByRole("button", { name: "B&W" });
-    await user.click(mono);
-    expect(mono).toHaveAttribute("aria-pressed", "true");
-    expect(radioNames()).toContain("datum");
-    expect(radioNames()).not.toContain("pride");
-    await user.click(mono);
-    expect(radioNames()).toContain("pride");
-  });
-
-  it("narrows to see-through themes with the See-through chip", async () => {
-    const user = userEvent.setup();
-    await openThemes(user);
-    const glass = screen.getByRole("button", { name: "See-through" });
-    await user.click(glass);
-    expect(glass).toHaveAttribute("aria-pressed", "true");
-    expect(radioNames()).toEqual(["frost", "glass"]);
-  });
-
-  it("stars favorites and lists only them under Favorites", async () => {
+  it("stars the current theme, marks its card, and lists only favorites under Favorites", async () => {
     const user = userEvent.setup();
     const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
     await openThemes(user);
+    await user.click(screen.getByRole("radio", { name: "Facet" }));
     const star = screen.getByRole("button", { name: "Favorite Facet" });
     expect(star).toHaveAttribute("aria-pressed", "false");
     await user.click(star);
@@ -316,28 +327,25 @@ describe("SettingsDialog", () => {
         expect.objectContaining({ favoriteThemes: ["facet"] }),
       ),
     );
+    const card = screen.getByRole("radio", { name: "Facet" }).closest("label") as HTMLElement;
+    expect(within(card).getByRole("img", { name: "Favorite" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Favorites" }));
     expect(radioNames()).toEqual(["facet"]);
-    await user.click(screen.getByRole("button", { name: "Favorite Facet" }));
+    await user.click(star);
     expect(radioNames()).toEqual([]);
   });
 
-  it("shows the recent themes that still exist, and hides them while filtering", async () => {
+  it("offers the recent themes that still exist under a Recent chip", async () => {
     const user = userEvent.setup();
-    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
     game.settings = { ...settings(), recentThemes: ["datum", "gone", "facet"] };
     await openThemes(user);
-    const recent = screen.getByRole("group", { name: "Recent" });
-    const [first, second, ...rest] = within(recent).getAllByRole("button");
-    expect(first).toHaveAccessibleName("Datum");
-    expect(second).toHaveAccessibleName("Facet");
-    expect(rest).toEqual([]);
-    await user.click(within(recent).getByRole("button", { name: "Facet" }));
-    await vi.waitFor(() =>
-      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ theme: "facet" })),
-    );
-    await user.type(screen.getByRole("searchbox"), "loop");
-    expect(screen.queryByRole("group", { name: "Recent" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Recent" }));
+    expect(radioNames()).toEqual(["datum", "facet"]);
+  });
+
+  it("offers no Recent chip before any theme has changed", async () => {
+    await openThemes(userEvent.setup());
+    expect(screen.queryByRole("button", { name: "Recent" })).not.toBeInTheDocument();
   });
 
   it("picks a different theme from those showing when asked for a surprise", async () => {
@@ -345,7 +353,7 @@ describe("SettingsDialog", () => {
     const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
     vi.spyOn(Math, "random").mockReturnValue(0);
     await openThemes(user);
-    await user.click(screen.getByRole("button", { name: "Code" }));
+    await user.click(screen.getByRole("button", { name: "Light" }));
     await user.click(screen.getByRole("button", { name: "Surprise me" }));
     await vi.waitFor(() =>
       expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ theme: radioNames()[0] })),
@@ -368,103 +376,24 @@ describe("SettingsDialog", () => {
     );
   });
 
-  it("shows a theme's name, description, and author in a flyout on hover", async () => {
+  it("changes nothing while the pointer rests on a card", async () => {
     const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
     await openThemes(user);
+    await user.hover(screen.getByRole("radio", { name: "Pride" }).closest("label") as HTMLElement);
+    await new Promise((resolve) => setTimeout(resolve, 600));
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
-    const pride = screen.getByRole("radio", { name: /Pride/ }).closest("label") as HTMLElement;
-    await user.hover(pride);
-    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
-    const tip = await vi.waitFor(() => screen.getByRole("tooltip"));
-    expect(tip).toHaveTextContent("Pride Colors instead of numbers, cool to hot By Polymine");
-    await user.hover(tip);
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    expect(tip).toBeVisible();
-    await user.unhover(tip);
-    await vi.waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
-  });
-
-  it("shows the flyout on keyboard focus, and Escape closes it before the dialog", async () => {
-    const user = userEvent.setup();
-    await openThemes(user);
-    for (let i = 0; i < 30 && document.activeElement?.getAttribute("type") !== "radio"; i++) {
-      await user.tab();
-    }
-    const first = document.activeElement as HTMLInputElement;
-    expect(first).toHaveAttribute("type", "radio");
-    expect(screen.getByRole("tooltip")).toBeInTheDocument();
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    await user.keyboard("{ArrowRight}");
-    expect(document.activeElement).not.toBe(first);
-    expect(screen.getByRole("tooltip")).toBeInTheDocument();
+    expect(game.theme.id).toBe("graphite");
+    expect(update).not.toHaveBeenCalled();
   });
 
   it("keeps each theme's description as its radio's accessible description", async () => {
     await openThemes(userEvent.setup());
-    const pride = screen.getByRole("radio", { name: /Pride/ });
+    const pride = screen.getByRole("radio", { name: "Pride" });
     expect(pride).toHaveAccessibleDescription("Colors instead of numbers, cool to hot");
-    const described = document.getElementById(pride.getAttribute("aria-describedby") ?? "");
-    expect(described?.closest("[role=tooltip]")).not.toBeNull();
   });
 
-  it("lists player themes in a section of their own, with their own preview and author", async () => {
-    const user = userEvent.setup();
-    const css =
-      "/* Name: Dusk\n Author: Ann\n Description: Evening colors\n Version: 1\n Format: 1 */ :root {}";
-    game.library.user = [themeEntry("dusk", css, false, { preview: "data:image/png;base64,AA==" })];
-    game.library.skipped = [{ id: "bad", reason: "it has no theme.css" }];
-    const reload = vi.spyOn(game, "reloadThemes").mockResolvedValue(undefined);
-    const openFolder = vi.spyOn(game, "openThemesFolder").mockResolvedValue(undefined);
-    await openThemes(user);
-    expect(reload).toHaveBeenCalled();
-    const custom = screen.getByRole("radiogroup", { name: "Custom" });
-    const dusk = within(custom).getByRole("radio", { name: /Dusk/ });
-    expect(dusk).toHaveAccessibleDescription("Evening colors");
-    expect(custom.querySelector("img.preview")).toHaveAttribute(
-      "src",
-      "data:image/png;base64,AA==",
-    );
-    await user.click(screen.getByRole("button", { name: "Custom" }));
-    expect(radioNames()).toEqual(["dusk"]);
-    await user.hover(dusk.closest("label") as HTMLElement);
-    expect(await vi.waitFor(() => screen.getByRole("tooltip"))).toHaveTextContent(
-      "Dusk Evening colors By Ann",
-    );
-    await user.click(screen.getByRole("button", { name: "Open themes folder" }));
-    expect(openFolder).toHaveBeenCalled();
-    expect(screen.getByRole("list", { name: "Themes that didn't load" })).toHaveTextContent(
-      "bad didn't load: it has no theme.css",
-    );
-    game.library.user = [];
-    game.library.skipped = [];
-  });
-
-  it("tries a theme on after the pointer rests on its card, until the pointer leaves", async () => {
-    const user = userEvent.setup();
-    const tryOn = vi.spyOn(game, "tryOn");
-    await openThemes(user);
-    await user.hover(screen.getByRole("radio", { name: "Facet" }).closest("label") as HTMLElement);
-    expect(tryOn).not.toHaveBeenCalledWith("facet");
-    await vi.waitFor(() => expect(tryOn).toHaveBeenLastCalledWith("facet"));
-    await user.unhover(screen.getByRole("radiogroup", { name: "Signature" }));
-    await vi.waitFor(() => expect(tryOn).toHaveBeenLastCalledWith(null));
-  });
-
-  it("tries a theme on at once when the keyboard reaches it", async () => {
-    const user = userEvent.setup();
-    const tryOn = vi.spyOn(game, "tryOn");
-    await openThemes(user);
-    for (let i = 0; i < 30 && document.activeElement?.getAttribute("type") !== "radio"; i++) {
-      await user.tab();
-    }
-    await user.keyboard("{ArrowRight}");
-    const now = document.activeElement as HTMLInputElement;
-    expect(tryOn).toHaveBeenLastCalledWith(now.value);
-  });
-
-  it("previews with the arrow keys, chooses with Space or Enter, and Escape reverts", async () => {
+  it("moves between cards with the arrow keys and chooses with Space or Enter", async () => {
     const user = userEvent.setup();
     const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
     await openThemes(user);
@@ -475,13 +404,10 @@ describe("SettingsDialog", () => {
     expect(datum).toHaveFocus();
     expect(datum).not.toBeChecked();
     expect(graphite).toBeChecked();
-    expect(game.previewThemeId).toBe("datum");
+    expect(game.theme.id).toBe("graphite");
     await user.keyboard("{ArrowLeft}{ArrowRight}{ArrowRight}");
     const swatch = screen.getByRole("radio", { name: "Swatch" });
     expect(swatch).toHaveFocus();
-    await user.keyboard("{Escape}");
-    expect(game.previewThemeId).toBeNull();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Enter}");
     expect(swatch).toBeChecked();
     await user.keyboard("{ArrowLeft}");
@@ -490,26 +416,38 @@ describe("SettingsDialog", () => {
     await vi.waitFor(() =>
       expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ theme: "datum" })),
     );
-    expect(update).not.toHaveBeenCalledWith(expect.objectContaining({ theme: "facet" }));
   });
 
-  it("drops the try-on on Escape before closing, and when the dialog closes", async () => {
+  it("lists player themes in a section of their own, with their own preview and author", async () => {
     const user = userEvent.setup();
+    const css =
+      "/* Name: Dusk\n Author: Ann\n Description: Evening colors\n Version: 1\n Format: 1 */ :root {}";
+    game.library.user = [themeEntry("dusk", css, false, { preview: "data:image/png;base64,AA==" })];
+    game.library.skipped = [{ id: "bad", reason: "it has no theme.css" }];
+    vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    const reload = vi.spyOn(game, "reloadThemes").mockResolvedValue(undefined);
+    const openFolder = vi.spyOn(game, "openThemesFolder").mockResolvedValue(undefined);
     await openThemes(user);
-    game.tryOn("facet");
-    const pride = screen.getByRole("radio", { name: "Pride" });
-    pride.focus();
-    await user.keyboard("{Escape}");
-    expect(game.previewThemeId).toBeNull();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    game.tryOn("facet");
-    await done(user);
-    expect(game.previewThemeId).toBeNull();
-  });
-
-  it("offers no Custom chip without player themes", async () => {
-    await openThemes(userEvent.setup());
-    expect(screen.queryByRole("button", { name: "Custom" })).not.toBeInTheDocument();
+    expect(reload).toHaveBeenCalled();
+    const custom = screen.getByRole("radiogroup", { name: "Custom" });
+    const dusk = within(custom).getByRole("radio", { name: "Dusk" });
+    expect(dusk).toHaveAccessibleDescription("Evening colors");
+    expect(custom.querySelector("img.preview")).toHaveAttribute(
+      "src",
+      "data:image/png;base64,AA==",
+    );
+    await user.click(dusk);
+    const current = screen.getByRole("group", { name: "Current theme" });
+    expect(current).toHaveTextContent("Dusk");
+    expect(current).toHaveTextContent("Evening colors");
+    expect(current).toHaveTextContent("By Ann");
+    await user.click(screen.getByRole("button", { name: "Open themes folder" }));
+    expect(openFolder).toHaveBeenCalled();
+    expect(screen.getByRole("list", { name: "Themes that didn't load" })).toHaveTextContent(
+      "bad didn't load: it has no theme.css",
+    );
+    game.library.user = [];
+    game.library.skipped = [];
   });
 
   it("saves the color filter and shows it in the theme previews", async () => {

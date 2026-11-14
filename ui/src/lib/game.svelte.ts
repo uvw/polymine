@@ -79,12 +79,10 @@ export class GameStore {
     accent: this.settings?.accentTint === false ? null : this.accent,
     dark: this.dark.current,
   });
-  /** A theme shown on the board for a look, without choosing it, or null. */
-  previewThemeId = $state<string | null>(null);
-  /** The theme for the moment, tried on or chosen, through the player's color filter. */
+  /** The chosen theme, through the player's color filter. */
   readonly theme: Theme = $derived(
     filterTheme(
-      themeFor(findTheme(this.themes, this.previewThemeId ?? this.settings?.theme), this.themeEnv),
+      themeFor(findTheme(this.themes, this.settings?.theme), this.themeEnv),
       this.settings?.colorFilter,
     ),
   );
@@ -330,12 +328,6 @@ export class GameStore {
   loadSave(name: string) {
     this.takeOverFromAutoplay();
     return this.run(async () => this.load(await api.loadSave(name)));
-  }
-
-  /** Shows theme `id` on the board without saving it, or the chosen one again for null. */
-  tryOn(id: string | null): void {
-    this.previewThemeId = id;
-    if (id) void this.library.loadGlyphs(id);
   }
 
   /** Reads the themes folder again, for themes added or edited while Polymine ran. */

@@ -4,22 +4,21 @@ import { themeFor } from "./catalog";
 import { linear, oklab } from "./color";
 import type { ThemeEntry } from "./types";
 
-/** Which themes the gallery lists: one group, the player's favorites, or all. */
-export type ThemeSource = "all" | ThemeGroup | "favorites";
+/**
+ * Which themes the gallery lists: all, the recent or favorite ones, those that
+ * show a mode (both-mode themes included), black and white ones, or those the
+ * desktop shows through.
+ */
+export type ThemeShow = "all" | "recent" | "favorites" | "light" | "dark" | "mono" | "seeThrough";
 
 /** The modes a theme shows: one fixed mode, or both as the system switches. */
 export type ThemeMode = "light" | "dark" | "both";
 
 export interface GalleryFilter {
   query: string;
-  source: ThemeSource;
-  /** Themes that show this mode, both-mode themes included, or null for any. */
-  mode: "light" | "dark" | null;
-  /** Only black and white themes. */
-  mono: boolean;
-  /** Only themes the desktop shows through. */
-  seeThrough: boolean;
+  show: ThemeShow;
   favorites: readonly string[];
+  recent: readonly string[];
 }
 
 /** Most OKLab chroma a black and white theme's cells may carry, a paper's tint. */
@@ -72,21 +71,31 @@ export function themeMode(entry: ThemeEntry): ThemeMode {
   return scheme === "light" || scheme === "dark" ? scheme : "both";
 }
 
+/** Whether `entry` belongs to what `show` lists. */
+function shows(entry: ThemeEntry, filter: GalleryFilter): boolean {
+  switch (filter.show) {
+    case "all":
+      return true;
+    case "recent":
+      return filter.recent.includes(entry.id);
+    case "favorites":
+      return filter.favorites.includes(entry.id);
+    case "mono":
+      return isMonochrome(entry);
+    case "seeThrough":
+      return isSeeThrough(entry);
+    default: {
+      const mode = themeMode(entry);
+      return mode === "both" || mode === filter.show;
+    }
+  }
+}
+
 /** Entries that pass every part of `filter`, in their catalog order. */
 export function filterThemes(entries: readonly ThemeEntry[], filter: GalleryFilter): ThemeEntry[] {
   const words = filter.query.toLowerCase().split(/\s+/).filter(Boolean);
   return entries.filter((entry) => {
-    if (filter.source === "favorites") {
-      if (!filter.favorites.includes(entry.id)) return false;
-    } else if (filter.source !== "all" && themeGroup(entry) !== filter.source) {
-      return false;
-    }
-    if (filter.mono && !isMonochrome(entry)) return false;
-    if (filter.seeThrough && !isSeeThrough(entry)) return false;
-    if (filter.mode) {
-      const mode = themeMode(entry);
-      if (mode !== "both" && mode !== filter.mode) return false;
-    }
+    if (!shows(entry, filter)) return false;
     const { name, description, author } = entry.sheet.meta;
     const text = `${name} ${description} ${author}`.toLowerCase();
     return words.every((word) => text.includes(word));
