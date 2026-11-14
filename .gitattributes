@@ -7,6 +7,8 @@
 *.sh text eol=lf
 *.nsh text eol=lf
 *.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
 
 # Force LF for cross-platform source and config.
 *.rs text eol=lf
@@ -25,9 +27,14 @@
 
 # Binary assets. Never normalize or diff them as text.
 *.png binary
+*.jpg binary
+*.gif binary
 *.ico binary
 *.icns binary
 *.woff binary
 *.woff2 binary
 *.ttf binary
 *.otf binary
+*.zip binary
+*.gz binary
+*.dmg binary

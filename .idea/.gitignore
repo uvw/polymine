@@ -1,0 +1,15 @@
+# Ignore everything here except the settings meant to be shared. Shared run
+# configurations live in /.run/ at the repository's root.
+/*
+!/.gitignore
+!/codeStyles/
+!/inspectionProfiles/
+!/externalDependencies.xml
+!/vcs.xml
+!/prettier.xml
+!/modules.xml
+!/*.iml
+# Only the project dictionary; the other files in this folder are per user.
+!/dictionaries/
+/dictionaries/*
+!/dictionaries/project.xml
