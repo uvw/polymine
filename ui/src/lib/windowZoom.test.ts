@@ -33,16 +33,16 @@ describe("wheelScale", () => {
     expect(wheelPixels(wheel({ deltaY: 1, deltaMode: WheelEvent.DOM_DELTA_PAGE }))).toBe(800);
   });
 
-  it("grows by 10% for each 100 px the wheel turns up", () => {
-    expect(Math.exp(wheelScale(wheel({ deltaY: -100 })))).toBeCloseTo(1.1);
-    expect(Math.exp(wheelScale(wheel({ deltaY: 100 })))).toBeCloseTo(1 / 1.1);
-    expect(Math.exp(wheelScale(wheel({ deltaY: -50 })) * 2)).toBeCloseTo(1.1);
+  it("grows by 4% for each 100 px the wheel turns up", () => {
+    expect(Math.exp(wheelScale(wheel({ deltaY: -100 })))).toBeCloseTo(1.04);
+    expect(Math.exp(wheelScale(wheel({ deltaY: 100 })))).toBeCloseTo(1 / 1.04);
+    expect(Math.exp(wheelScale(wheel({ deltaY: -50 })) * 2)).toBeCloseTo(1.04);
   });
 
-  it("caps a notch at 10% when Windows scrolls more lines a notch", () => {
+  it("caps a notch at 4% when Windows scrolls more lines a notch", () => {
     const tenLines = 1000 / 3;
-    expect(Math.exp(wheelScale(wheel({ deltaY: -tenLines })))).toBeCloseTo(1.1);
-    expect(Math.exp(wheelScale(wheel({ deltaY: tenLines })))).toBeCloseTo(1 / 1.1);
+    expect(Math.exp(wheelScale(wheel({ deltaY: -tenLines })))).toBeCloseTo(1.04);
+    expect(Math.exp(wheelScale(wheel({ deltaY: tenLines })))).toBeCloseTo(1 / 1.04);
   });
 
   it("reads Ctrl and the wheel as Chromium's touchpad pinch", () => {

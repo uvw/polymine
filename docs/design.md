@@ -902,7 +902,7 @@ Settings opens, and when the window comes to the front.
       count. WKWebView sends a pinch as WebKit `gesturechange` events with a
       scale. Chromium, and so WebView2, sends it as a wheel with Ctrl held,
       whose scale is `exp(-deltaY / 100)`. A Ctrl and mouse wheel notch is
-      capped at about 20%. The plain wheel moves 10% per 100 px.
+      capped at about 20%. The plain wheel moves 4% per 100 px.
    2. Input adds up between animation frames, and one resize at a time goes to
       the window. A resize keeps the window's center and aspect ratio, measured
       from the frame when the input began, until the input pauses for 300 ms.

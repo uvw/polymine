@@ -38,11 +38,11 @@ export const MIN_INNER: Size = { width: 800, height: 600 };
 /** Pixels in a wheel line or page, for wheels that report those units. */
 const LINE_PX = 40;
 const PAGE_PX = 800;
-/** A 100 px turn of the plain wheel resizes by 10%. */
-const WHEEL_RATE = Math.log(1.1) / 100;
+/** A 100 px turn of the plain wheel resizes by 4%, so a notch nudges the window. */
+const WHEEL_RATE = Math.log(1.04) / 100;
 /**
  * A notch is 100 px at Windows' default of three lines a notch, and 333 px
- * at ten. Capping each event keeps a notch to 10% whatever the setting.
+ * at ten. Capping each event keeps a notch to 4% whatever the setting.
  */
 const MAX_WHEEL_DELTA = 100;
 /** Chromium sends a touchpad pinch as Ctrl and a wheel whose scale is exp(-deltaY / 100). */
