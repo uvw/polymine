@@ -181,9 +181,9 @@
     placeholder={t("settings.themesSearch", { count: game.themes.length })}
     bind:value={query}
   />
-  <button type="button" disabled={shown.length < 2} onclick={surprise}
-    >{t("settings.surprise")}</button
-  >
+  <button type="button" disabled={shown.length < 2} onclick={surprise}>
+    {t("settings.surprise")}
+  </button>
 </div>
 <div class="chips" role="group" aria-label={t("settings.themesShow")}>
   {#each chips as chip (chip.value)}
@@ -191,8 +191,10 @@
       type="button"
       class="chip"
       aria-pressed={show === chip.value}
-      onclick={() => (show = chip.value)}>{t(chip.label)}</button
+      onclick={() => (show = chip.value)}
     >
+      {t(chip.label)}
+    </button>
   {/each}
 </div>
 
@@ -231,9 +233,9 @@
             <span class="theme-name">
               <span id="{idPrefix}-name-{theme.id}">{theme.sheet.meta.name}</span>
               {#if favorite(theme.id)}
-                <span class="mark" role="img" aria-label={t("settings.favoriteMark")}
-                  ><Icon name="star" size={12} /></span
-                >
+                <span class="mark" role="img" aria-label={t("settings.favoriteMark")}>
+                  <Icon name="star" size={12} />
+                </span>
               {/if}
             </span>
             <span class="line" id="{idPrefix}-line-{theme.id}">{theme.sheet.meta.description}</span>
@@ -246,9 +248,9 @@
   {/each}
 </div>
 
-<button type="button" class="folder" onclick={() => void game.openThemesFolder()}
-  >{t("settings.openThemes")}</button
->
+<button type="button" class="folder" onclick={() => void game.openThemesFolder()}>
+  {t("settings.openThemes")}
+</button>
 
 {#if game.library.skipped.length > 0}
   <ul class="skipped" aria-label={t("settings.skippedThemes")}>

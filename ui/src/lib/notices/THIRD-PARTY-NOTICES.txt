@@ -237,7 +237,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
-@tauri-apps/plugin-log 2.10.1 (MIT OR Apache-2.0)
+@tauri-apps/plugin-log 2.10.2 (MIT OR Apache-2.0)
 https://github.com/tauri-apps/plugins-workspace
 
                                  Apache License
@@ -579,7 +579,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 --------------------------------------------------------------------------------
-rolldown 1.2.16 (MIT)
+rolldown 1.2.18 (MIT)
 https://github.com/rolldown/rolldown
 
 MIT License
@@ -653,7 +653,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-vite 8.3.5 (MIT)
+vite 8.3.7 (MIT)
 https://github.com/vitejs/vite
 
 # Vite core license
@@ -1146,7 +1146,7 @@ Apache License
 Apache License 2.0 (Apache-2.0)
 
 Used by:
-- interprocess 2.4.7: https://crates.io/crates/interprocess/2.4.7
+- interprocess 2.4.8: https://crates.io/crates/interprocess/2.4.8
 
 Apache License
 Version 2.0, January 2004
@@ -4104,7 +4104,7 @@ Used by:
 - specta-typescript 0.0.13: https://crates.io/crates/specta-typescript/0.0.13
 - specta-util 0.0.13: https://crates.io/crates/specta-util/0.0.13
 - specta 2.0.0-rc.26: https://crates.io/crates/specta/2.0.0-rc.26
-- tauri-plugin-log 2.10.1: https://crates.io/crates/tauri-plugin-log/2.10.1
+- tauri-plugin-log 2.10.2: https://crates.io/crates/tauri-plugin-log/2.10.2
 - tauri-plugin-single-instance 2.5.5: https://crates.io/crates/tauri-plugin-single-instance/2.5.5
 - webview2-com-macros 0.8.1: https://crates.io/crates/webview2-com-macros/0.8.1
 - webview2-com-sys 0.39.1: https://crates.io/crates/webview2-com-sys/0.39.1

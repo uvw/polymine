@@ -277,6 +277,7 @@ describe("domColors", () => {
   });
 
   it("is the default only where the browser resolves var() and color-mix()", () => {
+    fakeBrowser({});
     expect(defaultColors()).toBe(staticColors);
     fakeBrowser({ "--test": "color(srgb 0.5 0.5 0.5)" });
     expect(defaultColors()).toBe(browserColors);

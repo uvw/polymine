@@ -173,8 +173,9 @@
           class:on={inspected !== null && inspected >= entry.from && inspected <= entry.to}
           style:--chip={cssColor(entry.color)}
           style:color={ink(entry.ring ? board.open : entry.color)}
-          >{entry.from === entry.to ? entry.from : `${entry.from}–${entry.to}`}</span
         >
+          {entry.from === entry.to ? entry.from : `${entry.from}–${entry.to}`}
+        </span>
       {/each}
     </div>
   {/if}
