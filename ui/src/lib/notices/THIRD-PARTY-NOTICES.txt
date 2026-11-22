@@ -8,33 +8,7 @@ Web UI: npm packages
 ================================================================================
 
 --------------------------------------------------------------------------------
-@pixi/colord 2.9.6 (MIT)
-https://github.com/omgovich/colord
-
-MIT License
-
-Copyright (c) 2020 Vlad Shilov omgovich@ya.ru
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
-@tauri-apps/api 2.12.4 (Apache-2.0 OR MIT)
+@tauri-apps/api 2.12.5 (Apache-2.0 OR MIT)
 https://github.com/tauri-apps/tauri
 
                                  Apache License
@@ -454,6 +428,32 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
+colord 2.14.0 (MIT)
+https://github.com/omgovich/colord
+
+MIT License
+
+Copyright (c) 2020 Vlad Shilov omgovich@ya.ru
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
 earcut 3.2.4 (ISC)
 https://github.com/mapbox/earcut
 
@@ -553,7 +553,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
-pixi.js 8.22.0 (MIT)
+pixi.js 8.23.0 (MIT)
 https://github.com/pixijs/pixijs
 
 The MIT License
@@ -653,7 +653,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-vite 8.3.7 (MIT)
+vite 8.3.8 (MIT)
 https://github.com/vitejs/vite
 
 # Vite core license
@@ -1382,40 +1382,6 @@ third-party/chromium/LICENSE.
 MIT License (MIT)
 
 Used by:
-- sha2 0.10.9: https://crates.io/crates/sha2/0.10.9
-
-Copyright (c) 2006-2009 Graydon Hoare
-Copyright (c) 2009-2013 Mozilla Foundation
-Copyright (c) 2016 Artyom Pavlov
-
-Permission is hereby granted, free of charge, to any
-person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the
-Software without restriction, including without
-limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software
-is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice
-shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
---------------------------------------------------------------------------------
-MIT License (MIT)
-
-Used by:
 - brotli 9.1.1: https://crates.io/crates/brotli/9.1.1
 
 Copyright (c) 2009, 2010, 2013-2016 by the Brotli Authors.
@@ -1478,7 +1444,7 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- form_urlencoded 1.2.2: https://crates.io/crates/form_urlencoded/1.2.2
+- form_urlencoded 1.2.3: https://crates.io/crates/form_urlencoded/1.2.3
 
 Copyright (c) 2013-2016 The rust-url developers
 
@@ -1512,7 +1478,7 @@ MIT License (MIT)
 Used by:
 - idna 1.1.0: https://crates.io/crates/idna/1.1.0
 - percent-encoding 2.3.2: https://crates.io/crates/percent-encoding/2.3.2
-- url 2.5.8: https://crates.io/crates/url/2.5.8
+- url 2.5.9: https://crates.io/crates/url/2.5.9
 
 Copyright (c) 2013-2025 The rust-url developers
 
@@ -2278,9 +2244,12 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- digest 0.10.7: https://crates.io/crates/digest/0.10.7
+- sha2 0.11.1: https://crates.io/crates/sha2/0.11.1
 
-Copyright (c) 2017 Artyom Pavlov
+Copyright (c) 2016-2026 The RustCrypto Project Developers
+Copyright (c) 2016 Artyom Pavlov
+Copyright (c) 2009-2013 Mozilla Foundation
+Copyright (c) 2006-2009 Graydon Hoare
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -2491,6 +2460,39 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
+- digest 0.11.3: https://crates.io/crates/digest/0.11.3
+
+Copyright (c) 2017-2025 RustCrypto Developers
+Copyright (c) 2017 Artyom Pavlov
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+MIT License (MIT)
+
+Used by:
 - bytes 1.12.1: https://crates.io/crates/bytes/1.12.1
 
 Copyright (c) 2018 Carl Lerche
@@ -2555,38 +2557,6 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- block-buffer 0.10.4: https://crates.io/crates/block-buffer/0.10.4
-
-Copyright (c) 2018-2019 The RustCrypto Project Developers
-
-Permission is hereby granted, free of charge, to any
-person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the
-Software without restriction, including without
-limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software
-is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice
-shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
---------------------------------------------------------------------------------
-MIT License (MIT)
-
-Used by:
 - dirs-sys 0.5.0: https://crates.io/crates/dirs-sys/0.5.0
 - dirs 7.0.0: https://crates.io/crates/dirs/7.0.0
 
@@ -2618,6 +2588,38 @@ Used by:
 
 Copyright (c) 2018-2024 The rust-random Project Developers
 Copyright (c) 2014 The Rust Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+MIT License (MIT)
+
+Used by:
+- block-buffer 0.12.1: https://crates.io/crates/block-buffer/0.12.1
+
+Copyright (c) 2018-2025 The RustCrypto Project Developers
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -2875,38 +2877,7 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- cpufeatures 0.2.17: https://crates.io/crates/cpufeatures/0.2.17
-
-Copyright (c) 2020-2025 The RustCrypto Project Developers
-
-Permission is hereby granted, free of charge, to any
-person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the
-Software without restriction, including without
-limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software
-is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice
-shall be included in all copies or substantial portions
-of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
---------------------------------------------------------------------------------
-MIT License (MIT)
-
-Used by:
+- const-oid 0.10.3: https://crates.io/crates/const-oid/0.10.3
 - cpufeatures 0.3.1: https://crates.io/crates/cpufeatures/0.3.1
 
 Copyright (c) 2020-2026 The RustCrypto Project Developers
@@ -2965,9 +2936,41 @@ SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- crypto-common 0.1.7: https://crates.io/crates/crypto-common/0.1.7
+- crypto-common 0.2.2: https://crates.io/crates/crypto-common/0.2.2
 
-Copyright (c) 2021 RustCrypto Developers
+Copyright (c) 2021-2026 RustCrypto Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+MIT License (MIT)
+
+Used by:
+- hybrid-array 0.4.15: https://crates.io/crates/hybrid-array/0.4.15
+
+Copyright (c) 2022-2026 The RustCrypto Project Developers
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -3145,9 +3148,9 @@ Used by:
 - anstyle-query 1.1.5: https://crates.io/crates/anstyle-query/1.1.5
 - anstyle-wincon 3.0.11: https://crates.io/crates/anstyle-wincon/3.0.11
 - anstyle 1.0.14: https://crates.io/crates/anstyle/1.0.14
-- clap 4.6.7: https://crates.io/crates/clap/4.6.7
+- clap 4.6.8: https://crates.io/crates/clap/4.6.8
 - clap_builder 4.6.7: https://crates.io/crates/clap_builder/4.6.7
-- clap_derive 4.6.7: https://crates.io/crates/clap_derive/4.6.7
+- clap_derive 4.6.8: https://crates.io/crates/clap_derive/4.6.8
 - clap_lex 1.1.1: https://crates.io/crates/clap_lex/1.1.1
 - colorchoice 1.0.5: https://crates.io/crates/colorchoice/1.0.5
 - is_terminal_polyfill 1.70.2: https://crates.io/crates/is_terminal_polyfill/1.70.2
@@ -3314,7 +3317,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 MIT License (MIT)
 
 Used by:
-- rand 0.10.3: https://crates.io/crates/rand/0.10.3
+- rand 0.10.4: https://crates.io/crates/rand/0.10.4
 - rand_chacha 0.10.0: https://crates.io/crates/rand_chacha/0.10.0
 
 Copyright 2018 Developers of the Rand project
@@ -3455,12 +3458,12 @@ DEALINGS IN THE SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- tauri-codegen 2.7.4: https://crates.io/crates/tauri-codegen/2.7.4
-- tauri-macros 2.7.4: https://crates.io/crates/tauri-macros/2.7.4
-- tauri-runtime-wry 2.12.3: https://crates.io/crates/tauri-runtime-wry/2.12.3
-- tauri-runtime 2.12.2: https://crates.io/crates/tauri-runtime/2.12.2
-- tauri-utils 2.10.2: https://crates.io/crates/tauri-utils/2.10.2
-- tauri 2.12.5: https://crates.io/crates/tauri/2.12.5
+- tauri-codegen 2.7.6: https://crates.io/crates/tauri-codegen/2.7.6
+- tauri-macros 2.7.6: https://crates.io/crates/tauri-macros/2.7.6
+- tauri-runtime-wry 2.12.5: https://crates.io/crates/tauri-runtime-wry/2.12.5
+- tauri-runtime 2.12.4: https://crates.io/crates/tauri-runtime/2.12.4
+- tauri-utils 2.10.4: https://crates.io/crates/tauri-utils/2.10.4
+- tauri 2.12.6: https://crates.io/crates/tauri/2.12.6
 
 MIT License
 
@@ -3715,7 +3718,7 @@ SOFTWARE.
 MIT License (MIT)
 
 Used by:
-- ureq 3.5.1: https://crates.io/crates/ureq/3.5.1
+- ureq 3.5.2: https://crates.io/crates/ureq/3.5.2
 
 MIT License
 
@@ -4349,7 +4352,7 @@ Used by:
 - serde_repr 0.1.21: https://crates.io/crates/serde_repr/0.1.21
 - servo_arc 0.4.3: https://crates.io/crates/servo_arc/0.4.3
 - syn 2.0.119: https://crates.io/crates/syn/2.0.119
-- syn 3.0.9: https://crates.io/crates/syn/3.0.9
+- syn 3.0.10: https://crates.io/crates/syn/3.0.10
 - thiserror-impl 2.0.21: https://crates.io/crates/thiserror-impl/2.0.21
 - thiserror 2.0.21: https://crates.io/crates/thiserror/2.0.21
 - typeid 1.0.3: https://crates.io/crates/typeid/1.0.3
@@ -4765,33 +4768,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
---------------------------------------------------------------------------------
-MIT License (MIT)
-
-Used by:
-- generic-array 0.14.7: https://crates.io/crates/generic-array/0.14.7
-
-The MIT License (MIT)
-
-Copyright (c) 2015 Bartłomiej Kamiński
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 --------------------------------------------------------------------------------
 MIT No Attribution (MIT-0)
 
