@@ -309,11 +309,11 @@
                   step="20"
                   bind:value={draft.assistant.moveDelayMs}
                 />
-                <output for="{id}-delay"
-                  >{t("settings.moveDelayValue", {
+                <output for="{id}-delay">
+                  {t("settings.moveDelayValue", {
                     ms: formatNumber(draft.assistant.moveDelayMs, SLIDER_VALUE),
-                  })}</output
-                >
+                  })}
+                </output>
               </span>
             </div>
             <div class="setting-row">
@@ -336,11 +336,11 @@
                   disabled={draft.assistant.idleAction === "off"}
                   bind:value={draft.assistant.idleSeconds}
                 />
-                <output for="{id}-idle-time"
-                  >{t("settings.idleSecondsValue", {
+                <output for="{id}-idle-time">
+                  {t("settings.idleSecondsValue", {
                     seconds: formatNumber(draft.assistant.idleSeconds, SLIDER_VALUE),
-                  })}</output
-                >
+                  })}
+                </output>
               </span>
             </div>
           </div>
