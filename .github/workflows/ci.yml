@@ -47,6 +47,9 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run lint:md
+      # The release notes are Markdown, checked with these same tools.
+      - name: The release notes scripts pass their tests
+        run: bash .github/workflows/hack/release-notes.sh test
       - run: npm run check
       - run: npm run coverage
       - run: npm run build

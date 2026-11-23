@@ -192,7 +192,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      # For the downloads section of the release notes.
+      # For the release notes, the script that checks them, and the downloads
+      # section.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.eligibility.outputs.sha }}
@@ -216,8 +217,29 @@ jobs:
             gh release create "$TAG" --draft --verify-tag --generate-notes
           fi
           gh release upload "$TAG" dist/* --clobber
+      # Copilot wrote the notes in the release pull request (release-please.yml).
+      # Without them, or when they fail their check, the release keeps
+      # release-please's list alone, so the notes never hold up a release.
+      - name: Put the release notes above the changelog list
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          notes=docs/release-notes/$TAG.md
+          if [[ ! -f $notes ]]; then
+            echo "No $notes, so the release keeps the changelog list alone"
+            exit 0
+          fi
+          gh release view "$TAG" --json body -q .body >"$RUNNER_TEMP/current.md"
+          if bash .github/workflows/hack/release-notes.sh body "$notes" "$RUNNER_TEMP/current.md" >"$RUNNER_TEMP/notes-body.md"; then
+            gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes-body.md"
+          else
+            echo "::warning::$notes failed its check, so the release keeps the changelog list alone"
+          fi
       # release-please wrote the changelog into the draft. The downloads and
-      # first-launch steps go below it, once.
+      # first-launch steps go below it, and below the notes, once.
       - name: Add the downloads to the release notes
         env:
           GH_TOKEN: ${{ github.token }}

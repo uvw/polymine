@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-# Pushes the formatted changelog that format-changelog.sh made, without a push
-# token, to the open release pull request. DIR holds sha, the commit that job
-# read, and CHANGELOG.md.
+# Pushes what the jobs without a push token made for the open release pull
+# request: the formatted changelog from format-changelog.sh and the release
+# notes from release-notes.sh. Each DIR holds sha, the commit its job read, and
+# its files at their paths in the repository. All of them go into one commit.
 #
-# It pushes nothing when the branch moved since that job read it: release-please
-# rewrote it, and the next run starts over. It refuses any file but
-# CHANGELOG.md, so a job that went wrong can't write anywhere else.
+# It pushes nothing when the branch moved since any DIR's job read it:
+# release-please rewrote it, and the next run starts over. It refuses any file
+# but CHANGELOG.md and the notes for the branch's version, and checks the notes
+# again, so a job that went wrong can't write anywhere else.
 #
 # With RELEASE_PLEASE_TOKEN as TOKEN, the push starts CI like any other. With
 # the workflow's own token it starts none, and the pull request's checks wait
 # for a maintainer (docs/releasing.md).
 #
-# Usage: .github/workflows/hack/release-pr-push.sh [--dry-run] DIR
+# Usage: .github/workflows/hack/release-pr-push.sh [--dry-run] DIR...
 # Env: GITHUB_REPOSITORY, GH_TOKEN (read-only, for gh), and unless --dry-run,
 #      TOKEN and the commit's author as GIT_AUTHOR_* and GIT_COMMITTER_*.
 #      --dry-run makes the commit and shows it, but pushes nothing.
@@ -22,10 +24,14 @@ if [[ ${1:-} == --dry-run ]]; then
   dry_run=true
   shift
 fi
-dir=${1:?usage: release-pr-push.sh [--dry-run] DIR}
+(($#)) || {
+  echo "usage: release-pr-push.sh [--dry-run] DIR..." >&2
+  exit 2
+}
 : "${GITHUB_REPOSITORY:?}"
 $dry_run || : "${TOKEN:?}"
 root=$PWD
+hack=$(cd "$(dirname "$0")" && pwd)
 
 work=$(mktemp -d)
 cleanup() {
@@ -41,30 +47,53 @@ if [[ -z $branch ]]; then
 fi
 git fetch --quiet origin "refs/heads/$branch"
 head=$(git rev-parse FETCH_HEAD)
-if [[ $(<"$dir/sha") != "$head" ]]; then
-  echo "$branch moved since the changelog was formatted, so nothing was pushed"
-  exit 0
-fi
+version=$(git show FETCH_HEAD:.github/release-please-manifest.json | jq -r '."."')
+notes=docs/release-notes/v$version.md
 
-files=$(cd "$dir" && find . -mindepth 1 | sed 's|^\./||' | sort | tr '\n' ' ')
-if [[ $files != "CHANGELOG.md sha " ]]; then
-  echo "::error::$dir holds $files, not just CHANGELOG.md and sha"
-  exit 1
-fi
+for dir in "$@"; do
+  if [[ $(<"$dir/sha") != "$head" ]]; then
+    echo "$branch moved since $dir was made, so nothing was pushed"
+    exit 0
+  fi
+done
 
 git worktree add --quiet --detach "$work" "$head"
-cp "$dir/CHANGELOG.md" "$work/CHANGELOG.md"
+paths=()
+for dir in "$@"; do
+  [[ -z $(find "$dir" ! -type f ! -type d) ]] || {
+    echo "::error::$dir holds something other than files"
+    exit 1
+  }
+  while IFS= read -r path; do
+    path=${path#./}
+    case $path in
+    sha) continue ;;
+    CHANGELOG.md) ;;
+    "$notes") bash "$hack/release-notes.sh" verify "$dir/$path" ;;
+    *)
+      echo "::error::$dir holds $path, which is neither the changelog nor $notes"
+      exit 1
+      ;;
+    esac
+    mkdir -p "$(dirname "$work/$path")"
+    cp "$dir/$path" "$work/$path"
+    paths+=("$path")
+  done < <(cd "$dir" && find . -type f)
+done
+
 cd "$work"
-git add -- CHANGELOG.md
-if git diff --cached --quiet; then
-  echo "$branch already has this changelog"
-  exit 0
-fi
-git commit --quiet -m "chore: format the changelog"
+git add -- "${paths[@]}"
+case $(git diff --cached --name-only | sort | tr '\n' ' ') in
+'') echo "$branch already has these files" && exit 0 ;;
+"CHANGELOG.md $notes ") message="chore: format the changelog and write the release notes" ;;
+"CHANGELOG.md ") message="chore: format the changelog" ;;
+*) message="chore: write the release notes" ;;
+esac
+git commit --quiet -m "$message"
 if $dry_run; then
   git show --stat HEAD
   echo "Would push that to $branch"
   exit 0
 fi
 git push --quiet "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${branch}"
-echo "Pushed the formatted changelog to $branch"
+echo "Pushed \"$message\" to $branch"

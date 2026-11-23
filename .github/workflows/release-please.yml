@@ -78,10 +78,84 @@ jobs:
           path: ${{ runner.temp }}/changelog
           if-no-files-found: error
 
+  # Copilot CLI writes docs/release-notes/vX.Y.Z.md for the release pull
+  # request, and the publish job in release.yml puts it above the changelog
+  # list (docs/releasing.md). Pull request bodies can come from anyone, so this
+  # job holds only the Copilot token and a read-only token, Copilot can create
+  # only the one file, and the file is checked here and again before the push.
+  # Without a COPILOT_TOKEN secret it does nothing, and a failure here never
+  # fails the run: the release keeps the changelog list alone.
+  release-notes:
+    name: Write the release notes
+    needs: release-please
+    if: needs.release-please.outputs.created != 'true'
+    # COPILOT_TOKEN is a secret of the release environment.
+    environment: release
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      written: ${{ steps.check.outputs.written }}
+    steps:
+      # A job's if: can't read secrets.
+      - name: Look for the Copilot token
+        id: token
+        env:
+          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: |
+          if [[ -n $COPILOT_TOKEN ]]; then
+            echo "set=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "::notice::No COPILOT_TOKEN secret, so the release keeps the changelog list alone"
+          fi
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install Prettier, markdownlint, and Copilot CLI
+        if: steps.token.outputs.set == 'true'
+        run: |
+          npm ci --ignore-scripts
+          npm ci --prefix .github/release-notes --ignore-scripts
+      - name: Gather the changelog entry and the pull requests
+        id: gather
+        if: steps.token.outputs.set == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/workflows/hack/release-notes.sh gather "$RUNNER_TEMP/notes"
+      - name: Write the notes with Copilot
+        if: steps.gather.outputs.found == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          MODEL: ${{ vars.RELEASE_NOTES_MODEL || 'claude-sonnet-5.5' }}
+        run: bash .github/workflows/hack/release-notes.sh write "$RUNNER_TEMP/notes"
+      - name: Check the notes
+        id: check
+        if: steps.gather.outputs.found == 'true'
+        run: bash .github/workflows/hack/release-notes.sh check "$RUNNER_TEMP/notes"
+      - if: steps.check.outputs.written == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/notes/result
+          if-no-files-found: error
+
   push:
     name: Push to the release pull request
-    needs: format-changelog
-    if: needs.format-changelog.outputs.changed == 'true'
+    needs: [format-changelog, release-notes]
+    # The formatted changelog goes out even when the notes job failed.
+    if: >-
+      !cancelled() &&
+      (needs.format-changelog.outputs.changed == 'true' ||
+      needs.release-notes.outputs.written == 'true')
     environment: release
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -92,11 +166,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - if: needs.format-changelog.outputs.changed == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: changelog
           path: ${{ runner.temp }}/changelog
-      - name: Push it to the release pull request
+      - if: needs.release-notes.outputs.written == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/notes
+      - name: Push them to the release pull request
         env:
           TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -105,7 +185,12 @@ jobs:
           GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-        run: bash .github/workflows/hack/release-pr-push.sh "$RUNNER_TEMP/changelog"
+        run: |
+          dirs=()
+          for dir in "$RUNNER_TEMP/changelog" "$RUNNER_TEMP/notes"; do
+            [[ ! -d $dir ]] || dirs+=("$dir")
+          done
+          bash .github/workflows/hack/release-pr-push.sh "${dirs[@]}"
 
   release:
     name: Release

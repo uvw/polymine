@@ -10,7 +10,8 @@ opens the release pull request, and merging it builds and publishes the release.
    ship in the next one.
 2. On every push to `main`, the Release Please workflow keeps one release pull
    request open, titled `chore(main): release X.Y.Z`. It bumps the version in
-   every version file and adds the changelog entry to `CHANGELOG.md`.
+   every version file, adds the changelog entry to `CHANGELOG.md`, and, when
+   `COPILOT_TOKEN` is set, writes the release notes.
 3. Merging that pull request creates the `vX.Y.Z` tag and a draft release, then
    runs the Release workflow, which builds, attests, and publishes.
 
@@ -40,6 +41,70 @@ runs Prettier over the release pull request's copy and pushes the result, which
 keeps the Markdown checks green. Edit the entry in the pull request before
 merging, if it needs it.
 
+## Release notes
+
+Copilot CLI writes notes for players above the changelog list: a TL;DR, what the
+release is about, and what changed in the game. It runs on every push to `main`
+while a release pull request is open, so a release needs no step of its own.
+
+1. The "Write the release notes" job in `release-please.yml` gathers the release
+   pull request's changelog entry and the title and body of each pull request
+   merged since the last release, with the workflow's read-only token.
+2. Copilot CLI writes `docs/release-notes/vX.Y.Z.md` from them, guided by
+   `.github/release-notes/prompt.md`. Edit that file to change how the notes
+   read.
+3. The job checks the file, formats it with Prettier, and lints it with
+   markdownlint. The push job checks it again and commits it to the release pull
+   request beside the formatted changelog.
+4. At publish, `release.yml` puts the notes at the top of the release, then an
+   "All changes" heading and the list release-please wrote, then
+   `.github/release-body.md`.
+
+Read the notes in the release pull request before merging it. Edit them there,
+or delete the file to release with the list alone. Each push to `main` writes
+them again, so edit them just before you merge.
+
+`.github/workflows/hack/release-notes.sh` does each step, and
+`release-notes.sh test` runs them on the fixtures in
+`.github/release-notes/testdata`, with no Copilot call. CI runs that test.
+
+Pull request bodies can come from anyone, so the workflow treats them as
+untrusted:
+
+1. The prompt marks them as data, never instructions, between markers a body
+   can't fake.
+2. The job that runs Copilot holds only `COPILOT_TOKEN` and a read-only
+   `GITHUB_TOKEN`, and gathers everything before Copilot starts.
+3. Copilot sees one tool, `create`, which may write only the notes, in an empty
+   folder with no MCP servers and no shell.
+4. The check refuses anything but one file of Markdown under 16 KiB, with no
+   HTML, images, @-mentions, title heading, or links outside this repository. A
+   refused file is never pushed.
+5. The push job accepts only `CHANGELOG.md` and the notes for the release pull
+   request's version.
+
+Notes are optional, and never hold up a release. Without the `COPILOT_TOKEN`
+secret the job skips itself with a notice. A failed run doesn't fail the
+workflow, and the formatted changelog still goes out. Without a notes file at
+the tag, or with one that fails its check, the release keeps release-please's
+list alone.
+
+Each run spends Copilot AI credits from the account that owns `COPILOT_TOKEN`,
+about 10 to 15 a run, with one run on each push to `main`. Copilot CLI makes no
+more model calls once a run has used 30 credits (`--max-ai-credits`), the least
+it accepts. The job log shows what a run used. `COPILOT_TOKEN` is a fine-grained
+token with the account permission "Copilot Requests" and no repository access.
+
+The model is `claude-sonnet-5.5` unless the repository variable
+`RELEASE_NOTES_MODEL` names another, so changing it needs no code change:
+
+```sh
+gh variable set RELEASE_NOTES_MODEL --body claude-sonnet-5.5 -R uvw/polymine
+```
+
+Copilot CLI is pinned in `.github/release-notes/package.json`, and Dependabot
+updates it weekly.
+
 ## The release workflow
 
 `.github/workflows/release.yml` runs these jobs in order. The build jobs hold no
@@ -52,10 +117,11 @@ token that can write.
    installer, and the portable Windows ZIP, built from scratch with no caches.
 4. **Attest provenance:** `checksums.txt` and a build provenance attestation for
    every file.
-5. **Publish:** uploads the files and `checksums.txt` to the draft, adds
-   `.github/release-body.md` (downloads and first-launch steps for unsigned
-   builds) below the changelog entry, checks the tag still names the commit that
-   was built, and publishes the release as the latest.
+5. **Publish:** uploads the files and `checksums.txt` to the draft, puts the
+   [release notes](#release-notes) above the changelog entry when there are any,
+   adds `.github/release-body.md` (downloads and first-launch steps for unsigned
+   builds) below it, checks the tag still names the commit that was built, and
+   publishes the release as the latest.
 
 Running the Release workflow by hand with an existing tag (re)publishes it.
 
