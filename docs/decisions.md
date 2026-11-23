@@ -109,7 +109,7 @@ were free, and polymine.com is parked.
 
 **Known risk:** Polimines by Molter Games is a live, commercial
 Minesweeper-style logic game on Steam, consoles, and mobile, with no registered
-mark found. The names differ by one letter and sound alike. The owner kept
+mark found. The names differ by one letter and sound alike. The maintainer kept
 Polymine knowing this.
 
 **Alternatives:** Dopamine, and picking another name to stay clear of Polimines.
@@ -144,7 +144,7 @@ delegates to the generated `commands`. Commands throw on error, as `invoke`
 does. The versions are pinned exactly while specta 2 is a release candidate.
 
 **Why:** A renamed command or argument fails the build instead of a click. The
-owner prefers the cleaner code over waiting for specta 2 to ship.
+maintainer prefers the cleaner code over waiting for specta 2 to ship.
 
 **Alternatives:** `ts-rs` for the types with hand-written `invoke` wrappers,
 which is stable but leaves every command name and argument unchecked.
@@ -229,11 +229,11 @@ equal in exact math then tie on every platform, and each tiling breaks such ties
 top first or bottom first, whichever keeps the order saved games and seeds
 already use. A test pins every tiling's cell order.
 
-**Why:** Each FastMines tiling hand-coded its neighbors. Deriving them makes a
-new tiling a matter of coordinates, and tests can check every tiling the same
-way. Saves and seeds rebuild boards by cell index, and `sin` and `cos` round
-differently on each platform, so a raw float comparison would let a tie in exact
-math build a different board on another machine.
+**Why:** Deriving the neighbors from the geometry makes a new tiling a matter of
+coordinates, and tests can check every tiling the same way. Saves and seeds
+rebuild boards by cell index, and `sin` and `cos` round differently on each
+platform, so a raw float comparison would let a tie in exact math build a
+different board on another machine.
 
 **Alternatives:** exact constants for the vertices that tie. That fixes today's
 ties but not the next tiling's, and it would have flipped the order saved
@@ -291,12 +291,12 @@ measured complexity rating from 1 to 5, shown in the picker. Complex shapes are
 meant to play harder.
 
 **Why:** FastMines tuned a mine percentage per tiling, rising with the neighbor
-count, so its levels felt alike across tilings. The owner prefers shape to count
-as difficulty, and the rating tells players what they're choosing. At
+count, so its levels felt alike across tilings. The maintainer prefers shape to
+count as difficulty, and the rating tells players what they're choosing. At
 Professional, the assistant wins 64% of square games and 2% on Rosettes.
 
-**Alternatives:** a mine density per tiling from a per-neighbor formula, as
-FastMines does.
+**Alternatives:** a mine density per tiling that rises with the neighbor count,
+as FastMines' levels do.
 
 ## 15. FastMines click and pause behavior
 
@@ -307,7 +307,7 @@ game and resumes a paused one. Marks wait for the first open. Losing focus,
 minimizing, or opening a dialog pauses the game, and Esc pauses and minimizes.
 
 **Why:** A behavior audit of FastMines found these were part of its feel, and
-the owner missed the right-click restart first.
+the maintainer missed the right-click restart first.
 
 ## 16. Deliberate differences from FastMines
 
@@ -326,8 +326,8 @@ the owner missed the right-click restart first.
 5. The window doesn't stay on top while active.
 6. The idle assistant is off by default. FastMines takes over after 30 seconds
    out of the box, which surprises new players.
-7. Two FastMines bugs are not ported: a loss with as many flags as mines counts
-   as a win, and the assistant reads the hidden mine count.
+7. Two FastMines bugs, seen in play, are not ported: a loss with as many flags
+   as mines counts as a win, and the assistant reads the hidden mine count.
 8. Only opening every safe cell wins. FastMines also wins when the flags sit on
    exactly the mines, which lets a player settle any guess by trying flag
    layouts until one wins. A test that way settled 117 of 117 end-game guesses,
@@ -335,8 +335,8 @@ the owner missed the right-click restart first.
 9. The click that opens a number runs only smart click's flagging step. It never
    opens the neighbors; a second click on the open number does. FastMines runs
    the whole smart click on the opening click, so with a wrong flag nearby a
-   click that opened a safe cell could hit a mine. The owner is trying this and
-   may revisit it.
+   click that opened a safe cell could hit a mine. The maintainer is trying this
+   and may revisit it.
 
 **Why:** Each one either gives the player more information, matches current
 platform conventions, or fixes a bug or a loophole.
@@ -352,14 +352,14 @@ custom levels never rank. Average time and clicks count wins only. The file
 keeps every ranked record and the newest 2,000 unranked ones. Once it holds
 3,000 unranked records, it is rewritten through a synced temporary file and a
 rename. Only ranked records are held in memory. Abandoned records in older files
-count as unranked. Records carry no player passwords.
+count as unranked.
 
 **Why:** Appending never rewrites earlier games, and new views need no
 migration. Records should reflect unaided play on comparable boards. FastMines
 records no unfinished game, and recording one on a new game but not on exit
 would be inconsistent. Idle autoplay can add about 2 MB of assisted games a
 night. Statistics never read unranked records, so trimming them changes no
-number the player sees. A local game has no use for passwords.
+number the player sees.
 
 **Alternatives:** recording abandoned games as played, and keeping every
 unranked record.
@@ -371,7 +371,7 @@ unranked record.
 **Decision:** An unfinished game is saved as its seed and moves every 5 seconds
 when it changed, on pause, and on exit. It is restored paused on the next start.
 
-**Why:** The owner wants closing and reopening to pick up the game with no
+**Why:** The maintainer wants closing and reopening to pick up the game with no
 questions asked. Saving only on exit would lose games to crashes and forced
 restarts, while writing on every move is needless for a game. Saving every 5
 seconds bounds the loss. A seed and moves are a few kilobytes and rebuild the
@@ -429,9 +429,9 @@ Theme, rules, and the other settings stay shared by everyone on the computer.
 Stats open on the active player, with "All players" one click away.
 
 **Why:** Records already carry a player name, so a list of names is enough to
-tell people apart in stats and the champions table. The owner picked the smaller
-version. Per-player settings would need overrides layered over the shared ones,
-and a story for what changes when the player switches mid-game.
+tell people apart in stats and the champions table. The maintainer picked the
+smaller version. Per-player settings would need overrides layered over the
+shared ones, and a story for what changes when the player switches mid-game.
 
 **Alternatives:** profiles that carry their own theme and rules, which can still
 grow from this list later; and filtering stats by name in the UI, which would
@@ -603,8 +603,8 @@ WebGL, and native `wgpu` were weighed and rejected.
 The window's minimum size is 800 x 600.
 
 **Why:** An 11 px floor kept dense boards from fitting a smaller window, which
-the owner wanted more than readable digits at a glance. Zoom brings digits back
-when they get too small.
+the maintainer wanted more than readable digits at a glance. Zoom brings digits
+back when they get too small.
 
 ## 33. Results show in the toolbar
 
@@ -637,17 +637,17 @@ Each side stops at its own limit, the 800 by 600 minimum or the work area, and
 input past the point where both sides stop is dropped. Nothing happens while the
 window is maximized or fullscreen, or while a dialog is open.
 
-**Why:** The owner wanted the window, not the cells, to follow the wheel, and
-the board already refits its cells whenever the window resizes. Ctrl and the
+**Why:** The maintainer wanted the window, not the cells, to follow the wheel,
+and the board already refits its cells whenever the window resizes. Ctrl and the
 wheel resize too, because WebView2 sends a precision-touchpad pinch that way, as
 all Chromium builds do. WKWebView sends a pinch as WebKit gesture events
 instead, since wry leaves `allowsMagnification` off. Letting one side stop at
 its limit while the other carries on keeps the ratio between the screen's and
 the minimum's. The scale is measured from the frame when the input began, so
 turning back within one gesture restores the ratio. A mouse wheel notch resizes
-by 4%: at 10% each notch jumped too far, the owner found on 2026-11-14.
+by 4%: at 10% each notch jumped too far, the maintainer found on 2026-11-14.
 
-**Alternatives:** a modifier for the wheel, which the owner turned down;
+**Alternatives:** a modifier for the wheel, which the maintainer turned down;
 anchoring at the pointer or a corner instead of the center; fixed 25% steps; and
 stopping both sides as soon as either reaches a limit, which leaves a tall
 window at the minimum width unable to shrink at all.
@@ -747,7 +747,8 @@ one ships in a bundled theme.
 
 **Why:** A shader can't reach files or the network, but a bad one can hang the
 GPU or lose the WebGL context. Theme folders are meant to be safe to share. The
-owner wants experiments free of guardrails while keeping player themes to data.
+maintainer wants experiments free of guardrails while keeping player themes to
+data.
 
 ## 41. Experimental themes show only in development builds
 
@@ -756,14 +757,14 @@ owner wants experiments free of guardrails while keeping player themes to data.
 **Decision:** A built-in theme that tries out a board effect, such as
 Ferrofluid, is a folder in `ui/src/themes` named in `EXPERIMENTAL_THEMES`.
 Development builds list it after the other built-in themes; release builds leave
-it out unless built with `VITE_EXPERIMENTS=1`, which the owner uses to try an
-experiment in an installed app. The theme tests and the color filter tests skip
-it.
+it out unless built with `VITE_EXPERIMENTS=1`, which the maintainer uses to try
+an experiment in an installed app. The theme tests and the color filter tests
+skip it.
 
 **Why:** A hidden setting needs a field in Rust, a control, and a story for
 release builds, all for a look still changing every hour. A folder listed only
-where the owner and agents run lets the effect be tried in the real app, and
-decision 40 already frees experiments from the readability checks.
+where the maintainer and agents run lets the effect be tried in the real app,
+and decision 40 already frees experiments from the readability checks.
 
 **Alternatives:** a hidden setting, which can come once an experiment is worth
 trying in a release build; a player theme in the data folder, which the repo
@@ -909,9 +910,9 @@ which Pixi `Graphics` doesn't take.
 test that see-through numbers reach 4.5:1 over a white or a black desktop. Every
 other Frost check still applies, and the other themes keep the full check.
 
-**Why:** The owner wants Frost to look like glass. A dark tint on open cells or
-a halo around each digit kept the numbers readable but made the theme look
-opaque. Players who need the contrast can pick Graphite or Datum.
+**Why:** The maintainer wants Frost to look like glass. A dark tint on open
+cells or a halo around each digit kept the numbers readable but made the theme
+look opaque. Players who need the contrast can pick Graphite or Datum.
 
 ## 47. Swatch fills closed cells with the system accent
 
@@ -979,13 +980,13 @@ closed cells are white, and dark mode tints them with the accent. Glass relaxes
 reach 1.51:1, against 3:1. Digits over a black desktop reach 1.44:1 in light
 mode, and over a white one 1.00:1 in dark mode, against 4.5:1.
 
-**Why:** The owner wants glass that remixes Glossy with Frost. The glare and the
-rim draw at their own opacity over the cell, so they brighten the glass instead
-of graying it. A shade would mix into the cell's fill and fade with it. Closed
-cells read as glass by their light, not by a darker or lighter fill, so 3:1
-between the two layers' colors would need an opaque tile. Digits are chosen for
-the material in each mode, so the opposite desktop washes them out, as in Frost
-(decision 46).
+**Why:** The maintainer wants glass that remixes Glossy with Frost. The glare
+and the rim draw at their own opacity over the cell, so they brighten the glass
+instead of graying it. A shade would mix into the cell's fill and fade with it.
+Closed cells read as glass by their light, not by a darker or lighter fill, so
+3:1 between the two layers' colors would need an opaque tile. Digits are chosen
+for the material in each mode, so the opposite desktop washes them out, as in
+Frost (decision 46).
 
 **Alternatives:** Frost's light pastels in both modes, which vanish on the light
 material; and a stronger closed fill, which reads as a gray film.
@@ -1009,8 +1010,8 @@ closed-cell hover. The third-party notices list each palette with its license.
 Folder ids are kebab case. Older custom ids, such as `velvet`, map to them, and
 a player's folder can't take one.
 
-**Why:** The owner decided popular coding themes need no custom names, and a
-name that promises Dracula should deliver Dracula's colors. Syntax hues sit at
+**Why:** The maintainer decided popular coding themes need no custom names, and
+a name that promises Dracula should deliver Dracula's colors. Syntax hues sit at
 one lightness, while numbers need 4.5:1 on an open cell and must stay apart
 under color vision deficiency. Moving lightness alone keeps each color
 recognizable while it clears the bar. Tinting more than the hover would pull a
@@ -1038,19 +1039,19 @@ Each editor theme relaxes `pane-contrast`, which lowers the floor between closed
 and open cells to 1.06:1, in normal vision and under each filter's simulation.
 The question mark must reach 3:1 on a closed cell.
 
-**Why:** The owner found gray closed cells far too bright against the syntax
-colors. A 3:1 edge in the comment gray made a bright grid on a dark editor, and
-a shade's gradient on closed cells looked ugly. The owner asked for separation
-like VS Code's panes. An editor's surfaces sit within 1.3:1 of its background,
-and even black reaches only 1.50:1 on One Dark's background, so no honest fill
-reaches 3:1. GitHub Dark's inset canvas on its canvas, 1.09:1, is the closest
-pair of panes among the editors, and the filters pull a pair about 0.02 closer.
-So 1.06:1 keeps every theme at least that far apart. Editors draw their panes
-flat, and the fills alone reach 1.09 to 1.24:1.
+**Why:** The maintainer found gray closed cells far too bright against the
+syntax colors. A 3:1 edge in the comment gray made a bright grid on a dark
+editor, and a shade's gradient on closed cells looked ugly. The maintainer asked
+for separation like VS Code's panes. An editor's surfaces sit within 1.3:1 of
+its background, and even black reaches only 1.50:1 on One Dark's background, so
+no honest fill reaches 3:1. GitHub Dark's inset canvas on its canvas, 1.09:1, is
+the closest pair of panes among the editors, and the filters pull a pair about
+0.02 closer. So 1.06:1 keeps every theme at least that far apart. Editors draw
+their panes flat, and the fills alone reach 1.09 to 1.24:1.
 
-**Alternatives:** a 3:1 closed edge in the comment gray, which the owner found
-too bright; no floor at all, which would let a closed cell vanish into the
-board; a shade at a quarter of the strength, which the owner turned down in
+**Alternatives:** a 3:1 closed edge in the comment gray, which the maintainer
+found too bright; no floor at all, which would let a closed cell vanish into the
+board; a shade at a quarter of the strength, which the maintainer turned down in
 side-by-side samples of One Dark Pro and GitHub Light; and lighter open cells,
 which leave the editor background and weaken the digits.
 
@@ -1064,8 +1065,8 @@ count took. The colors come from each editor's published theme.
 [How theming works](themes/how-theming-works.md#adding-an-editor-theme) gives
 the order.
 
-**Why:** The owner found the classic blue, green, red count order unrelated to
-how the editors look, since the keyword color dominates their code views.
+**Why:** The maintainer found the classic blue, green, red count order unrelated
+to how the editors look, since the keyword color dominates their code views.
 
 **Alternatives:** the classic minesweeper order in each scheme's nearest hues.
 
@@ -1089,12 +1090,12 @@ holds a theme. A card draws a small hex board with the theme's own glyphs and
 light, and its name. A click chooses the theme, and nothing happens on hover.
 The shell keeps the recent list, and the window can't write it.
 
-**Why:** Ten signature themes brought the count to 31, and the owner wants room
-for many more. A page of its own scrolls freely, and search, chips, and
+**Why:** Ten signature themes brought the count to 31, and the maintainer wants
+room for many more. A page of its own scrolls freely, and search, chips, and
 favorites keep any theme a few clicks away. The first version stacked three
 option cards, a search, and two rows of chips above the grid, so one row of
 themes showed. Its cards cut each description off mid-word. Hover flyouts and a
-try-on that redrew the board behind Settings made the page lag. The owner
+try-on that redrew the board behind Settings made the page lag. The maintainer
 rejected that version on 2026-11-14, and approved this one from a mockup. The
 current theme leads because the dialog covers the board, so the page is the only
 place to see what's chosen, and the options sit beside it so their effect shows
@@ -1138,14 +1139,14 @@ background, and its syntax colors keep their hues and darken to 4.5:1. Solarized
 Dark relaxes `number-separation`, because Solarized's fixed accents run together
 for deuteranopes, and Monokai Light passes every check.
 
-**Why:** The owner asked for matching themes to sit one above the other.
+**Why:** The maintainer asked for matching themes to sit one above the other.
 Explicit rows and columns keep that at any column count, while the page's order
 stays the reading order for the keyboard and screen readers. One Dark Pro ships
 dark variants only, so Catppuccin Latte, which has no dark sibling here, fills
 its column. Solarized Dark keeps Solarized's published accents rather than
-bending them apart, as decision 42 allows for a look kept on purpose; the owner
-asked that color-blind tuning go to the main themes first. A player who needs
-the separation turns on the color filter (decision 43).
+bending them apart, as decision 42 allows for a look kept on purpose; the
+maintainer asked that color-blind tuning go to the main themes first. A player
+who needs the separation turns on the color filter (decision 43).
 
 **Alternatives:** pairs side by side, two to a row, which loses the column; six
 columns, which shrinks every card on the page; a popular light theme with no
@@ -1181,11 +1182,11 @@ may set `--icon-plate`, `--icon-metal`, `--icon-mine`, and `--icon-spark` to
 choose its colors. The icon is drawn from a template, never from a theme's own
 SVG.
 
-**Why:** The owner wanted the icon to match the theme, and picked the dark "Poly
-grid" plate from the concept sheets in `docs/icons`. Deriving the colors gives
-player themes an icon for free. Variables keep a theme's input to colors that
-pass the usual checks. An `icon.svg` would need a new file type, its own size
-limits, and a way to read well at 16 pixels.
+**Why:** The maintainer wanted the icon to match the theme, and picked the dark
+"Poly grid" plate from the concept sheets in `docs/icons`. Deriving the colors
+gives player themes an icon for free. Variables keep a theme's input to colors
+that pass the usual checks. An `icon.svg` would need a new file type, its own
+size limits, and a way to read well at 16 pixels.
 
 **Alternatives:** a static icon only; an optional `icon.svg` in the theme
 folder; and changing the macOS Dock icon at run time, which needs AppKit calls

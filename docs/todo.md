@@ -6,7 +6,7 @@ when it's done. When an item settles a question, record the choice in
 
 ## Next
 
-1. **Tune Frost, Pride, and Spectrum** once the owner has played with them.
+1. **Tune Frost, Pride, and Spectrum** once the maintainer has played with them.
    Frost and Pride already got a measured pass; what's left is taste.
 2. **The macOS Dock icon.** The window icon follows the theme on Windows and
    Linux only (decision 56). The Dock could follow it too, through
@@ -85,8 +85,8 @@ when it's done. When an item settles a question, record the choice in
    PixiJS then draws every number from one shared glyph atlas instead of one
    texture per `Text` object. Huge boards (200 by 200) are where it would show
    first.
-2. **One Dark Pro variant.** The owner runs One Dark Darker with Vivid and
-   italics and may switch the theme to that variant later.
+2. **One Dark Pro variant.** One Dark Pro also has a Darker flavor, with Vivid
+   colors and italics; the theme may switch to it later.
 3. **Ferrofluid cleanup.** Leaving the theme destroys textures its blur shaders
    still hold, and leaves those shaders and the quad geometry for Pixi's garbage
    collector; each round trip logs two binding warnings.
@@ -103,19 +103,19 @@ in. No theme editor UI for now.
 2. **Ferrofluid experiment.** Built as `--board-effects: ferrofluid` and the
    Ferrofluid theme, listed only in development builds (decision 41, and Board
    effects in `docs/themes/how-theming-works.md`). What's left:
-   1. **The owner's calls:** whether it ships as a bundled theme and under what
-      name; whether a hidden setting should let release builds pick it; and
+   1. **The maintainer's calls:** whether it ships as a bundled theme and under
+      what name; whether a hidden setting should let release builds pick it; and
       whether the camera's tilt, the spikes' lean, the flag spire, and the
       glowing digits are the look.
    2. **Performance off this machine:** a frame with the magnet up takes under 1
-      ms on an RTX 4090. Once a flag is up, every pixel marches 32 steps through
-      the spikes. On a slow GPU, the first fix is to march only the columns
-      under flags and the magnet.
+      ms on a high-end desktop GPU. Once a flag is up, every pixel marches 32
+      steps through the spikes. On a slow GPU, the first fix is to march only
+      the columns under flags and the magnet.
    3. **Large boards:** every change draws all of the field's cells again; a 200
       by 200 board's cost is unmeasured.
-   4. **The game's end:** the owner's call on the splash's timing and size, all
-      in `ui/src/lib/board/splash.ts`. The drop's shadow barely shows on dark
-      plates.
+   4. **The game's end:** the maintainer's call on the splash's timing and size,
+      all in `ui/src/lib/board/splash.ts`. The drop's shadow barely shows on
+      dark plates.
 3. **Effect stack.** The board renders into a texture, the theme's effects run
    over it in order as GPU shaders, and the result goes to the screen. PixiJS
    draws with WebGL2 (GLSL, translated to Metal on macOS and Direct3D 11 on
@@ -132,9 +132,10 @@ in. No theme editor UI for now.
       falls on a loss.
    2. **First themes:** a neon-noir CRT theme with an original name (not after a
       game's trademark), and a geometric, trippy one.
-   3. **Desktop refraction experiment.** A shader sees only what the app draws,
-      so refracting the desktop and windows behind Polymine needs a capture
-      stream of what's under the window.
+   3. **Desktop refraction experiment.** An opt-in idea for Glass: refract the
+      desktop behind the window, as real glass would. A shader sees only what
+      the app draws, so refracting the desktop and windows behind Polymine needs
+      a capture stream of what's under the window.
       1. **macOS:** ScreenCaptureKit streams the window's footprint with a
          filter that excludes Polymine's own window. The player grants Screen
          Recording, and macOS shows its capture indicator.
