@@ -654,7 +654,8 @@ bottom, as "dusk didn't load:" and the reason.
    `Theme.css` or `notes.txt` is refused. Hidden files, such as `.DS_Store`, and
    the files Windows leaves, `Thumbs.db` and `desktop.ini`, are ignored.
 2. **Subfolders and links.** A theme holds only plain files, and Polymine never
-   follows a link, so a theme can't point at other files on your disk.
+   follows a link or reads a hard-linked file, so a theme can't point at other
+   files on your disk.
 3. **Anything that could load or run something.**
    1. In `theme.css`: `url()`, `@import`, backslash escapes, `!important`, the
       characters `@`, `{`, `}`, `<`, `>`, and `!` in a value, and any function

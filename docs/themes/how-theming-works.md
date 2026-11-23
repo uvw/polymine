@@ -136,8 +136,11 @@ use it too.
    and four doc files the app never reads. Hidden entries and the files Windows
    leaves are ignored, which keeps a download's staging folder out of the list.
 2. Links and subfolders are refused. Entries are inspected with
-   `symlink_metadata`. On Unix the opened file must have the device and inode
-   that were listed, so a file swapped for a link mid-read is caught.
+   `symlink_metadata`, and a file with more than one hard link is refused when
+   it's read. On Unix the opened file must have the device and inode that were
+   listed. Windows opens a link as itself rather than following it, and checks
+   the size and write time against the listing. Either way, a file swapped for a
+   link mid-read is caught.
 3. Each file is read through `take(limit + 1)`, so a file that grows after it's
    listed is still capped. The limits are the `MAX_*` constants at the top of
    the module, and [Creating a theme](creating-a-theme.md#limits) lists them.
