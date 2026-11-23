@@ -298,7 +298,7 @@ stays responsive. The UI queues its game calls, so they land in order.
    each in the same format, through `src-tauri/src/saves.rs`. A name must make a
    file name on every platform, up to 40 characters. Loading one replaces the
    game in play, paused, and marks it assisted, so it never ranks
-   ([decision 21](decisions.md#21-a-loaded-named-save-counts-as-assisted)).
+   ([decision 20](decisions.md#20-a-loaded-named-save-counts-as-assisted)).
 
 ### Settings
 
@@ -329,7 +329,7 @@ The player's files live in a `Polymine` folder: settings, `history.jsonl`, the
 saved `game.json`, `window.json`, and the `saves` and `themes` folders. Files
 that matter only while the app runs, the logs, and the WebView cache keep the
 app identifier `dev.uvw.polymine` as their folder name
-([decision 30](decisions.md#30-player-data-lives-in-a-polymine-folder)).
+([decision 29](decisions.md#29-player-data-lives-in-a-polymine-folder)).
 
 | Folder      | Windows                                | macOS                                            |
 | ----------- | -------------------------------------- | ------------------------------------------------ |
@@ -569,7 +569,7 @@ apply as they're made, and a language change reloads the window.
 
 ### The Themes page
 
-Themes opens on the current theme ([decision 53][decision-53]): a large preview,
+Themes opens on the current theme ([decision 52][decision-52]): a large preview,
 its name with a star that makes it a favorite, and its description and author.
 Beside it sit the options that change how the board reads:
 
@@ -581,8 +581,8 @@ Beside it sit the options that change how the board reads:
    themes for every new game, the bot's included. Favorites need two or more to
    rotate, or every theme takes part.
 
-[decision-53]:
-  decisions.md#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
+[decision-52]:
+  decisions.md#52-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from
 
 Below, the All themes heading carries a search field and Surprise me. The search
 matches every word typed against each theme's name, description, and author.
@@ -607,13 +607,13 @@ in sections that each show their count:
 3. Custom, for the player's themes, shown only when the themes folder holds one.
 
 The Code section sets each dark theme over its light one in five columns, and
-the pairs past the fifth start a new pair of rows ([decision 54][decision-54]).
+the pairs past the fifth start a new pair of rows ([decision 53][decision-53]).
 `EDITOR_COLUMNS` in `builtin.ts` lists the pairs, and `editorPlacement` gives
 each card its row and column. A filter drops the placement, so the cards that
 match close up.
 
-[decision-54]:
-  decisions.md#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column
+[decision-53]:
+  decisions.md#53-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column
 
 Each theme is a card in a five-column grid: a small hex board in the theme's
 colors, with its glyphs, font, glare, and shade, and its name below. The chosen
@@ -666,10 +666,10 @@ Polymine has 31 built-in themes, folders in `ui/src/themes` read at build time.
 Experimental themes are folders there too, named in `EXPERIMENTAL_THEMES`. Only
 development builds, and release builds made with `VITE_EXPERIMENTS=1`, list
 them, after the rest, and the theme tests skip them ([decision
-41][decision-41]).
+40][decision-40]).
 
-[decision-41]:
-  decisions.md#41-experimental-themes-show-only-in-development-builds
+[decision-40]:
+  decisions.md#40-experimental-themes-show-only-in-development-builds
 
 | Theme            | Chrome                                        | Board                                                       |
 | ---------------- | --------------------------------------------- | ----------------------------------------------------------- |
@@ -713,7 +713,7 @@ contrast bars, and count colors to a separation under color vision deficiency. A
 theme can relax a check only for a look kept on purpose.
 [How theming works](themes/how-theming-works.md#tests) owns the bars and the
 relaxations, and
-[decision 42](decisions.md#42-theme-tests-hold-every-built-in-theme-to-readability-bars)
+[decision 41](decisions.md#41-theme-tests-hold-every-built-in-theme-to-readability-bars)
 records why each theme relaxes what it does.
 
 A color filter in Themes remaps any theme's board colors for deuteranopia,
@@ -883,7 +883,7 @@ Settings opens, and when the window comes to the front.
 7. With reduced motion on, cells fade in over 120 ms, and the shake, glow,
    particles, confetti, entrance ripple, hint pulse, and glint are skipped.
 8. A theme's `--board-effects` names GPU shaders that ship with the app
-   ([decision 40](decisions.md#40-themes-never-carry-shader-code)). The
+   ([decision 39](decisions.md#39-themes-never-carry-shader-code)). The
    `ferrofluid` effect, in `ui/src/lib/board/ferrofluid.ts`, turns closed cells
    into a pool of glossy black fluid that spikes toward the pointer. Open cells
    keep the theme's drawing as drained plates. Its own win and loss effects,

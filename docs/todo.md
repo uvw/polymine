@@ -9,7 +9,7 @@ when it's done. When an item settles a question, record the choice in
 1. **Tune Frost, Pride, and Spectrum** once the maintainer has played with them.
    Frost and Pride already got a measured pass; what's left is taste.
 2. **The macOS Dock icon.** The window icon follows the theme on Windows and
-   Linux only (decision 56). The Dock could follow it too, through
+   Linux only (decision 55). The Dock could follow it too, through
    `NSApplication.applicationIconImage` while the app runs.
 3. **TypeScript 7.** Dependabot ignores TypeScript majors until `svelte-check`
    supports TypeScript 7; lift the ignore in `.github/dependabot.yml` then.
@@ -93,7 +93,7 @@ when it's done. When an item settles a question, record the choice in
 
 ## Themes
 
-Themes are folders of CSS variables (decision 36).
+Themes are folders of CSS variables (decision 35).
 [How theming works](themes/how-theming-works.md) says where each of these plugs
 in. No theme editor UI for now.
 
@@ -101,7 +101,7 @@ in. No theme editor UI for now.
    colors, count, and speed come from the theme, as new variables. The
    ferrofluid already replaces them with its own splash and ripples.
 2. **Ferrofluid experiment.** Built as `--board-effects: ferrofluid` and the
-   Ferrofluid theme, listed only in development builds (decision 41, and Board
+   Ferrofluid theme, listed only in development builds (decision 40, and Board
    effects in `docs/themes/how-theming-works.md`). What's left:
    1. **The maintainer's calls:** whether it ships as a bundled theme and under
       what name; whether a hidden setting should let release builds pick it; and
@@ -178,7 +178,7 @@ in. No theme editor UI for now.
    it on. Open: whether the theme tests should hold built-in themes to the
    filter's pairs without it, and whether to check milder severities, which need
    Machado's partial matrices.
-9. **Gaps in the light on cells** (decision 45).
+9. **Gaps in the light on cells** (decision 44).
    1. Give Catppuccin Latte a darker `--flag-outline`, then count the flat sheen
       in the mark checks.
    2. Opacities can't follow light or dark mode, since `light-dark()` works only
@@ -216,7 +216,7 @@ in. No theme editor UI for now.
       attached to each release.
 2. **Microsoft Store, winget, and MSIX.** The Store signs the build, so Windows
    shows no SmartScreen prompt and no certificate is needed. winget can point at
-   the GitHub release files. Both take the NSIS `.exe` (decision 55), so neither
+   the GitHub release files. Both take the NSIS `.exe` (decision 54), so neither
    needs an MSI. MSIX, the Store's own format, gives a sandboxed install, a
    clean uninstall, and Store updates. First check what it does to the CLI on
    `PATH`, the data folder, and the named pipe. If an MSI is ever wanted, a WiX
