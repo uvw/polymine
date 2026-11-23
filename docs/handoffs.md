@@ -14,34 +14,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
 
 ## Windows only
 
-1. **Pipe locked to its owner, checked from other accounts.**
-   - **What:** the pipe is named `dev.uvw.polymine.<SID>.<instance>` and its
-     DACL is protected, with one entry granting the owner full control. A
-     Windows session on 2026-11-03 confirmed the name, the DACL (with
-     `accesschk`), `polymine-cli status` and `paths`, and the smoke test. What
-     it couldn't check needs other Windows accounts, which an unelevated session
-     can't create.
-   - **Verify:**
-     1. As user B, through `runas /user:B powershell`, connect to A's pipe:
-
-        ```powershell
-        $p = New-Object System.IO.Pipes.NamedPipeClientStream(".", "dev.uvw.polymine.<A's SID>.default"); $p.Connect(2000)
-        ```
-
-        It must fail with access denied. `polymine-cli status` as B reports
-        `not_running` for A's instance.
-
-     2. Create a user whose name is Cyrillic, such as `Тест`, and another, such
-        as `Проба`. Run the app under both at once: each CLI reaches its own
-        instance, and neither fails to start.
-     3. With A's app closed, have B create a pipe on A's name, open to Everyone,
-        and answer one line. A's `polymine-cli status` must refuse it with
-        `not_running` and "another account's process holds this pipe"; since
-        2026-11-07 the CLI opens the pipe for identification only and checks the
-        server's account.
-   - **Added:** 2026-11-03, macOS session; narrowed by the Windows session.
-
-2. **Frost's Acrylic while dragging the window.**
+1. **Frost's Acrylic while dragging the window.**
    - **What:** Frost sets `--window-material: frosted` in
      `ui/src/themes/frost/theme.css`, and `set_material` in
      `src-tauri/src/environment.rs` swaps Mica for a lightly tinted Acrylic
@@ -61,7 +34,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
         build would trade the see-through desktop for a window that keeps up.
    - **Added:** 2026-11-03, macOS session.
 
-3. **Swatch under other accents and light mode.**
+2. **Swatch under other accents and light mode.**
    - **What:** a Windows session on 2026-11-03 checked two things with the
      purple accent `#881798` in dark mode. Swatch's tiles and its Settings
      preview take the accent, and turn blue with "Tint the theme with the system
