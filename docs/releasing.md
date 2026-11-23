@@ -122,6 +122,8 @@ token that can write.
    adds `.github/release-body.md` (downloads and first-launch steps for unsigned
    builds) below it, checks the tag still names the commit that was built, and
    publishes the release as the latest.
+6. **winget:** opens a pull request on microsoft/winget-pkgs for the new version
+   ([winget](#winget)).
 
 Running the Release workflow by hand with an existing tag (re)publishes it.
 
@@ -129,6 +131,36 @@ Publish only what the workflow builds. A build made on a developer's machine
 records that machine's home folder in the binaries, and nothing attests it.
 `scripts/release-windows.ps1` (docs/windows.md) is for testing the Windows
 files.
+
+## winget
+
+Once a release is published, the winget job runs
+`.github/workflows/hack/winget.sh`. It runs
+[komac](https://github.com/russellbanks/Komac), pinned by version and checksum,
+to open a pull request on microsoft/winget-pkgs that adds the new version of
+`uvw.Polymine`, from the uvw/winget-pkgs fork. The package points at the NSIS
+installer, `Polymine_X.Y.Z_x64-setup.exe`, a `nullsoft` installer to winget.
+
+1. The job runs in the `release` environment and needs `WINGET_TOKEN`, a classic
+   token with `public_repo`. A fine-grained token can't open pull requests on
+   another owner's public repository. Without the secret, the job skips itself
+   with a notice.
+2. komac adds versions only to a package winget already has, so until
+   `uvw.Polymine` is in winget-pkgs the job skips itself too.
+3. A failed winget job doesn't touch the release, which is already out. Rerun
+   the job, or submit the version by hand as below.
+
+The first version goes in by hand, on any machine with komac:
+
+```sh
+GITHUB_TOKEN=<the winget token> komac new uvw.Polymine --version X.Y.Z \
+  --urls https://github.com/uvw/polymine/releases/download/vX.Y.Z/Polymine_X.Y.Z_x64-setup.exe
+```
+
+komac asks for the rest: publisher `uvw`, package name `Polymine`, license
+`MIT OR Apache-2.0`, and installer type `nullsoft`, installed per user. The
+winget-pkgs maintainers review the first pull request of a new package by hand.
+Once it merges, the release job handles every version after it.
 
 ## Repository settings
 

@@ -9,6 +9,11 @@ on:
         description: The tag to release, such as v0.1.0.
         required: true
         type: string
+    # Optional: without it, winget is skipped. A secret of the release
+    # environment takes the place of the one passed here.
+    secrets:
+      WINGET_TOKEN:
+        required: false
   workflow_dispatch:
     inputs:
       tag:
@@ -264,3 +269,23 @@ jobs:
           [[ $tagged == "$SHA" ]] ||
             { echo "::error::$TAG moved to $tagged after the build of $SHA"; exit 1; }
           gh release edit "$TAG" --draft=false --latest
+
+  # winget points at the published release, so it comes after it.
+  winget:
+    name: winget
+    needs: [eligibility, publish]
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.eligibility.outputs.sha }}
+          persist-credentials: false
+      - name: Open the winget-pkgs pull request
+        env:
+          TAG: ${{ inputs.tag }}
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: bash .github/workflows/hack/winget.sh "$TAG"
