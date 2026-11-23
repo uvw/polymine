@@ -1,0 +1,8 @@
+{
+  "name": "polymine-release-notes",
+  "private": true,
+  "description": "Copilot CLI, which writes the release notes, pinned for Dependabot",
+  "devDependencies": {
+    "@github/copilot": "1.0.114"
+  }
+}

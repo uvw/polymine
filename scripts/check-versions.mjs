@@ -1,7 +1,8 @@
-// Fails unless Cargo.toml, tauri.conf.json, and package.json share one
-// version. Given a tag such as v0.0.2, it also fails unless the tag names that
-// version. Tauri names installers after tauri.conf.json, so a missed bump would
-// ship files labeled with the old version under the new tag.
+// Fails unless Cargo.toml, tauri.conf.json, package.json, package-lock.json,
+// and the workspace crates' entries in Cargo.lock share one version: the files
+// release-please bumps. Given a tag such as v0.0.2, it also fails unless the
+// tag names that version. Tauri names installers after tauri.conf.json, so a
+// missed bump would ship files labeled with the old version under the new tag.
 //
 // It also fails when a Tauri crate and its npm package disagree on major and
 // minor version, which stops `tauri build`. Dependabot bumps them in separate
@@ -28,9 +29,18 @@ const TAURI_PAIRS = [
 ];
 const lock = read("Cargo.lock");
 const npmLock = JSON.parse(read("package-lock.json")).packages;
+const lockVersion = (name) =>
+  new RegExp(`^name = "${name}"\\r?\\nversion = "([^"]+)"`, "m").exec(lock)?.[1];
+
+// release-please bumps each workspace crate's entry in Cargo.lock too, or a
+// --locked build fails, so they count as version files.
+const CRATES = ["polymine", "polymine-cli", "polymine-core", "polymine-ipc", "polymine-net"];
+for (const crate of CRATES) versions[`Cargo.lock ${crate}`] = lockVersion(crate);
+versions["package-lock.json"] = npmLock[""]?.version;
+
 const minor = (version) => version?.split(".").slice(0, 2).join(".");
 for (const [crate, pkg] of TAURI_PAIRS) {
-  const rust = new RegExp(`^name = "${crate}"\\r?\\nversion = "([^"]+)"`, "m").exec(lock)?.[1];
+  const rust = lockVersion(crate);
   const js = npmLock[`node_modules/${pkg}`]?.version;
   if (!rust || !js || minor(rust) !== minor(js)) {
     console.error(`${crate} ${rust} and ${pkg} ${js} must share a major and minor version.`);

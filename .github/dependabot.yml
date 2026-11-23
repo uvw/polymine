@@ -51,6 +51,19 @@ updates:
         patterns: ["@tauri-apps/*"]
       npm:
         patterns: ["*"]
+  # Copilot CLI, which writes the release notes (docs/releasing.md). It never
+  # reaches the app, so its updates make no release.
+  - package-ecosystem: npm
+    directory: /.github/release-notes
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      release-notes:
+        patterns: ["*"]
   # The workflows' actions never reach the app, so their updates make no
   # release. The prefix holds the deps scope itself, so titles start ci(deps):.
   - package-ecosystem: github-actions

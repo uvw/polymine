@@ -945,8 +945,8 @@
           w: 200,
           h: 112,
           t: "Release workflow",
-          k: "release.yml · v* tags",
-          m: ["CI first, then a draft", "cli built as a sidecar"],
+          k: "release-please · release.yml",
+          m: ["release PR, then CI", "attested, then published"],
         },
         {
           id: "b-bindings",
@@ -2079,21 +2079,24 @@
             "Web job on Ubuntu: version check, Prettier, ESLint, svelte-check, coverage, and the build.",
             "Rust jobs on Windows and macOS: fmt, clippy with `-D warnings`, tests, and the CLI smoke test. They fail when the bindings drift.",
             "Two more Ubuntu jobs: one fails when the notices drift, and cargo-deny checks licenses and advisories.",
+            "zizmor audits the workflows, gitleaks scans the history, and one all-green job is the check to require. A weekly Security workflow runs CodeQL, zizmor's online audits, and cargo-deny's advisories.",
           ],
         },
         "b-release": {
           t: "Release workflow",
           m: ".github/workflows/release.yml",
-          owns: "Builds installers for a `v*` tag or a manual run, for macOS on Apple silicon and Intel and for Windows x64.",
+          owns: "release-please keeps a release pull request open; merging it tags the version and runs release.yml, which builds installers for macOS on Apple silicon and Intel and for Windows x64.",
           files: [
+            ".github/workflows/release-please.yml",
             ".github/workflows/release.yml",
+            ".github/release-please-config.json",
             "scripts/check-versions.mjs",
             "src-tauri/tauri.bundle-cli.conf.json",
           ],
           rules: [
             "No release from a commit that hasn't passed CI.",
-            "The tag must match the version in Cargo.toml, tauri.conf.json, and package.json.",
-            "docs/todo.md: Actions minutes are used up until December, so releases build on the owner's machines for now.",
+            "The tag must be on main and match every version file release-please bumps.",
+            "Build jobs hold no token that can write; publishing comes last, after the attestations (docs/releasing.md).",
           ],
         },
         "b-bindings": {
@@ -2122,12 +2125,12 @@
         "b-gh": {
           t: "GitHub Releases",
           m: "draft release",
-          owns: "The draft release the workflow creates once, before the build jobs fill it.",
+          owns: "The draft release release-please creates; the publish job fills and publishes it.",
           files: [".github/workflows/release.yml"],
           rules: [
             "macOS: a dmg for Apple silicon and one for Intel, ad-hoc signed.",
             "Windows: setup.exe and a portable ZIP that keeps its data beside the executable.",
-            "Builds aren't signed with a certificate or notarized yet.",
+            "Builds aren't signed with a certificate or notarized yet. checksums.txt and build provenance attestations cover every file.",
           ],
         },
         "pl-net": {
@@ -2662,12 +2665,12 @@
             "b-gh",
           ],
           steps: [
-            "A `v*` tag or a manual run starts release.yml, which first runs ci.yml on that commit.",
+            "Merging the release pull request tags the version, and release-please.yml calls release.yml, which first runs ci.yml on that commit.",
             "CI fails when `npm run notices` or `cargo test` changes a committed file, so the notices and the bindings always match the code.",
             "It also runs the CLI smoke test against a named instance on Windows and macOS.",
-            "check-versions.mjs checks the tag against every version file, then one draft release is created.",
-            "Each target builds polymine-cli first as the sidecar, then tauri-action bundles the app and uploads the installers. Windows also gets a portable ZIP.",
-            "For now, docs/todo.md says releases build on the owner's machines, since Actions minutes are used up until December.",
+            "The eligibility job checks the tag is on main, and check-versions.mjs checks it against every version file.",
+            "Each target builds polymine-cli first as the sidecar, then the Tauri CLI bundles the app. Windows also gets a portable ZIP.",
+            "checksums.txt and an attestation cover every file, then the publish job uploads them, checks the tag hasn't moved, and publishes.",
           ],
         },
       };

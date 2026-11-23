@@ -1,0 +1,38 @@
+## [0.2.0](https://github.com/uvw/polymine/compare/v0.1.0...v0.2.0) (2026-12-02)
+
+### Features
+
+- **app:** remember favorite and recent themes, and a rotation choice
+  ([#14](https://github.com/uvw/polymine/issues/14))
+  ([bdea817](https://github.com/uvw/polymine/commit/bdea817d09eb5320df1d6680eaa15196731b47d8))
+- **themes:** add search, filters, and picks for the theme gallery
+  ([#16](https://github.com/uvw/polymine/issues/16))
+  ([45664e1](https://github.com/uvw/polymine/commit/45664e1d61f80d144ee9d64c302ecb72fbe9ebee))
+- **ui:** add a B&W filter to the themes page
+  ([#19](https://github.com/uvw/polymine/issues/19))
+  ([61fd1a9](https://github.com/uvw/polymine/commit/61fd1a9ad4634e2b9b57320f5b6d97a8fffbdebd))
+- **ui:** add a see-through filter to the themes page
+  ([#22](https://github.com/uvw/polymine/issues/22))
+  ([2d4c9d9](https://github.com/uvw/polymine/commit/2d4c9d903586160854855128d27ee9e3740f1755))
+- **ui:** give themes a page of their own
+  ([#17](https://github.com/uvw/polymine/issues/17))
+  ([a5c8728](https://github.com/uvw/polymine/commit/a5c8728e975e71abd02e3c1d76981f9c4f9bb3fe))
+- **ui:** let players hide the count key for a harder game
+  ([#24](https://github.com/uvw/polymine/issues/24))
+  ([8d41b93](https://github.com/uvw/polymine/commit/8d41b93d1459ea8e49942ad9f519d24a01c08ab9))
+- **ui:** rework the themes page around the current theme
+  ([#25](https://github.com/uvw/polymine/issues/25))
+  ([4846554](https://github.com/uvw/polymine/commit/4846554e0ee05b09396ce1aeb7cdb376899e942d))
+
+### Bug fixes
+
+- **deps:** Bump tauri from 2.12.4 to 2.12.5 in the tauri group across 1
+  directory ([#21](https://github.com/uvw/polymine/issues/21))
+  ([022bae0](https://github.com/uvw/polymine/commit/022bae0eb79f9a102515e08c70cab3fd9993fb28))
+- **ui:** resize the window in smaller steps on the wheel
+  ([#26](https://github.com/uvw/polymine/issues/26))
+  ([022bae0](https://github.com/uvw/polymine/commit/022bae0eb79f9a102515e08c70cab3fd9993fb28))
+- **windows:** show the theme's icon on the taskbar
+  ([#20](https://github.com/uvw/polymine/issues/20))
+  ([2c1051b](https://github.com/uvw/polymine/commit/2c1051b53bc19a7faf692fed6c79e92eaa54198f))
+

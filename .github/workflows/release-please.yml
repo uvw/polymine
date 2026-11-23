@@ -1,0 +1,207 @@
+name: Release Please
+
+# Keeps a release pull request open with the next version and its changelog,
+# worked out from the Conventional Commits on main. Merging it creates the tag
+# and a draft release, then hands off to the release workflow.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release pull request
+    # RELEASE_PLEASE_TOKEN is a secret of the release environment, which admits
+    # only main and v* tags (docs/releasing.md).
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # A pull request opened with GITHUB_TOKEN starts no workflows, so its
+          # required check would never run. RELEASE_PLEASE_TOKEN is a
+          # fine-grained token that can open pull requests.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
+
+  # release-please writes the changelog with long lines, which the Markdown
+  # checks refuse, so this job formats the release pull request's copy for the
+  # push job to push. It holds no token that can push.
+  format-changelog:
+    name: Format the changelog
+    needs: release-please
+    if: needs.release-please.outputs.created != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      changed: ${{ steps.format.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Format the changelog in the release pull request
+        id: format
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/workflows/hack/format-changelog.sh "$RUNNER_TEMP/changelog"
+          if [[ -f $RUNNER_TEMP/changelog/sha ]]; then
+            echo "changed=true" >>"$GITHUB_OUTPUT"
+          fi
+      - if: steps.format.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: changelog
+          path: ${{ runner.temp }}/changelog
+          if-no-files-found: error
+
+  # Copilot CLI writes docs/release-notes/vX.Y.Z.md for the release pull
+  # request, and the publish job in release.yml puts it above the changelog
+  # list (docs/releasing.md). Pull request bodies can come from anyone, so this
+  # job holds only the Copilot token and a read-only token, Copilot can create
+  # only the one file, and the file is checked here and again before the push.
+  # Without a COPILOT_TOKEN secret it does nothing, and a failure here never
+  # fails the run: the release keeps the changelog list alone.
+  release-notes:
+    name: Write the release notes
+    needs: release-please
+    if: needs.release-please.outputs.created != 'true'
+    # COPILOT_TOKEN is a secret of the release environment.
+    environment: release
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      written: ${{ steps.check.outputs.written }}
+    steps:
+      # A job's if: can't read secrets.
+      - name: Look for the Copilot token
+        id: token
+        env:
+          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: |
+          if [[ -n $COPILOT_TOKEN ]]; then
+            echo "set=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "::notice::No COPILOT_TOKEN secret, so the release keeps the changelog list alone"
+          fi
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Install Prettier, markdownlint, and Copilot CLI
+        if: steps.token.outputs.set == 'true'
+        run: |
+          npm ci --ignore-scripts
+          npm ci --prefix .github/release-notes --ignore-scripts
+      - name: Gather the changelog entry and the pull requests
+        id: gather
+        if: steps.token.outputs.set == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/workflows/hack/release-notes.sh gather "$RUNNER_TEMP/notes"
+      - name: Write the notes with Copilot
+        if: steps.gather.outputs.found == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          MODEL: ${{ vars.RELEASE_NOTES_MODEL || 'claude-sonnet-5.5' }}
+        run: bash .github/workflows/hack/release-notes.sh write "$RUNNER_TEMP/notes"
+      - name: Check the notes
+        id: check
+        if: steps.gather.outputs.found == 'true'
+        run: bash .github/workflows/hack/release-notes.sh check "$RUNNER_TEMP/notes"
+      - if: steps.check.outputs.written == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/notes/result
+          if-no-files-found: error
+
+  push:
+    name: Push to the release pull request
+    needs: [format-changelog, release-notes]
+    # The formatted changelog goes out even when the notes job failed.
+    if: >-
+      !cancelled() &&
+      (needs.format-changelog.outputs.changed == 'true' ||
+      needs.release-notes.outputs.written == 'true')
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: needs.format-changelog.outputs.changed == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: changelog
+          path: ${{ runner.temp }}/changelog
+      - if: needs.release-notes.outputs.written == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/notes
+      - name: Push them to the release pull request
+        env:
+          TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
+          # The runner has no git identity; the commit is the workflow's own.
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          dirs=()
+          for dir in "$RUNNER_TEMP/changelog" "$RUNNER_TEMP/notes"; do
+            [[ ! -d $dir ]] || dirs+=("$dir")
+          done
+          bash .github/workflows/hack/release-pr-push.sh "${dirs[@]}"
+
+  release:
+    name: Release
+    needs: release-please
+    if: needs.release-please.outputs.created == 'true'
+    uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
+    with:
+      tag: ${{ needs.release-please.outputs.tag }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    secrets:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}

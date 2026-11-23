@@ -36,18 +36,18 @@ with and without the data, and the uninstall an update runs.
 4. Makensis prints one warning, `LangString "choowHowToInstall" is not set`. It
    comes from Tauri's own NSIS template, not from Polymine's hooks.
 
-## Releasing from Windows
+## Building the release files on Windows
 
-`scripts/release-windows.ps1` makes the files the release workflow makes on
-Windows: the NSIS installer with `polymine-cli` bundled, and the portable ZIP.
-Set the version in every manifest first; the script checks the tag against them.
+Releases come from the release workflow ([releasing.md](releasing.md)).
+`scripts/release-windows.ps1` makes the same Windows files on this machine, the
+NSIS installer with `polymine-cli` bundled and the portable ZIP, to test them.
+It publishes nothing: a local build records this machine's home folder in the
+binaries, and nothing attests it.
 
 ```powershell
-pwsh scripts/release-windows.ps1 -Tag v0.0.3
-pwsh scripts/release-windows.ps1 -Tag v0.0.3 -InstallerTest -Upload
+pwsh scripts/release-windows.ps1
+pwsh scripts/release-windows.ps1 -Tag v0.0.3 -InstallerTest
 ```
 
-1. Without `-Upload`, the script only builds.
-2. `-InstallerTest` runs the installer test above before anything goes up.
-3. `-Upload` creates the draft release for the tag if it's missing and attaches
-   the files. Publish it on GitHub when it's ready.
+1. `-Tag` checks the tag against every version file first.
+2. `-InstallerTest` runs the installer test above on the new installer.
