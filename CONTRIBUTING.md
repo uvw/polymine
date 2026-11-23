@@ -144,6 +144,10 @@ sentences about what changed and why.
 The type decides the release: release-please makes one for `feat` and `fix`, and
 lists them in `CHANGELOG.md` ([releasing.md](docs/releasing.md)).
 
+No AI attribution. Commit messages, tags, release notes, and pull request bodies
+carry no AI attribution, such as a `Co-Authored-By` trailer for an AI tool, and
+no session links.
+
 ## Pull requests
 
 Changes from outside the project come as pull requests from a fork, which
