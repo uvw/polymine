@@ -13,18 +13,13 @@
 .claude/settings.local.json
 CLAUDE.local.md
 
-# IDE run configurations
-/.run/
-
-# Page snapshots and console logs from browser checks with the Playwright MCP
+# Output of browser automation tools
 /.playwright-mcp/
 
-# Local notes, task lists, and resume prompts. The `.local.` infix means the
-# file is never committed.
+# Local notes. The `.local.` infix means the file is never committed.
 *.local.md
 
-# Local-only docs: scratch, prompts, and half-finished work. Everything else
-# under docs/ is committed.
+# Local-only docs. Everything else under docs/ is committed.
 docs/local/
 
 # Agent worktrees: whole checkouts under .claude/, not the folder's settings.
