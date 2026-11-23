@@ -11,60 +11,60 @@ file current.
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | [1](#1-rust-engine-with-a-tauri-and-svelte-shell)                                | Rust engine with a Tauri and Svelte shell                               |
 | [2](#2-mit-or-apache-license-with-a-clean-room-rule)                             | MIT or Apache license with a clean-room rule                            |
-| [4](#4-game-state-lives-in-the-rust-backend)                                     | Game state lives in the Rust backend                                    |
-| [5](#5-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
-| [6](#6-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
-| [7](#7-logs-go-through-log-and-tauri-plugin-log)                                 | Logs go through `log` and `tauri-plugin-log`                            |
-| [8](#8-eight-modules-may-use-unsafe-code)                                        | Eight modules may use unsafe code                                       |
-| [9](#9-third-party-notices-ship-in-the-about-window)                             | Third-party notices ship in the About window                            |
-| [10](#10-tilings-are-data)                                                       | Tilings are data                                                        |
-| [11](#11-chacha8-for-mine-placement)                                             | ChaCha8 for mine placement                                              |
-| [12](#12-twin-cells-never-hold-a-mine)                                           | Twin cells never hold a mine                                            |
-| [13](#13-obtuse-triangles-come-from-rhombuses-and-the-cube-pattern-is-out)       | Obtuse triangles come from rhombuses, and the cube pattern is out       |
-| [14](#14-difficulty-is-the-level-plus-the-tilings-complexity)                    | Difficulty is the level plus the tiling's complexity                    |
-| [15](#15-fastmines-click-and-pause-behavior)                                     | FastMines click and pause behavior                                      |
-| [16](#16-deliberate-differences-from-fastmines)                                  | Deliberate differences from FastMines                                   |
-| [17](#17-history-keeps-every-finished-game-and-ranks-unaided-ones)               | History keeps every finished game and ranks unaided ones                |
-| [18](#18-autosave-by-replay-every-5-seconds)                                     | Autosave by replay, every 5 seconds                                     |
-| [19](#19-rules-changes-are-logged-with-the-moves)                                | Rules changes are logged with the moves                                 |
-| [20](#20-games-pause-when-the-computer-sleeps)                                   | Games pause when the computer sleeps                                    |
-| [21](#21-a-loaded-named-save-counts-as-assisted)                                 | A loaded named save counts as assisted                                  |
-| [22](#22-players-are-names-only)                                                 | Players are names only                                                  |
-| [23](#23-a-cli-and-a-skill-not-an-mcp-server)                                    | A CLI and a skill, not an MCP server                                    |
-| [24](#24-a-full-instance-answers-busy)                                           | A full instance answers busy                                            |
-| [25](#25-a-move-is-checked-in-one-order-on-both-paths)                           | A move is checked in one order on both paths                            |
-| [26](#26-network-requests-go-through-ureq-with-rustls)                           | Network requests go through ureq with rustls                            |
-| [27](#27-histories-sync-ranked-games-through-a-gist)                             | Histories sync ranked games through a gist                              |
-| [28](#28-native-chrome-that-follows-the-platform)                                | Native chrome that follows the platform                                 |
-| [29](#29-no-menu-bar-on-windows)                                                 | No menu bar on Windows                                                  |
-| [30](#30-player-data-lives-in-a-polymine-folder)                                 | Player data lives in a Polymine folder                                  |
-| [31](#31-keep-pixi-render-on-demand)                                             | Keep Pixi, render on demand                                             |
-| [32](#32-minimum-cell-size-then-scroll)                                          | Minimum cell size, then scroll                                          |
-| [33](#33-results-show-in-the-toolbar)                                            | Results show in the toolbar                                             |
-| [34](#34-keyboard-play-by-direction)                                             | Keyboard play by direction                                              |
-| [35](#35-the-wheel-and-a-pinch-resize-the-window)                                | The wheel and a pinch resize the window                                 |
-| [36](#36-themes-are-folders-of-css-variables-that-pair-chrome-and-board)         | Themes are folders of CSS variables that pair chrome and board          |
-| [37](#37-theme-variables-resolve-away-from-the-apps-styles)                      | Theme variables resolve away from the app's styles                      |
-| [38](#38-board-colors-are-opaque-and-layers-have-opacities)                      | Board colors are opaque, and layers have opacities                      |
-| [39](#39-player-themes-come-from-a-folder-with-hard-limits)                      | Player themes come from a folder with hard limits                       |
-| [40](#40-themes-never-carry-shader-code)                                         | Themes never carry shader code                                          |
-| [41](#41-experimental-themes-show-only-in-development-builds)                    | Experimental themes show only in development builds                     |
-| [42](#42-theme-tests-hold-every-built-in-theme-to-readability-bars)              | Theme tests hold every built-in theme to readability bars               |
-| [43](#43-a-color-filter-solves-each-themes-pairs-under-the-deficiency)           | A color filter solves each theme's pairs under the deficiency           |
-| [44](#44-color-only-themes-ring-high-counts-and-keep-their-key-under-the-board)  | Color-only themes ring high counts and keep their key under the board   |
-| [45](#45-cells-take-one-light-drawn-from-one-shared-texture)                     | Cells take one light, drawn from one shared texture                     |
-| [46](#46-frost-puts-its-look-ahead-of-readability-over-bright-desktops)          | Frost puts its look ahead of readability over bright desktops           |
-| [47](#47-swatch-fills-closed-cells-with-the-system-accent)                       | Swatch fills closed cells with the system accent                        |
-| [48](#48-glossy-glazes-tiles-in-the-accent-deep-in-light-mode-and-light-in-dark) | Glossy glazes tiles in the accent, deep in light mode and light in dark |
-| [49](#49-glass-lights-see-through-cells-and-relaxes-cell-and-digit-contrast)     | Glass lights see-through cells and relaxes cell and digit contrast      |
-| [50](#50-editor-themes-take-their-sources-names-and-official-palettes)           | Editor themes take their sources' names and official palettes           |
-| [51](#51-editor-themes-part-cells-like-panes)                                    | Editor themes part cells like panes                                     |
-| [52](#52-editor-theme-counts-follow-the-syntax-colors)                           | Editor theme counts follow the syntax colors                            |
-| [53](#53-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from)     | Themes get a page of their own, in sections by where they come from     |
-| [54](#54-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column)     | The Code section sets a dark theme over a light one in each column      |
-| [55](#55-windows-releases-ship-the-nsis-installer-only)                          | Windows releases ship the NSIS installer only                           |
-| [56](#56-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
-| [57](#57-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
+| [3](#3-game-state-lives-in-the-rust-backend)                                     | Game state lives in the Rust backend                                    |
+| [4](#4-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
+| [5](#5-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
+| [6](#6-logs-go-through-log-and-tauri-plugin-log)                                 | Logs go through `log` and `tauri-plugin-log`                            |
+| [7](#7-eight-modules-may-use-unsafe-code)                                        | Eight modules may use unsafe code                                       |
+| [8](#8-third-party-notices-ship-in-the-about-window)                             | Third-party notices ship in the About window                            |
+| [9](#9-tilings-are-data)                                                         | Tilings are data                                                        |
+| [10](#10-chacha8-for-mine-placement)                                             | ChaCha8 for mine placement                                              |
+| [11](#11-twin-cells-never-hold-a-mine)                                           | Twin cells never hold a mine                                            |
+| [12](#12-obtuse-triangles-come-from-rhombuses-and-the-cube-pattern-is-out)       | Obtuse triangles come from rhombuses, and the cube pattern is out       |
+| [13](#13-difficulty-is-the-level-plus-the-tilings-complexity)                    | Difficulty is the level plus the tiling's complexity                    |
+| [14](#14-fastmines-click-and-pause-behavior)                                     | FastMines click and pause behavior                                      |
+| [15](#15-deliberate-differences-from-fastmines)                                  | Deliberate differences from FastMines                                   |
+| [16](#16-history-keeps-every-finished-game-and-ranks-unaided-ones)               | History keeps every finished game and ranks unaided ones                |
+| [17](#17-autosave-by-replay-every-5-seconds)                                     | Autosave by replay, every 5 seconds                                     |
+| [18](#18-rules-changes-are-logged-with-the-moves)                                | Rules changes are logged with the moves                                 |
+| [19](#19-games-pause-when-the-computer-sleeps)                                   | Games pause when the computer sleeps                                    |
+| [20](#20-a-loaded-named-save-counts-as-assisted)                                 | A loaded named save counts as assisted                                  |
+| [21](#21-players-are-names-only)                                                 | Players are names only                                                  |
+| [22](#22-a-cli-and-a-skill-not-an-mcp-server)                                    | A CLI and a skill, not an MCP server                                    |
+| [23](#23-a-full-instance-answers-busy)                                           | A full instance answers busy                                            |
+| [24](#24-a-move-is-checked-in-one-order-on-both-paths)                           | A move is checked in one order on both paths                            |
+| [25](#25-network-requests-go-through-ureq-with-rustls)                           | Network requests go through ureq with rustls                            |
+| [26](#26-histories-sync-ranked-games-through-a-gist)                             | Histories sync ranked games through a gist                              |
+| [27](#27-native-chrome-that-follows-the-platform)                                | Native chrome that follows the platform                                 |
+| [28](#28-no-menu-bar-on-windows)                                                 | No menu bar on Windows                                                  |
+| [29](#29-player-data-lives-in-a-polymine-folder)                                 | Player data lives in a Polymine folder                                  |
+| [30](#30-keep-pixi-render-on-demand)                                             | Keep Pixi, render on demand                                             |
+| [31](#31-minimum-cell-size-then-scroll)                                          | Minimum cell size, then scroll                                          |
+| [32](#32-results-show-in-the-toolbar)                                            | Results show in the toolbar                                             |
+| [33](#33-keyboard-play-by-direction)                                             | Keyboard play by direction                                              |
+| [34](#34-the-wheel-and-a-pinch-resize-the-window)                                | The wheel and a pinch resize the window                                 |
+| [35](#35-themes-are-folders-of-css-variables-that-pair-chrome-and-board)         | Themes are folders of CSS variables that pair chrome and board          |
+| [36](#36-theme-variables-resolve-away-from-the-apps-styles)                      | Theme variables resolve away from the app's styles                      |
+| [37](#37-board-colors-are-opaque-and-layers-have-opacities)                      | Board colors are opaque, and layers have opacities                      |
+| [38](#38-player-themes-come-from-a-folder-with-hard-limits)                      | Player themes come from a folder with hard limits                       |
+| [39](#39-themes-never-carry-shader-code)                                         | Themes never carry shader code                                          |
+| [40](#40-experimental-themes-show-only-in-development-builds)                    | Experimental themes show only in development builds                     |
+| [41](#41-theme-tests-hold-every-built-in-theme-to-readability-bars)              | Theme tests hold every built-in theme to readability bars               |
+| [42](#42-a-color-filter-solves-each-themes-pairs-under-the-deficiency)           | A color filter solves each theme's pairs under the deficiency           |
+| [43](#43-color-only-themes-ring-high-counts-and-keep-their-key-under-the-board)  | Color-only themes ring high counts and keep their key under the board   |
+| [44](#44-cells-take-one-light-drawn-from-one-shared-texture)                     | Cells take one light, drawn from one shared texture                     |
+| [45](#45-frost-puts-its-look-ahead-of-readability-over-bright-desktops)          | Frost puts its look ahead of readability over bright desktops           |
+| [46](#46-swatch-fills-closed-cells-with-the-system-accent)                       | Swatch fills closed cells with the system accent                        |
+| [47](#47-glossy-glazes-tiles-in-the-accent-deep-in-light-mode-and-light-in-dark) | Glossy glazes tiles in the accent, deep in light mode and light in dark |
+| [48](#48-glass-lights-see-through-cells-and-relaxes-cell-and-digit-contrast)     | Glass lights see-through cells and relaxes cell and digit contrast      |
+| [49](#49-editor-themes-take-their-sources-names-and-official-palettes)           | Editor themes take their sources' names and official palettes           |
+| [50](#50-editor-themes-part-cells-like-panes)                                    | Editor themes part cells like panes                                     |
+| [51](#51-editor-theme-counts-follow-the-syntax-colors)                           | Editor theme counts follow the syntax colors                            |
+| [52](#52-themes-get-a-page-of-their-own-in-sections-by-where-they-come-from)     | Themes get a page of their own, in sections by where they come from     |
+| [53](#53-the-code-section-sets-a-dark-theme-over-a-light-one-in-each-column)     | The Code section sets a dark theme over a light one in each column      |
+| [54](#54-windows-releases-ship-the-nsis-installer-only)                          | Windows releases ship the NSIS installer only                           |
+| [55](#55-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
+| [56](#56-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
 
 ## 1. Rust engine with a Tauri and Svelte shell
 
@@ -90,7 +90,7 @@ or translates FastMines code, tables, or assets.
 **Why:** FastMines is GPL. Tilings and minesweeper rules are public math and
 ideas, so a new implementation can carry a permissive license.
 
-## 4. Game state lives in the Rust backend
+## 3. Game state lives in the Rust backend
 
 **Date:** 2026-10-24
 
@@ -100,7 +100,7 @@ webview.
 **Why:** It keeps the UI free of rules and makes each click one small command.
 The engine has no I/O, so a WASM build stays possible.
 
-## 5. The shell's logic is a plain struct
+## 4. The shell's logic is a plain struct
 
 **Date:** 2026-11-02
 
@@ -110,7 +110,7 @@ history, and implements every command. The Tauri commands are one-line wrappers.
 **Why:** Tests can drive the whole shell without a window, which took its
 coverage from zero to over 90%.
 
-## 6. Types and commands come from tauri-specta
+## 5. Types and commands come from tauri-specta
 
 **Date:** 2026-11-03
 
@@ -125,7 +125,7 @@ maintainer prefers the cleaner code over waiting for specta 2 to ship.
 **Alternatives:** `ts-rs` for the types with hand-written `invoke` wrappers,
 which is stable but leaves every command name and argument unchecked.
 
-## 7. Logs go through `log` and `tauri-plugin-log`
+## 6. Logs go through `log` and `tauri-plugin-log`
 
 **Date:** 2026-11-03
 
@@ -140,7 +140,7 @@ lost. Release builds have no devtools either, so UI warnings and errors would
 never reach a file. The official plugin needs only the `log:default` permission,
 where a custom command would add app code and generated bindings.
 
-## 8. Eight modules may use unsafe code
+## 7. Eight modules may use unsafe code
 
 **Date:** 2026-11-05
 
@@ -175,7 +175,7 @@ module keeps a new `allow` from slipping in unrecorded. AppKit moves the traffic
 lights back into its own title bar whenever it lays the title bar out again. tao
 re-applies its inset only from a `drawRect:` that never runs under the webview.
 
-## 9. Third-party notices ship in the About window
+## 8. Third-party notices ship in the About window
 
 **Date:** 2026-11-03
 
@@ -193,7 +193,7 @@ committed file shows each dependency change in review.
 Vite's switch to Rolldown, and a notices file beside the installers only, which
 the Mac app bundle and the portable ZIP would not carry.
 
-## 10. Tilings are data
+## 9. Tilings are data
 
 **Date:** 2026-10-24
 
@@ -215,7 +215,7 @@ different board on another machine.
 ties but not the next tiling's, and it would have flipped the order saved
 Rosettes games use.
 
-## 11. ChaCha8 for mine placement
+## 10. ChaCha8 for mine placement
 
 **Date:** 2026-11-01
 
@@ -225,7 +225,7 @@ the layout one seed produces.
 **Why:** `StdRng` may change its algorithm between rand releases, which would
 break saved games, shared seeds, and replays.
 
-## 12. Twin cells never hold a mine
+## 11. Twin cells never hold a mine
 
 **Date:** 2026-11-02
 
@@ -244,7 +244,7 @@ its games at 6% density. With twins kept clear, it wins 96%. A solver blind to
 the rule guessed on risky cells while a closed twin was certainly safe, and its
 hint odds were wrong on boards with twins.
 
-## 13. Obtuse triangles come from rhombuses, and the cube pattern is out
+## 12. Obtuse triangles come from rhombuses, and the cube pattern is out
 
 **Date:** 2026-11-02
 
@@ -258,7 +258,7 @@ exactly the cells around its two sharp corners. Two different mine layouts on
 any four-corner loop then show the same numbers, so the assistant won only 38%
 of games even at 6% density.
 
-## 14. Difficulty is the level plus the tiling's complexity
+## 13. Difficulty is the level plus the tiling's complexity
 
 **Date:** 2026-11-02
 
@@ -274,18 +274,19 @@ Professional, the assistant wins 64% of square games and 2% on Rosettes.
 **Alternatives:** a mine density per tiling that rises with the neighbor count,
 as FastMines' levels do.
 
-## 15. FastMines click and pause behavior
+## 14. FastMines click and pause behavior
 
 **Date:** 2026-11-02
 
 **Decision:** Polymine follows FastMines here. Right click restarts an ended
 game and resumes a paused one. Marks wait for the first open. Losing focus,
-minimizing, or opening a dialog pauses the game, and Esc pauses and minimizes.
+minimizing, or opening a dialog pauses the game, and Esc pauses and minimizes. A
+setting turns off the pause on focus loss.
 
 **Why:** A behavior audit of FastMines found these were part of its feel, and
 the maintainer missed the right-click restart first.
 
-## 16. Deliberate differences from FastMines
+## 15. Deliberate differences from FastMines
 
 **Date:** 2026-11-02
 
@@ -317,7 +318,7 @@ the maintainer missed the right-click restart first.
 **Why:** Each one either gives the player more information, matches current
 platform conventions, or fixes a bug or a loophole.
 
-## 17. History keeps every finished game and ranks unaided ones
+## 16. History keeps every finished game and ranks unaided ones
 
 **Date:** 2026-11-03
 
@@ -340,7 +341,7 @@ number the player sees.
 **Alternatives:** recording abandoned games as played, and keeping every
 unranked record.
 
-## 18. Autosave by replay, every 5 seconds
+## 17. Autosave by replay, every 5 seconds
 
 **Date:** 2026-11-02
 
@@ -353,7 +354,7 @@ restarts, while writing on every move is needless for a game. Saving every 5
 seconds bounds the loss. A seed and moves are a few kilobytes and rebuild the
 board exactly.
 
-## 19. Rules changes are logged with the moves
+## 18. Rules changes are logged with the moves
 
 **Date:** 2026-11-03
 
@@ -366,7 +367,7 @@ replays under its saved rules.
 **Why:** Replaying every move under the rules at save time rebuilds a different
 board than the one on screen. For example, a removed `?` comes back as a flag.
 
-## 20. Games pause when the computer sleeps
+## 19. Games pause when the computer sleeps
 
 **Date:** 2026-11-03
 
@@ -379,7 +380,7 @@ the same game left open overnight would record different times. Tauri exposes no
 system sleep event on desktop, and the clock comparison works the same
 everywhere.
 
-## 21. A loaded named save counts as assisted
+## 20. A loaded named save counts as assisted
 
 **Date:** 2026-11-03
 
@@ -395,7 +396,7 @@ the assistant's moves and the CLI's.
 retries; and ranking a loaded game only when it was saved before the first open,
 which adds a rule for little gain.
 
-## 22. Players are names only
+## 21. Players are names only
 
 **Date:** 2026-11-04
 
@@ -413,7 +414,7 @@ shared ones, and a story for what changes when the player switches mid-game.
 grow from this list later; and filtering stats by name in the UI, which would
 miss a player's wins outside the overall top 10.
 
-## 23. A CLI and a skill, not an MCP server
+## 22. A CLI and a skill, not an MCP server
 
 **Date:** 2026-11-02
 
@@ -428,7 +429,7 @@ scripts, and CI. The design follows PecoFence's `pecofence-cli`. Instance names
 let tests run an isolated copy beside the player's own, which a singleton app
 can't. Counting CLI games as assisted keeps the champions table human.
 
-## 24. A full instance answers busy
+## 23. A full instance answers busy
 
 **Date:** 2026-11-05
 
@@ -446,7 +447,7 @@ version moved.
 **Alternatives:** `internal` with a hint, which reads as a failure; and
 `timeout` with exit code 4, which hides that a retry is safe.
 
-## 25. A move is checked in one order on both paths
+## 24. A move is checked in one order on both paths
 
 **Date:** 2026-11-05
 
@@ -463,7 +464,7 @@ finished game refuses every move, whatever cells it names.
 **Alternatives:** checking the cells first, which tells an agent to fix a cell
 id on a game it can't play anyway.
 
-## 26. Network requests go through ureq with rustls
+## 25. Network requests go through ureq with rustls
 
 **Date:** 2026-11-03
 
@@ -492,12 +493,12 @@ for `sync`, so `npm run notices` lists these crates.
 each platform's TLS library, and `tauri-plugin-http`, which ties requests to the
 app and leaves the CLI and tests without them.
 
-## 27. Histories sync ranked games through a gist
+## 26. Histories sync ranked games through a gist
 
 **Date:** 2026-11-03
 
 **Decision:** `polymine-cli sync` shares a history through a GitHub gist the
-player owns. It sends and takes only ranked records (decision 17). It adds the
+player owns. It sends and takes only ranked records (decision 16). It adds the
 games the gist lacks after the lines the gist already holds, and it only appends
 to the local file. A record is one game when every field this build knows
 matches. The gist keeps every line as it was, including lines this build can't
@@ -519,20 +520,22 @@ build can't parse; comparing raw lines, which doubles a game whenever two builds
 write it differently; and pruning unranked lines from the gist, which deletes
 records another machine may still want.
 
-## 28. Native chrome that follows the platform
+## 27. Native chrome that follows the platform
 
 **Date:** 2026-11-01
 
 **Decision:** The window follows the system's light or dark mode. It uses Mica
 on Windows 11 and `sidebar` vibrancy with an overlay title bar on macOS, and
-falls back to an opaque window color elsewhere. Controls follow Fluent metrics
-on Windows and AppKit metrics on macOS.
+falls back to an opaque window color elsewhere. A theme with
+`--window-material: frosted`, such as Frost, switches to a frosted blur: Acrylic
+on Windows and the under-window material on macOS. Controls follow Fluent
+metrics on Windows and AppKit metrics on macOS.
 
 **Why:** A UX review found that a dark web page in a window reads as foreign on
 both platforms. A forced navy theme ignores a light-mode system, and generic
 gradient styling looks like no platform at all.
 
-## 29. No menu bar on Windows
+## 28. No menu bar on Windows
 
 **Date:** 2026-11-01
 
@@ -544,7 +547,7 @@ Window menus.
 Win32 menu bar looks dated. macOS apps need a menu bar. Without an Edit menu,
 the clipboard shortcuts stop working in text fields.
 
-## 30. Player data lives in a Polymine folder
+## 29. Player data lives in a Polymine folder
 
 **Date:** 2026-11-03
 
@@ -560,7 +563,7 @@ noise. Tauri derives its own folders from the identifier, and the macOS bundle
 ID is the identifier, so it stays reverse-domain. The window-state plugin always
 writes into the identifier's folder, so Polymine saves its window state itself.
 
-## 31. Keep Pixi, render on demand
+## 30. Keep Pixi, render on demand
 
 **Date:** 2026-11-01
 
@@ -571,7 +574,7 @@ and cells share one `GraphicsContext` per shape and state.
 a core. Shared contexts keep large custom boards cheap. SVG, Canvas 2D, raw
 WebGL, and native `wgpu` were weighed and rejected.
 
-## 32. Minimum cell size, then scroll
+## 31. Minimum cell size, then scroll
 
 **Date:** 2026-11-01
 
@@ -582,7 +585,7 @@ The window's minimum size is 800 x 600.
 the maintainer wanted more than readable digits at a glance. Zoom brings digits
 back when they get too small.
 
-## 33. Results show in the toolbar
+## 32. Results show in the toolbar
 
 **Date:** 2026-11-01
 
@@ -592,7 +595,7 @@ toolbar instead of a card over the board.
 **Why:** A card covers the bottom rows, and the space reserved for it pushes the
 board off center in every state.
 
-## 34. Keyboard play by direction
+## 33. Keyboard play by direction
 
 **Date:** 2026-11-01
 
@@ -601,7 +604,7 @@ direction is nearest the key's, preferring closer neighbors.
 
 **Why:** It works on every tiling without per-tiling key maps.
 
-## 35. The wheel and a pinch resize the window
+## 34. The wheel and a pinch resize the window
 
 **Date:** 2026-11-03
 
@@ -628,7 +631,7 @@ anchoring at the pointer or a corner instead of the center; fixed 25% steps; and
 stopping both sides as soon as either reaches a limit, which leaves a tall
 window at the minimum width unable to shrink at all.
 
-## 36. Themes are folders of CSS variables that pair chrome and board
+## 35. Themes are folders of CSS variables that pair chrome and board
 
 **Date:** 2026-11-03
 
@@ -653,7 +656,7 @@ lets a theme keep a whole look, as Midnight keeps the game's first one.
 `light-dark()`, or the accent; and a stylesheet the app injects, which would let
 a theme restyle anything and load resources.
 
-## 37. Theme variables resolve away from the app's styles
+## 36. Theme variables resolve away from the app's styles
 
 **Date:** 2026-11-03
 
@@ -671,7 +674,7 @@ directly keeps the built-in themes exact and makes the tests run the same code
 as the app. On an element in the page itself, a theme would also inherit the
 app's tokens and the Reduce Motion transitions, which delay every read.
 
-## 38. Board colors are opaque, and layers have opacities
+## 37. Board colors are opaque, and layers have opacities
 
 **Date:** 2026-11-03
 
@@ -688,14 +691,15 @@ highlight laid over the cell, which a color with alpha says directly. Writing
 the tint in each theme lets a theme use the accent its own way, such as closed
 cells in the accent itself.
 
-## 39. Player themes come from a folder with hard limits
+## 38. Player themes come from a folder with hard limits
 
 **Date:** 2026-11-03
 
 **Decision:** Player themes live in `themes` in the instance's data folder.
 `polymine-ipc` checks each folder before the UI sees it:
 
-1. Only the known file names, matched exactly, and no links or subfolders.
+1. Only the known file names, matched exactly, no symbolic or hard links, and no
+   subfolders.
 2. 32 KiB for `theme.css` and each SVG, and 64 KiB for a README or license file.
 3. 256 KiB and 1024 by 1024 pixels for the preview.
 4. 1 MiB per theme, and at most 64 themes.
@@ -709,9 +713,10 @@ folder. Checking the folder in a crate without Tauri lets a download use the
 same rules before it moves a theme into place. An SVG loaded as an image can't
 run scripts or fetch anything, which a sanitizer would have to prove for every
 SVG feature. Reading the folder on focus lets a player edit a theme and see it
-by switching back.
+by switching back. A hard link passes every check a plain file does but can
+share its contents with a file anywhere on the volume.
 
-## 40. Themes never carry shader code
+## 39. Themes never carry shader code
 
 **Date:** 2026-11-03
 
@@ -726,7 +731,7 @@ GPU or lose the WebGL context. Theme folders are meant to be safe to share. The
 maintainer wants experiments free of guardrails while keeping player themes to
 data.
 
-## 41. Experimental themes show only in development builds
+## 40. Experimental themes show only in development builds
 
 **Date:** 2026-11-04
 
@@ -740,13 +745,13 @@ skip it.
 **Why:** A hidden setting needs a field in Rust, a control, and a story for
 release builds, all for a look still changing every hour. A folder listed only
 where the maintainer and agents run lets the effect be tried in the real app,
-and decision 40 already frees experiments from the readability checks.
+and decision 39 already frees experiments from the readability checks.
 
 **Alternatives:** a hidden setting, which can come once an experiment is worth
 trying in a release build; a player theme in the data folder, which the repo
 can't ship; and a bundled theme, which would have to pass every theme test.
 
-## 42. Theme tests hold every built-in theme to readability bars
+## 41. Theme tests hold every built-in theme to readability bars
 
 **Date:** 2026-11-03
 
@@ -768,7 +773,7 @@ inks sit too close for some pairs, and the dot-matrix glyph's shape carries the
 count. Rupture and Diode relax `cell-contrast` for dark tiles on a black board,
 which their rim light or dome highlight sets apart, and Deboss for one khaki
 card pressed up and in. Frost, Swatch, Glass, and the editor themes give their
-reasons in decisions 46, 47, 49, 51, and 54.
+reasons in decisions 45, 46, 48, 50, and 53.
 
 **Why:** Testing themes as data keeps a new theme from regressing legibility.
 Digits need only side-by-side separation, about one just-noticeable step. A
@@ -776,20 +781,20 @@ player names a color-only count from one small cell against the key, so 10,
 about five steps, leaves room for that and for the simulation's error. At 2.5,
 Spectrum's 2 and 4 sat 3.5 apart under protanopia. One strong accent misses the
 spread from yellow to dark gray that real accents cover. A player who needs the
-separation a relaxed theme gives up turns on the color filter (decision 43).
+separation a relaxed theme gives up turns on the color filter (decision 42).
 
 **Alternatives:** holding only the main themes to the color vision checks and
 letting the rest opt out, which leaves a player without help on most themes; and
 one separation bar for every theme.
 
-## 43. A color filter solves each theme's pairs under the deficiency
+## 42. A color filter solves each theme's pairs under the deficiency
 
 **Date:** 2026-11-03
 
 **Decision:** A Color filter setting, off by default, remaps the board colors of
 any theme, built-in or a player's, for deuteranopia, protanopia, or tritanopia.
 It checks the pairs of colors a player must tell apart against the theme tests'
-bars (decision 42), under the Machado simulation and in normal vision. A failing
+bars (decision 41), under the Machado simulation and in normal vision. A failing
 pair's two colors take the smallest step in OKLab that clears the bar with some
 headroom, in the manner of Kuhn, Oliveira, and Fernandes's mass-spring
 recoloring for dichromats. A board that passes comes back unchanged, and a pair
@@ -818,7 +823,7 @@ gamma-encoded values and costs a render pass per sprite; and pushing failing
 digit pairs far past 2.5, which treats a pair just under the bar much better
 than one just over it.
 
-## 44. Color-only themes ring high counts and keep their key under the board
+## 43. Color-only themes ring high counts and keep their key under the board
 
 **Date:** 2026-11-03
 
@@ -826,11 +831,11 @@ than one just over it.
 `--number-ring-from` variable draws counts from that one up as rings: the color
 fills a band inside the cell's edge and the middle stays open. Pride and
 Spectrum ring 9 to 14 in the colors of 1 to 6. The tests hold counts drawn alike
-to the OKLab distance of 10 from decision 42, under normal vision and the three
+to the OKLab distance of 10 from decision 41, under normal vision and the three
 deficiencies; a ring and a fill pass on shape. The key sits in a strip under the
-board, sized to the counts the tiling can reach. The cell under the pointer or
-the keyboard focus shows its count as a digit, and its chip in the key lights
-up.
+board, sized to the counts the tiling can reach, and the Show the count key
+switch hides it for a harder game. The cell under the pointer or the keyboard
+focus shows its count as a digit, and its chip in the key lights up.
 
 **Why:** Crosses reach 14 neighbors and triangles 12, and eight colors can't
 cover every count. A search found 14 colors that clear the bar, at 10.4, but in
@@ -845,7 +850,7 @@ travel to the key.
 triangles; a legend in the toolbar, which has no room at 800 by 600 and hides
 with the toolbar.
 
-## 45. Cells take one light, drawn from one shared texture
+## 44. Cells take one light, drawn from one shared texture
 
 **Date:** 2026-11-03
 
@@ -878,19 +883,19 @@ gradient and fits it to each shape's bounding box, not along the light; a blur
 filter for the inner shadow, which costs a render pass; and per-vertex colors,
 which Pixi `Graphics` doesn't take.
 
-## 46. Frost puts its look ahead of readability over bright desktops
+## 45. Frost puts its look ahead of readability over bright desktops
 
 **Date:** 2026-11-03
 
-**Decision:** Frost's open cells are nearly clear (6% tint), and Frost skips the
-test that see-through numbers reach 4.5:1 over a white or a black desktop. Every
-other Frost check still applies, and the other themes keep the full check.
+**Decision:** Frost's open cells are nearly clear (6% tint), and Frost relaxes
+`number-readability`, the check that see-through numbers reach 4.5:1 over a
+white or a black desktop.
 
 **Why:** The maintainer wants Frost to look like glass. A dark tint on open
 cells or a halo around each digit kept the numbers readable but made the theme
 look opaque. Players who need the contrast can pick Graphite or Datum.
 
-## 47. Swatch fills closed cells with the system accent
+## 46. Swatch fills closed cells with the system accent
 
 **Date:** 2026-11-03
 
@@ -911,7 +916,7 @@ preview without the accent would show Swatch in blue for every player.
 the player's own color; and a `preview.png`, which can't show the player's
 accent.
 
-## 48. Glossy glazes tiles in the accent, deep in light mode and light in dark
+## 47. Glossy glazes tiles in the accent, deep in light mode and light in dark
 
 **Date:** 2026-11-03
 
@@ -941,7 +946,7 @@ the shaded tile and its outline under the glare.
 3:1 against one floor for every accent; and a fixed candy color, which ignores
 the player's accent.
 
-## 49. Glass lights see-through cells and relaxes cell and digit contrast
+## 48. Glass lights see-through cells and relaxes cell and digit contrast
 
 **Date:** 2026-11-03
 
@@ -962,12 +967,12 @@ instead of graying it. A shade would mix into the cell's fill and fade with it.
 Closed cells read as glass by their light, not by a darker or lighter fill, so
 3:1 between the two layers' colors would need an opaque tile. Digits are chosen
 for the material in each mode, so the opposite desktop washes them out, as in
-Frost (decision 46).
+Frost (decision 45).
 
 **Alternatives:** Frost's light pastels in both modes, which vanish on the light
 material; and a stronger closed fill, which reads as a gray film.
 
-## 50. Editor themes take their sources' names and official palettes
+## 49. Editor themes take their sources' names and official palettes
 
 **Date:** 2026-11-03
 
@@ -976,7 +981,7 @@ dark ones are Atom One Dark, One Dark Pro, Dracula, Monokai, GitHub Dark, and
 Solarized Dark. The light ones are Atom One Light, Alucard, GitHub Light,
 Solarized Light, Catppuccin Latte, and Monokai Light. Each fixes its mode and
 paints an opaque window in chrome tokens of its own. Each uses its source's
-official palette, except Monokai Light, which adapts Monokai's (decision 54).
+official palette, except Monokai Light, which adapts Monokai's (decision 53).
 Its header credits the author and names the source in a `Source:` line. Where an
 official color misses a theme test bar, it moves in OKLab lightness only,
 keeping hue and chroma. `theme.css` then names the original and the color used.
@@ -1002,7 +1007,7 @@ exact, which would leave light schemes' pastel digits under 3:1; and one theme
 per scheme that follows the system's mode, which pairs schemes that weren't
 designed together.
 
-## 51. Editor themes part cells like panes
+## 50. Editor themes part cells like panes
 
 **Date:** 2026-11-03
 
@@ -1031,7 +1036,7 @@ board; a shade at a quarter of the strength, which the maintainer turned down in
 side-by-side samples of One Dark Pro and GitHub Light; and lighter open cells,
 which leave the editor background and weaken the digits.
 
-## 52. Editor theme counts follow the syntax colors
+## 51. Editor theme counts follow the syntax colors
 
 **Date:** 2026-11-03
 
@@ -1046,7 +1051,7 @@ to how the editors look, since the keyword color dominates their code views.
 
 **Alternatives:** the classic minesweeper order in each scheme's nearest hues.
 
-## 53. Themes get a page of their own, in sections by where they come from
+## 52. Themes get a page of their own, in sections by where they come from
 
 **Date:** 2026-11-08
 
@@ -1060,7 +1065,7 @@ Surprise me, and one row of chips picks what the grid shows: All, Recent,
 Favorites, Light, Dark, B&W, or See-through, one at a time. The grid lists every
 theme in one scroll, in sections named Signature, Code, and Custom, each with
 its count. Signature holds the app's own looks, Code the editor themes (decision
-50), and Custom the player's themes; `EDITOR_THEMES` in `builtin.ts` sends each
+49), and Custom the player's themes; `EDITOR_THEMES` in `builtin.ts` sends each
 built-in theme to its section, and Custom shows only when the themes folder
 holds a theme. A card draws a small hex board with the theme's own glyphs and
 light, and its name. A click chooses the theme, and nothing happens on hover.
@@ -1093,7 +1098,7 @@ from the real board; a separate gallery window; loading a player theme's glyphs
 only once its card scrolls into view, which matters only with many player
 themes; and a `Group:` line in each `theme.css`.
 
-## 54. The Code section sets a dark theme over a light one in each column
+## 53. The Code section sets a dark theme over a light one in each column
 
 **Date:** 2026-11-08
 
@@ -1120,16 +1125,16 @@ Explicit rows and columns keep that at any column count, while the page's order
 stays the reading order for the keyboard and screen readers. One Dark Pro ships
 dark variants only, so Catppuccin Latte, which has no dark sibling here, fills
 its column. Solarized Dark keeps Solarized's published accents rather than
-bending them apart, as decision 42 allows for a look kept on purpose; the
+bending them apart, as decision 41 allows for a look kept on purpose; the
 maintainer asked that color-blind tuning go to the main themes first. A player
-who needs the separation turns on the color filter (decision 43).
+who needs the separation turns on the color filter (decision 42).
 
 **Alternatives:** pairs side by side, two to a row, which loses the column; six
 columns, which shrinks every card on the page; a popular light theme with no
 dark sibling, such as Rosé Pine Dawn, under One Dark Pro; and Monokai Pro's
 light filter, which is commercial.
 
-## 55. Windows releases ship the NSIS installer only
+## 54. Windows releases ship the NSIS installer only
 
 **Date:** 2026-11-03
 
@@ -1140,23 +1145,24 @@ release adds the portable ZIP. No MSI ships.
 installs Polymine without putting `polymine-cli` on `PATH` and without offering
 to remove the player's data on uninstall. NSIS installs per user with no admin
 prompt, and winget and the Microsoft Store both take its `.exe`. MSIX, the
-Store's own format, is the one to evaluate before Polymine goes public
+Store's own format, is still to evaluate
 ([todo.md](todo.md#platform-and-release)).
 
 **Alternatives:** shipping the MSI beside the NSIS installer as an equal choice,
 which hands some players an install without the CLI on `PATH`.
 
-## 56. The window icon follows the theme
+## 55. The window icon follows the theme
 
 **Date:** 2026-11-07
 
 **Decision:** The static app icon is a steel mine on a dark plate with a faint
-triangle lattice. While Polymine runs, the window's icon is the same mine drawn
-in the active theme's colors: its board plate, closed cell, mine, and mine
-spark. The plate matches light or dark mode. Every theme gets one, and a theme
-may set `--icon-plate`, `--icon-metal`, `--icon-mine`, and `--icon-spark` to
-choose its colors. The icon is drawn from a template, never from a theme's own
-SVG.
+triangle lattice. While Polymine runs on Windows or Linux, the window's icon is
+the same mine drawn in the active theme's colors: its board plate, closed cell,
+mine, and mine spark. The plate matches light or dark mode. Every theme gets
+one, and a theme may set `--icon-plate`, `--icon-metal`, `--icon-mine`, and
+`--icon-spark` to choose its colors. The icon is drawn from a template, never
+from a theme's own SVG. macOS has no window icon, and the Dock keeps the static
+one.
 
 **Why:** The maintainer wanted the icon to match the theme, and picked the dark
 "Poly grid" plate from the concept sheets in `docs/icons`. Deriving the colors
@@ -1168,7 +1174,7 @@ size limits, and a way to read well at 16 pixels.
 folder; and changing the macOS Dock icon at run time, which needs AppKit calls
 and can wait ([todo.md](todo.md#next)).
 
-## 57. Each data folder is an instance of its own
+## 56. Each data folder is an instance of its own
 
 **Date:** 2026-11-07
 

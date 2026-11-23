@@ -97,7 +97,7 @@ Prettier.
    needs its own `.typ::<T>()` line.
 3. **`specta` and `tauri-specta` are pinned to exact versions.** A looser
    version can pull a release candidate that changes the generated bindings.
-4. **A new `allow(unsafe_code)` needs a line in decisions.md.** Decision 8 lists
+4. **A new `allow(unsafe_code)` needs a line in decisions.md.** Decision 7 lists
    the eight modules that may use unsafe code, so no `allow` slips in
    unrecorded.
 5. **Theme files are untrusted input.** Never add one to the page as a

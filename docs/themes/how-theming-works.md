@@ -360,7 +360,7 @@ moves. The flat sheen stays out, as it does in the theme tests.
 `--board-effects` is a list of effect names from `BOARD_EFFECTS` in
 `lib/themes/format.ts`, parsed into `BoardTheme.effects`. A theme can only pick
 effects; their shaders live in `lib/board`
-([decision 40](../decisions.md#40-themes-never-carry-shader-code)).
+([decision 39](../decisions.md#39-themes-never-carry-shader-code)).
 
 ### The ferrofluid
 
