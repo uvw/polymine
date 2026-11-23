@@ -174,7 +174,7 @@ These live in GitHub's settings, not in the repository.
    requests set to read and write. A pull request opened with the workflow's own
    token starts no workflows, so without it the release pull request's checks
    never run: a maintainer then has to approve them, or close and reopen the
-   pull request.
+   pull request. [Tokens](#tokens) covers it and the other release secrets.
 3. **Actions, General:** allow GitHub Actions to create and approve pull
    requests, which release-please needs when it falls back to the workflow's
    token.
@@ -184,6 +184,32 @@ These live in GitHub's settings, not in the repository.
    CodeQL errors for `main`; the second protects `v*` tags. GitHub offers
    rulesets on private repositories only with a paid plan, so they're imported
    when the repository goes public.
+
+## Tokens
+
+The release workflows read three tokens, all secrets of the `release`
+environment, not of the repository:
+
+1. `RELEASE_PLEASE_TOKEN` opens and updates the release pull request, so its
+   checks start without a maintainer's approval.
+2. `WINGET_TOKEN` opens the winget-pkgs pull requests from the uvw/winget-pkgs
+   fork ([winget](#winget)).
+3. `COPILOT_TOKEN` lets Copilot CLI write the [release notes](#release-notes).
+
+Each is optional: without it, its step is skipped with a notice, or, for
+`RELEASE_PLEASE_TOKEN`, falls back to the workflow's own token.
+
+`scripts/release-tokens.sh` sets them up. Run it once the repository is public
+and the `release` environment exists. It forks microsoft/winget-pkgs when the
+fork is missing, opens each token's page with its fields filled in, checks the
+token you paste, and saves it as a secret of the `release` environment. It never
+prints a token or passes one on a command line, and skips any secret that's
+already set.
+
+When a token expires, run it again with the secret's name, such as
+`scripts/release-tokens.sh WINGET_TOKEN`. Each token's name ends in the day it
+was made, since GitHub refuses a name another of your tokens has. Revoke the old
+token once the new secret is saved. Each fine-grained token lasts a year.
 
 ## Verifying a download
 
