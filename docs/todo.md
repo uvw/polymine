@@ -229,13 +229,9 @@ in. No theme editor UI for now.
    the CLI has any role there.
 4. **Specta 2.** Move to specta 2 and `tauri-specta` 2 once they ship, and drop
    the exact version pins in `Cargo.toml` and `src-tauri/Cargo.toml`.
-5. **Windows file checks for theme folders.** `same_file` in
-   `crates/polymine-ipc/src/themes.rs` always passes on Windows, and a hard link
-   to a file outside the folder reads fine. Open with
-   `FILE_FLAG_OPEN_REPARSE_POINT` and compare file IDs.
-6. **A sturdier installer test.** A locked file in the `finally` block of
+5. **A sturdier installer test.** A locked file in the `finally` block of
    `scripts/windows-installer-test.ps1` stops the remaining restores. Wrap each
    restore on its own and print the backup path on any error.
-7. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
+6. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
    `--timeout` floor, the player's guide's minimal theme, and the tiling table
    in `docs/design.md` can drift without a test failing.

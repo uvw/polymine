@@ -415,10 +415,15 @@ fn read_capped(
         name: name.to_owned(),
         source,
     };
-    let file = File::open(path).map_err(io_error)?;
+    let file = open_no_follow(path).map_err(io_error)?;
     let opened = file.metadata().map_err(io_error)?;
     if !opened.is_file() || !same_file(listed, &opened) {
         return Err(ThemeError::Changed(name.to_owned()));
+    }
+    // A hard link is a plain file to every check above, but it can share its
+    // contents with a file anywhere on the volume.
+    if links(&file, &opened).map_err(io_error)? > 1 {
+        return Err(ThemeError::Link(name.to_owned()));
     }
     let mut bytes = Vec::new();
     file.take(limit + 1)
@@ -431,15 +436,44 @@ fn read_capped(
 }
 
 #[cfg(unix)]
+fn open_no_follow(path: &Path) -> io::Result<File> {
+    File::open(path)
+}
+
+/// Opens a symbolic link or junction as itself, so one swapped in after the
+/// listing fails the `is_file` check instead of being followed.
+#[cfg(windows)]
+fn open_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::windows::fs::OpenOptionsExt;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    File::options()
+        .read(true)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+}
+
+#[cfg(unix)]
 fn same_file(a: &Metadata, b: &Metadata) -> bool {
     use std::os::unix::fs::MetadataExt;
     a.dev() == b.dev() && a.ino() == b.ino()
 }
 
-/// Windows has no stable file id in `std`; the listing already refused links.
-#[cfg(not(unix))]
-fn same_file(_: &Metadata, _: &Metadata) -> bool {
-    true
+/// `std` has no stable file id on Windows, so a file swapped in after the
+/// listing is caught by its size and write time instead.
+#[cfg(windows)]
+fn same_file(a: &Metadata, b: &Metadata) -> bool {
+    a.len() == b.len() && a.modified().ok() == b.modified().ok()
+}
+
+#[cfg(unix)]
+fn links(_: &File, opened: &Metadata) -> io::Result<u64> {
+    use std::os::unix::fs::MetadataExt;
+    Ok(opened.nlink())
+}
+
+#[cfg(windows)]
+fn links(file: &File, _: &Metadata) -> io::Result<u64> {
+    Ok(winapi_util::file::information(file)?.number_of_links())
 }
 
 fn text(name: &str, bytes: Vec<u8>) -> Result<String, ThemeError> {
@@ -713,6 +747,16 @@ mod tests {
         std::os::unix::fs::symlink(secret.path(), root.path().join("linked")).unwrap();
         let err = read_theme(root.path(), "linked").unwrap_err();
         assert!(err.to_string().contains("is a link"), "{err}");
+    }
+
+    #[test]
+    fn refuses_a_hard_link_to_a_file_outside_the_folder() {
+        let secret = tempfile::tempdir().unwrap();
+        fs::write(secret.path().join("key.css"), CSS.as_bytes()).unwrap();
+        let (_root, dir) = theme(&[]);
+        fs::hard_link(secret.path().join("key.css"), dir.join("theme.css")).unwrap();
+        let err = read_folder(&dir).unwrap_err();
+        assert!(err.to_string().contains("theme.css is a link"), "{err}");
     }
 
     #[test]
