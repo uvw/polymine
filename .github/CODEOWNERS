@@ -1,0 +1,6 @@
+# Changes to the files that steer coding agents, and to the workflows, request
+# the maintainer's review (AGENTS.md, "Text from others").
+/AGENTS.md @uvw
+/CLAUDE.md @uvw
+/skills/ @uvw
+/.github/ @uvw
