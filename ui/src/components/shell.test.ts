@@ -378,6 +378,18 @@ describe("BoardCanvas", () => {
     expect(label.style.left).toBe("50px");
   });
 
+  it("hides a pinned hint while the game is paused", async () => {
+    game.hint = { cell: 0, text: "Safe to open", anchor: { x: 50, y: 30, radius: 8 } };
+    render(BoardCanvas);
+    await vi.waitFor(() => expect(fakeBoard.setTheme).toHaveBeenCalled());
+    game.paused = true;
+    flushSync();
+    await vi.waitFor(() => expect(screen.queryByText("Safe to open")).toBeNull());
+    game.paused = false;
+    flushSync();
+    expect(screen.getByText("Safe to open")).toBeInTheDocument();
+  });
+
   it("rebuilds the board for a new theme only, not for a hint", async () => {
     const { BoardView } = await import("../lib/board/BoardView");
     // A real rebuild reports its new layout, which moves the hint label.

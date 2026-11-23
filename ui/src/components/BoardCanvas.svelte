@@ -180,7 +180,8 @@
     </div>
   {/if}
 
-  {#if game.hint && hintStyle}
+  <!-- The Paused card covers only the middle, and a paused board hides the cell. -->
+  {#if game.hint && hintStyle && !game.paused}
     <div
       class="hint"
       class:below={hintStyle.below}
