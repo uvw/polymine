@@ -48,6 +48,29 @@ function host(width: number, height: number) {
   return el;
 }
 
+/** A pointer move on the window, at window coordinates. */
+function windowMove(pointerType: string, pointerId: number, x: number, y: number) {
+  window.dispatchEvent(
+    new PointerEvent("pointermove", { pointerType, pointerId, clientX: x, clientY: y }),
+  );
+}
+
+/** Counts the window's pointer-move listeners, by spying on adding and removing them. */
+function windowMoveListeners() {
+  const live = new Set<unknown>();
+  const add = window.addEventListener.bind(window);
+  const remove = window.removeEventListener.bind(window);
+  vi.spyOn(window, "addEventListener").mockImplementation((type, fn, options) => {
+    if (type === "pointermove") live.add(fn);
+    add(type, fn, options);
+  });
+  vi.spyOn(window, "removeEventListener").mockImplementation((type, fn, options) => {
+    if (type === "pointermove") live.delete(fn);
+    remove(type, fn, options);
+  });
+  return () => live.size;
+}
+
 async function setup(width = 400, height = 400, cols = 3, rows = 3, board = theme) {
   const handlers = {
     primary: vi.fn(),
@@ -189,14 +212,33 @@ describe("layout", () => {
   });
 
   it("drags a large board with the middle button", async () => {
+    const listening = windowMoveListeners();
+    const { internals } = await setup(200, 200, 40, 40);
+    const stage = internals.app.stage;
+    expect(listening()).toBe(0);
+    stage.emit("pointerdown", fake.pointer(1, 4, { x: 100, y: 100 }));
+    expect(listening()).toBe(1);
+    windowMove("mouse", 1, 60, 70);
+    expect(internals.pan).toMatchObject({ x: -40, y: -30 });
+    stage.emit("pointerup", fake.pointer(1));
+    expect(listening()).toBe(0);
+    windowMove("mouse", 1, 0, 0);
+    expect(internals.pan).toMatchObject({ x: -40, y: -30 });
+  });
+
+  it("keeps dragging when the pointer leaves the canvas, until it lifts outside", async () => {
+    const listening = windowMoveListeners();
     const { internals } = await setup(200, 200, 40, 40);
     const stage = internals.app.stage;
     stage.emit("pointerdown", fake.pointer(1, 4, { x: 100, y: 100 }));
-    stage.emit("globalpointermove", fake.pointer(1, 4, { x: 60, y: 70 }));
-    expect(internals.pan).toMatchObject({ x: -40, y: -30 });
-    stage.emit("pointerup", fake.pointer(1));
-    stage.emit("globalpointermove", fake.pointer(0, 0, { x: 0, y: 0 }));
-    expect(internals.pan).toMatchObject({ x: -40, y: -30 });
+    internals.app.canvas.dispatchEvent(new PointerEvent("pointerleave"));
+    windowMove("mouse", 1, -50, -80);
+    expect(internals.pan).toMatchObject({ x: -150, y: -180 });
+    stage.emit("pointerupoutside", fake.pointer(1));
+    expect(listening()).toBe(0);
+    expect(internals.app.canvas.parentElement?.style.cursor ?? "").toBe("");
+    windowMove("mouse", 1, 100, 100);
+    expect(internals.pan).toMatchObject({ x: -150, y: -180 });
   });
 
   it("rebuilds with a new theme", async () => {
@@ -230,10 +272,25 @@ describe("touch input", () => {
     const stage = internals.app.stage;
     cell(4).root.emit("pointerdown", fake.touch(1, { x: 10, y: 10 }));
     stage.emit("pointerdown", fake.touch(1, { x: 10, y: 10 }));
-    stage.emit("globalpointermove", fake.touch(1, { x: 40, y: 10 }));
+    windowMove("touch", 1, 40, 10);
     vi.advanceTimersByTime(500);
     expect(handlers.secondary).not.toHaveBeenCalled();
     vi.useRealTimers();
+  });
+
+  it("zooms on a pinch, also with a finger off the canvas, and stops listening once both lift", async () => {
+    const listening = windowMoveListeners();
+    const { internals } = await setup(400, 400, 6, 6);
+    const stage = internals.app.stage;
+    stage.emit("pointerdown", fake.touch(1, { x: 100, y: 200 }));
+    stage.emit("pointerdown", fake.touch(2, { x: 200, y: 200 }));
+    expect(listening()).toBe(1);
+    windowMove("touch", 2, 450, 200);
+    expect(internals.pan.minX).toBeLessThan(0);
+    stage.emit("pointerupoutside", fake.touch(2));
+    expect(listening()).toBe(1);
+    stage.emit("pointerup", fake.touch(1));
+    expect(listening()).toBe(0);
   });
 
   it("forgets a touch the system cancels", async () => {
@@ -769,6 +826,15 @@ describe("lifecycle", () => {
     vi.useRealTimers();
   });
 
+  it("stops following a drag on the window once destroyed", async () => {
+    const listening = windowMoveListeners();
+    const { view, internals } = await setup(200, 200, 40, 40);
+    internals.app.stage.emit("pointerdown", fake.pointer(1, 4, { x: 100, y: 100 }));
+    expect(listening()).toBe(1);
+    view.destroy();
+    expect(listening()).toBe(0);
+  });
+
   it("redraws at the new pixel density when the window moves to another display", async () => {
     const { internals, cell } = await setup();
     const before = cell(0);
@@ -922,7 +988,7 @@ describe("the ferrofluid effect", () => {
   it("aims the magnet at the pointer, then at the keyboard focus once it leaves", async () => {
     const { view, internals } = await setup(400, 400, 3, 3, ferrofluid);
     const fluid = fluidOf(internals);
-    internals.app.stage.emit("globalpointermove", fake.pointer(0, 0, { x: 120, y: 90 }));
+    internals.app.stage.emit("pointermove", fake.pointer(0, 0, { x: 120, y: 90 }));
     expect(fluid.ferro?.aim).toEqual({ x: 120, y: 90 });
     view.setFocus(4);
     internals.app.canvas.dispatchEvent(new Event("pointerleave"));
@@ -935,7 +1001,7 @@ describe("the ferrofluid effect", () => {
   it("drops the magnet while the board is paused", async () => {
     const { view, internals, settle } = await setup(400, 400, 3, 3, ferrofluid);
     const fluid = fluidOf(internals);
-    internals.app.stage.emit("globalpointermove", fake.pointer(0, 0, { x: 120, y: 90 }));
+    internals.app.stage.emit("pointermove", fake.pointer(0, 0, { x: 120, y: 90 }));
     view.setLocked(true);
     settle();
     expect(fluid.ferro?.aim).toBeNull();

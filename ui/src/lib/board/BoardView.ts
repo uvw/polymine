@@ -246,7 +246,9 @@ export class BoardView {
     app.stage.eventMode = "static";
     app.stage.hitArea = app.screen;
     app.stage.on("pointerdown", (e) => this.onStagePointerDown(e));
-    app.stage.on("globalpointermove", (e) => this.moveDrag(e));
+    // With global moves off, the stage hears only moves over the canvas. A
+    // drag or a touch also listens on the window, in `trackWindow`.
+    app.stage.on("pointermove", (e) => this.onStagePointerMove(e));
     app.stage.on("pointerup", (e) => this.endPointer(e));
     app.stage.on("pointerupoutside", (e) => this.endPointer(e));
     app.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -269,6 +271,8 @@ export class BoardView {
   static async create(host: HTMLElement, theme: BoardTheme, handlers: BoardHandlers) {
     const app = new Application();
     await app.init({
+      // Global move events hit-test every cell on each pointer move.
+      eventFeatures: { globalMove: false },
       resizeTo: host,
       antialias: true,
       backgroundAlpha: 0,
@@ -286,6 +290,7 @@ export class BoardView {
     this.motionQuery.removeEventListener("change", this.onMotionChange);
     this.resolutionQuery?.removeEventListener("change", this.onResolutionChange);
     window.removeEventListener("blur", this.onWindowBlur);
+    window.removeEventListener("pointermove", this.onWindowPointerMove, true);
     this.dropContexts();
     this.ferro?.destroy();
     this.app.destroy(true, { children: true });
@@ -1261,6 +1266,7 @@ export class BoardView {
     this.pressTarget = null;
     if (e.pointerType === "touch") {
       this.touches.set(e.pointerId, { x: e.global.x, y: e.global.y });
+      this.trackWindow();
       if (this.touches.size === 2) {
         // A second finger means a pinch, not a press.
         this.cancelHold();
@@ -1298,24 +1304,40 @@ export class BoardView {
     if (e.button !== 1 || !this.pannable) return;
     this.drag = { x: e.global.x, y: e.global.y, panX: this.pan.x, panY: this.pan.y };
     this.host.style.cursor = "grabbing";
+    this.trackWindow();
     this.wake();
   }
 
-  private moveDrag(e: FederatedPointerEvent): void {
-    if (this.ferro && e.pointerType !== "touch") {
-      this.pointerAt = { x: e.global.x, y: e.global.y };
-      this.aimMagnet();
-    }
-    if (e.pointerType === "touch" && this.touches.has(e.pointerId)) this.moveTouch(e);
-    if (!this.drag) return;
-    this.pan.x = this.drag.panX + (e.global.x - this.drag.x);
-    this.pan.y = this.drag.panY + (e.global.y - this.drag.y);
-    this.applyPan();
+  /** Aims the fluid's magnet at a mouse or pen over the board. */
+  private onStagePointerMove(e: FederatedPointerEvent): void {
+    if (!this.ferro || e.pointerType === "touch") return;
+    this.pointerAt = { x: e.global.x, y: e.global.y };
+    this.aimMagnet();
   }
 
-  private moveTouch(e: FederatedPointerEvent): void {
-    this.touches.set(e.pointerId, { x: e.global.x, y: e.global.y });
-    if (this.hold && Math.hypot(e.global.x - this.hold.x, e.global.y - this.hold.y) > TOUCH_SLOP) {
+  /** Listens on the window only while a drag or a touch needs moves off the canvas. */
+  private trackWindow(): void {
+    if (this.drag || this.touches.size > 0) {
+      window.addEventListener("pointermove", this.onWindowPointerMove, true);
+    } else {
+      window.removeEventListener("pointermove", this.onWindowPointerMove, true);
+    }
+  }
+
+  /** Follows a drag or a touch anywhere on the window, in the stage's coordinates. */
+  private readonly onWindowPointerMove = (e: PointerEvent) => {
+    const at = { x: 0, y: 0 };
+    this.app.renderer.events.mapPositionToPoint(at, e.clientX, e.clientY);
+    if (e.pointerType === "touch" && this.touches.has(e.pointerId)) this.moveTouch(e.pointerId, at);
+    if (!this.drag) return;
+    this.pan.x = this.drag.panX + (at.x - this.drag.x);
+    this.pan.y = this.drag.panY + (at.y - this.drag.y);
+    this.applyPan();
+  };
+
+  private moveTouch(pointerId: number, at: Point): void {
+    this.touches.set(pointerId, at);
+    if (this.hold && Math.hypot(at.x - this.hold.x, at.y - this.hold.y) > TOUCH_SLOP) {
       this.cancelHold();
       this.releasePress();
     }
@@ -1373,6 +1395,7 @@ export class BoardView {
       this.drag = null;
       this.host.style.cursor = "";
     }
+    this.trackWindow();
     this.releasePress();
   }
 

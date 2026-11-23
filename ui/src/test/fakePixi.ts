@@ -322,6 +322,13 @@ export class Application {
     resolution: 1,
     /** Every offscreen render, with what it drew and where. */
     renders: [] as { container: unknown; target: unknown }[],
+    /** Maps window coordinates to the stage's, with the canvas at the window's corner. */
+    events: {
+      mapPositionToPoint(point: { x: number; y: number }, x: number, y: number) {
+        point.x = x;
+        point.y = y;
+      },
+    },
     resize(_width: number, _height: number, resolution?: number) {
       if (resolution !== undefined) this.resolution = resolution;
     },
