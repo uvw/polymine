@@ -1,0 +1,4 @@
+# Findings gitleaks reports that aren't secrets, one fingerprint each.
+
+# A made-up signing key the updater manifest's self-test signs fixtures with.
+eaf8656a19873bdf80f4c65099c06d7e0b043e15:.github/workflows/hack/updater-manifest.sh:generic-api-key:138

@@ -466,6 +466,10 @@ fn same_file(a: &Metadata, b: &Metadata) -> bool {
 }
 
 #[cfg(unix)]
+#[allow(
+    clippy::unnecessary_wraps,
+    reason = "the Windows version reads the count from a handle, which can fail"
+)]
 fn links(_: &File, opened: &Metadata) -> io::Result<u64> {
     use std::os::unix::fs::MetadataExt;
     Ok(opened.nlink())
