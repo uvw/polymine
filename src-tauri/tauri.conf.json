@@ -31,7 +31,9 @@
   },
   "plugins": {
     "updater": {
-      "endpoints": ["https://github.com/uvw/polymine/releases/latest/download/latest.json"],
+      "endpoints": [
+        "https://github.com/uvw/polymine/releases/latest/download/latest.json"
+      ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk5MzE1MTRDQjNCOEZGQUQKUldTdC83aXpURkV4bVhMN3NNaWQ5aDRrZjcyeEh4MXAyeTFCQkRyQ1QxZ3FaelVWQzNYL2tCdUoK",
       "requireSignedVersion": true,
       "windows": {

@@ -11,3 +11,7 @@ hack/notices
 
 # Generated icon concept sheets
 docs/icons/concepts
+
+# release-please rewrites the version with JSON.stringify, which puts every array
+# item on its own line, so the file keeps that layout instead of Prettier's
+src-tauri/tauri.conf.json
