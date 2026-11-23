@@ -11,7 +11,6 @@ file current.
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | [1](#1-rust-engine-with-a-tauri-and-svelte-shell)                                | Rust engine with a Tauri and Svelte shell                               |
 | [2](#2-mit-or-apache-license-with-a-clean-room-rule)                             | MIT or Apache license with a clean-room rule                            |
-| [3](#3-the-game-is-called-polymine)                                              | The game is called Polymine                                             |
 | [4](#4-game-state-lives-in-the-rust-backend)                                     | Game state lives in the Rust backend                                    |
 | [5](#5-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
 | [6](#6-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
@@ -90,29 +89,6 @@ or translates FastMines code, tables, or assets.
 
 **Why:** FastMines is GPL. Tilings and minesweeper rules are public math and
 ideas, so a new implementation can carry a permissive license.
-
-## 3. The game is called Polymine
-
-**Date:** 2026-11-05
-
-**Decision:** The game, the app, `polymine-cli`, the crates, the bundle
-identifier `dev.uvw.polymine`, the environment variables, and the repository are
-named Polymine.
-
-**Why:** Polymine says both halves of the game, polygons and mines, and it's
-short. Dopamine is crowded on Steam and says nothing about mines or tiles. Games
-in the same space already use Tessera, Tilesweeper, and Polysweep. A knockout
-search on 2026-11-05 found no POLYMINE mark in the software, games, or
-entertainment classes in the US, the EU, or the UK. The nearest are Polymino
-(France, games) and POLYMIND (EU, software). polymine.app, .dev, .game, and .gg
-were free, and polymine.com is parked.
-
-**Known risk:** Polimines by Molter Games is a live, commercial
-Minesweeper-style logic game on Steam, consoles, and mobile, with no registered
-mark found. The names differ by one letter and sound alike. The maintainer kept
-Polymine knowing this.
-
-**Alternatives:** Dopamine, and picking another name to stay clear of Polimines.
 
 ## 4. Game state lives in the Rust backend
 
