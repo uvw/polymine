@@ -456,6 +456,24 @@ describe("animation", () => {
     expect(internals.app.ticker.started).toBe(true);
   });
 
+  it("keeps Pixi's system ticker stopped and advances it with the board's frames", async () => {
+    const system = fake.Ticker.system;
+    system.autoStart = true;
+    system.start();
+    const { view, internals, settle } = await setup();
+    expect(system.started).toBe(false);
+    expect(system.autoStart).toBe(false);
+    const before = system.updates;
+    settle();
+    expect(internals.app.ticker.started).toBe(false);
+    expect(system.updates).toBeGreaterThan(before);
+    view.setFocus(4);
+    expect(internals.app.ticker.started).toBe(true);
+    settle();
+    expect(internals.app.ticker.started).toBe(false);
+    expect(system.started).toBe(false);
+  });
+
   it("shares count fills between cells in color themes", async () => {
     const { view, cell, internals, settle } = await setup();
     view.setTheme(themeById("pride").board);
