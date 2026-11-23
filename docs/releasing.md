@@ -113,18 +113,21 @@ token that can write.
 1. **Release eligibility:** the tag must be `vX.Y.Z`, on `main`, and match every
    version file. Later jobs check out the commit it found, not the tag.
 2. **CI:** the whole CI workflow, on that commit.
-3. **Build:** the macOS DMGs for Apple silicon and Intel, the Windows NSIS
-   installer, and the portable Windows ZIP, built from scratch with no caches.
-4. **Attest provenance:** `checksums.txt` and a build provenance attestation for
-   every file.
-5. **Publish:** uploads the files and `checksums.txt` to the draft, puts the
+3. **Build:** the macOS DMGs and app archives for Apple silicon and Intel, the
+   Windows NSIS installer, and the portable Windows ZIP, built from scratch with
+   no caches.
+4. **Sign updates:** signs the [updater artifacts](#updates) with the release
+   key and writes `latest.json`.
+5. **Attest provenance:** `checksums.txt` and a build provenance attestation for
+   every file, the signatures and `latest.json` included.
+6. **Publish:** uploads the files and `checksums.txt` to the draft, puts the
    [release notes](#release-notes) above the changelog entry when there are any,
    adds `.github/release-body.md` (downloads and first-launch steps for unsigned
    builds) below it, checks the tag still names the commit that was built, and
    publishes the release as the latest.
-6. **Homebrew tap:** pushes the cask for the new version to `uvw/homebrew-tap`
+7. **Homebrew tap:** pushes the cask for the new version to `uvw/homebrew-tap`
    ([Homebrew](#homebrew)).
-7. **winget:** opens a pull request on microsoft/winget-pkgs for the new version
+8. **winget:** opens a pull request on microsoft/winget-pkgs for the new version
    ([winget](#winget)).
 
 Running the Release workflow by hand with an existing tag (re)publishes it.
@@ -132,6 +135,42 @@ Running the Release workflow by hand with an existing tag (re)publishes it.
 Publish only what the workflow builds. A build made on a developer's machine
 records that machine's home folder in the binaries, and nothing attests it.
 `hack/release-windows.ps1` (docs/windows.md) is for testing the Windows files.
+
+## Updates
+
+Installed copies update themselves from the latest release
+([design](design.md#updates)). Each release carries what they need:
+
+1. **The artifacts:** `Polymine_X.Y.Z_aarch64.app.tar.gz` and
+   `Polymine_X.Y.Z_x64.app.tar.gz`, the app bundles the macOS updater unpacks,
+   and the Windows installer itself.
+2. **A signature for each:** the artifact's name plus `.sig`, a minisign
+   signature whose trusted comment names the version. The app refuses an update
+   whose signature doesn't name the version `latest.json` announces.
+3. **`latest.json`:** the version, the notes, the publish date, and for
+   `darwin-aarch64`, `darwin-x86_64`, and `windows-x86_64` the download URL and
+   the signature. Installed copies read it from
+   `releases/latest/download/latest.json`, so publishing a release as the latest
+   offers it to everyone.
+
+The build jobs hold no signing key. Tauri writes the updater artifacts only when
+it can sign them, so each build signs with a key made for the run and deletes
+it. The Sign updates job then signs each artifact again with
+`TAURI_SIGNING_PRIVATE_KEY`, a secret of the `release` environment, and
+`.github/workflows/hack/updater-manifest.sh` writes `latest.json`. The script
+refuses a signature from any key other than the one in
+`src-tauri/tauri.conf.json`, or one that doesn't name the version, so a missing
+or wrong secret fails the release instead of the players' updates. Its `test`
+mode runs in CI.
+
+The key pair lives in `~/.tauri/polymine-updater.key` and its `.pub` beside it;
+the public key is also in `tauri.conf.json`. The key has no password, and the
+workflow passes an empty one. **Keep an offline backup of the private key.** If
+it's lost, no new release can be signed for the copies already installed: they
+keep refusing updates, and every player has to download the next version by
+hand. A new key pair then needs its public key in `tauri.conf.json` and the
+secret replaced. If the key leaks, do the same, since anyone holding it can sign
+an update that installed copies accept.
 
 ## Homebrew
 
@@ -148,7 +187,9 @@ removes the data, runtime, and log folders on `brew uninstall --zap`.
 2. The builds aren't signed or notarized, so macOS blocks the first launch after
    a Homebrew install too. The cask's caveat says how to open the app; it
    doesn't clear the quarantine flag itself.
-3. A failed Homebrew job doesn't touch the release. Rerun the job.
+3. The cask says `auto_updates true`, since the app updates itself, so
+   `brew upgrade` leaves it alone unless run with `--greedy`.
+4. A failed Homebrew job doesn't touch the release. Rerun the job.
 
 ## winget
 
@@ -205,8 +246,8 @@ These live in GitHub's settings, not in the repository.
 
 ## Tokens
 
-The release workflows read four tokens, all secrets of the `release`
-environment, not of the repository:
+The release workflows read four tokens and a signing key, all secrets of the
+`release` environment, not of the repository:
 
 1. `RELEASE_PLEASE_TOKEN` opens and updates the release pull request, so its
    checks start without a maintainer's approval.
@@ -215,8 +256,10 @@ environment, not of the repository:
 3. `WINGET_TOKEN` opens the winget-pkgs pull requests from the uvw/winget-pkgs
    fork ([winget](#winget)).
 4. `COPILOT_TOKEN` lets Copilot CLI write the [release notes](#release-notes).
+5. `TAURI_SIGNING_PRIVATE_KEY` signs the [updates](#updates). It's required:
+   without it, Sign updates fails and nothing is published.
 
-Each is optional: without it, its step is skipped with a notice, or, for
+Each token is optional: without it, its step is skipped with a notice, or, for
 `RELEASE_PLEASE_TOKEN`, falls back to the workflow's own token.
 
 `hack/release-tokens.sh` sets them up. Run it once the repository is public and
@@ -224,7 +267,9 @@ the `release` environment exists. It forks microsoft/winget-pkgs when the fork
 is missing, opens each token's page with its fields filled in, checks the token
 you paste, and saves it as a secret of the `release` environment. It never
 prints a token or passes one on a command line, and skips any secret that's
-already set.
+already set. For the signing key it reads `~/.tauri/polymine-updater.key`, or
+the file `--updater-key PATH` names, checks its `.pub` against
+`tauri.conf.json`, and reminds you to back it up.
 
 When a token expires, run it again with the secret's name, such as
 `hack/release-tokens.sh WINGET_TOKEN`. Each token's name ends in the day it was

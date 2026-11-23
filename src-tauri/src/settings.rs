@@ -51,6 +51,9 @@ pub struct Settings {
     /// Show the key under the board that names each count's color, on themes
     /// that draw counts as colors. Off makes a harder game.
     pub show_count_key: bool,
+    /// Look for a new release on startup, at most once a day, in a copy that
+    /// updates itself.
+    pub check_for_updates: bool,
     /// Top-level keys this build doesn't know, such as ones a newer build
     /// wrote. They're saved back as they were, and the window never sees them.
     #[serde(flatten)]
@@ -173,6 +176,7 @@ impl Default for Settings {
             recent_themes: Vec::new(),
             theme_rotation: ThemeRotation::Off,
             show_count_key: true,
+            check_for_updates: true,
             extra: Map::new(),
         }
     }
@@ -382,6 +386,32 @@ mod tests {
         assert_eq!(loaded.recent_themes, Vec::<String>::new());
         assert_eq!(loaded.theme_rotation, ThemeRotation::Off);
         assert!(loaded.show_count_key);
+    }
+
+    #[test]
+    fn settings_from_before_update_checks_check_for_updates() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("settings.json");
+        fs::write(&path, r#"{ "theme": "datum" }"#).unwrap();
+        let (loaded, error) = Settings::load(&path);
+        assert!(error.is_none());
+        assert!(loaded.check_for_updates);
+
+        fs::write(&path, r#"{ "checkForUpdates": false }"#).unwrap();
+        let (loaded, error) = Settings::load(&path);
+        assert!(error.is_none());
+        assert!(!loaded.normalized().check_for_updates);
+
+        fs::write(&path, r#"{ "checkForUpdates": "daily", "theme": "datum" }"#).unwrap();
+        let (loaded, error) = Settings::load(&path);
+        assert!(
+            error
+                .expect("the dropped value is reported")
+                .to_string()
+                .contains("checkForUpdates")
+        );
+        assert!(loaded.check_for_updates);
+        assert_eq!(loaded.theme, "datum");
     }
 
     #[test]

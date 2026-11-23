@@ -38,6 +38,7 @@ the parts and flows.
    10. [Window state](#window-state)
 6. [Command line](#command-line)
 7. [Network](#network)
+   1. [Updates](#updates)
 8. [Window and chrome](#window-and-chrome)
    1. [Toolbar and menus](#toolbar-and-menus)
    2. [Dialogs](#dialogs)
@@ -411,9 +412,9 @@ instead.
 
 ## Network
 
-`crates/polymine-net` makes every network request, and it has no Tauri
-dependency. `polymine-cli sync` uses it. `src-tauri` doesn't depend on it, so
-the app itself makes no requests.
+`crates/polymine-net` makes every network request but the updater's, and it has
+no Tauri dependency. `polymine-cli sync` uses it. `src-tauri` doesn't depend on
+it, so the app itself makes no requests other than [updates](#updates).
 
 1. A `Client` sends each request under a `Policy` the caller builds:
    1. The allowed hosts.
@@ -457,6 +458,35 @@ Tests talk to a loopback HTTP server with GitHub-shaped fixtures. `polymine-cli`
 tests `sync` against the same server through the crate's `test-support` feature.
 Plain HTTP to a loopback address is a policy switch that exists only in test
 builds, so no test touches the real network and no release build can turn it on.
+
+### Updates
+
+The player's own installed copy updates itself from GitHub releases ([decision
+57][decision-57]). `src-tauri/src/updates.rs` holds the rules and the commands,
+and `tauri-plugin-updater` does the requests, from Rust.
+
+1. Only the default instance of a release build checks. A named instance, a
+   portable copy, a copy with `POLYMINE_DATA_DIR`, and a debug build don't load
+   the plugin. Only the copies that check show an Updates group at the end of
+   General settings.
+2. On startup the window asks for a check. It runs when the `checkForUpdates`
+   setting is on and a day has passed since the last check that reached GitHub,
+   kept in `updates.json` in the data folder. Check for updates in General
+   settings runs one at once.
+3. The check reads `latest.json` from the latest release. A newer version shows
+   a notice in the corner of the board: Polymine X.Y.Z is available, with
+   Release notes, Later, and Install and restart. Later hides it until a check
+   finds the release again.
+4. Install downloads the platform's artifact and shows its progress. The plugin
+   refuses it unless its minisign signature comes from the key in
+   `tauri.conf.json` and names the announced version. The game and the window's
+   place are saved first. macOS replaces the app bundle and restarts; Windows
+   runs the NSIS installer in passive mode, which starts the new version.
+5. A failed check or install shows its reason in words and goes to the log. A
+   failed startup check only goes to the log.
+
+[decision-57]:
+  decisions.md#57-the-players-own-copy-updates-itself-from-signed-github-releases
 
 ## Window and chrome
 

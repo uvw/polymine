@@ -27,8 +27,11 @@ These are in scope:
    Windows, or a Unix socket on macOS and Linux, that only the user who started
    it may open ([CLI](docs/CLI.md)). Another account reaching it, or claiming
    its name first, is in scope.
-3. **Network access.** Only `polymine-cli sync` uses the network, over HTTPS to
-   GitHub hosts on an allowlist. The app's window makes no requests.
+3. **Network access.** `polymine-cli sync` uses the network over HTTPS to GitHub
+   hosts on an allowlist. The app's window makes no requests. The installed app
+   itself checks GitHub releases for updates, and installs one only when the
+   player asks and its signature matches the key built into the app. An update
+   that installs without a valid signature is in scope.
 4. **Saved data.** Settings, history, saves, and the files the CLI reads, when a
    crafted file makes Polymine do more than refuse it.
 5. **The installer,** including the folder it adds to `PATH` on Windows.

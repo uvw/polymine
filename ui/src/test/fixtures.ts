@@ -120,6 +120,7 @@ export function settings(overrides: Partial<Settings> = {}): Settings {
     recentThemes: [],
     themeRotation: "off",
     showCountKey: true,
+    checkForUpdates: true,
     ...overrides,
   };
 }

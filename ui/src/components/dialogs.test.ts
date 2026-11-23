@@ -16,12 +16,14 @@ const api = vi.hoisted(() => ({
   openThemesFolder: vi.fn(() => Promise.resolve(null)),
   listSaves: vi.fn((): Promise<SaveInfo[]> => Promise.resolve([])),
   deleteSave: vi.fn(() => Promise.resolve(null)),
+  checkForUpdate: vi.fn(),
 }));
 vi.mock("../lib/api", () => ({ api, hasShell: () => true }));
 vi.mock("@tauri-apps/api/app", () => ({ getVersion: () => Promise.resolve("1.2.3") }));
 
 const { game } = await import("../lib/game.svelte");
 const { themeEntry } = await import("../lib/themes/entry");
+const { updates } = await import("../lib/updates.svelte");
 const { default: AboutDialog } = await import("./AboutDialog.svelte");
 const { default: CustomLevelDialog } = await import("./CustomLevelDialog.svelte");
 const { default: SavesDialog } = await import("./SavesDialog.svelte");
@@ -32,6 +34,8 @@ beforeEach(() => {
   vi.restoreAllMocks();
   game.settings = settings();
   game.snapshot = snapshot();
+  updates.supported = false;
+  updates.status = { kind: "idle" };
 });
 
 describe("CustomLevelDialog", () => {
@@ -121,6 +125,45 @@ describe("SettingsDialog", () => {
     await vi.waitFor(() =>
       expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ playerName: "bob" })),
     );
+  });
+
+  it("turns the update check off and checks by hand, in a copy that updates itself", async () => {
+    const user = userEvent.setup();
+    const update = vi.spyOn(game, "updateSettings").mockResolvedValue(undefined);
+    updates.supported = true;
+    open();
+    const automatic = screen.getByRole("switch", { name: "Check for updates automatically" });
+    expect(automatic).toBeChecked();
+    await user.click(automatic);
+    await vi.waitFor(() =>
+      expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ checkForUpdates: false })),
+    );
+
+    let finish: (value: null) => void = () => {};
+    api.checkForUpdate.mockReturnValueOnce(new Promise((resolve) => (finish = resolve)));
+    const check = screen.getByRole("button", { name: "Check for updates" });
+    await user.click(check);
+    expect(api.checkForUpdate).toHaveBeenCalledWith(false);
+    expect(screen.getByText("Checking…")).toBeInTheDocument();
+    expect(check).toBeDisabled();
+    finish(null);
+    expect(await screen.findByText("Polymine is up to date.")).toBeInTheDocument();
+
+    api.checkForUpdate.mockResolvedValueOnce({ version: "1.4.0", notes: null, dateMs: null });
+    await user.click(check);
+    expect(await screen.findByText("Polymine 1.4.0 is available.")).toBeInTheDocument();
+
+    api.checkForUpdate.mockRejectedValueOnce("could not check for updates: offline");
+    await user.click(check);
+    expect(
+      await screen.findByText("The check didn't finish: could not check for updates: offline"),
+    ).toBeInTheDocument();
+  });
+
+  it("leaves updates out of a copy that doesn't update itself", () => {
+    open();
+    expect(screen.queryByRole("switch", { name: "Check for updates automatically" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Check for updates" })).toBeNull();
   });
 
   it("keeps a theme switched while Settings is open, as a rotation does", async () => {

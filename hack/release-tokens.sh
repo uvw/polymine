@@ -7,6 +7,9 @@
 #   HOMEBREW_TAP_TOKEN    pushes the cask to uvw/homebrew-tap
 #   WINGET_TOKEN          opens winget-pkgs pull requests from uvw/winget-pkgs
 #   COPILOT_TOKEN         lets Copilot CLI write the release notes
+#   TAURI_SIGNING_PRIVATE_KEY
+#                         signs the updates installed copies download, read
+#                         from --updater-key PATH or ~/.tauri/polymine-updater.key
 #
 # It also forks microsoft/winget-pkgs when the fork is missing. GitHub creates
 # tokens only in the browser, so the script opens each token page with its
@@ -14,7 +17,7 @@
 # passes one on a command line. A secret that is already set is skipped, unless
 # its name is given to renew it.
 #
-# Usage: hack/release-tokens.sh [SECRET...]
+# Usage: hack/release-tokens.sh [--updater-key PATH] [SECRET...]
 set -euo pipefail
 
 repo=uvw/polymine
@@ -51,6 +54,12 @@ read_token() {
   done
 }
 
+updater_key=$HOME/.tauri/polymine-updater.key
+if [[ ${1:-} == --updater-key ]]; then
+  updater_key=${2:?usage: hack/release-tokens.sh [--updater-key PATH] [SECRET...]}
+  shift 2
+fi
+
 # wanted SECRET reports whether to set SECRET this run: it was named, or no
 # names were given and it is not set yet.
 renew=("$@")
@@ -68,7 +77,7 @@ wanted() {
 
 for name in "$@"; do
   case $name in
-  RELEASE_PLEASE_TOKEN | HOMEBREW_TAP_TOKEN | WINGET_TOKEN | COPILOT_TOKEN) ;;
+  RELEASE_PLEASE_TOKEN | HOMEBREW_TAP_TOKEN | WINGET_TOKEN | COPILOT_TOKEN | TAURI_SIGNING_PRIVATE_KEY) ;;
   *) die "$name is not a secret this script sets" ;;
   esac
 done
@@ -150,6 +159,28 @@ if wanted COPILOT_TOKEN; then
   say "   saved COPILOT_TOKEN in the $env environment on $repo"
 fi
 unset token
+
+say ""
+say "6. TAURI_SIGNING_PRIVATE_KEY: the key that signs updates"
+if wanted TAURI_SIGNING_PRIVATE_KEY; then
+  [[ -f $updater_key ]] ||
+    die "no updater key at $updater_key; make one with: npx tauri signer generate -w $updater_key"
+  # A Tauri key file is base64 of a minisign key, which starts with a comment.
+  base64 -d <"$updater_key" 2>/dev/null | head -n 1 | grep -q '^untrusted comment: ' ||
+    die "$updater_key is not a key from tauri signer generate"
+  conf=$(cd "$(dirname "$0")/.." && pwd)/src-tauri/tauri.conf.json
+  if [[ -f $updater_key.pub ]] && command -v jq >/dev/null 2>&1; then
+    [[ $(tr -d '\r\n' <"$updater_key.pub") == $(jq -r .plugins.updater.pubkey "$conf" | tr -d '\r') ]] ||
+      die "$updater_key.pub is not the pubkey in src-tauri/tauri.conf.json, so installed copies would refuse its updates"
+  else
+    say "   no $updater_key.pub to compare with src-tauri/tauri.conf.json; make sure it's the same key pair"
+  fi
+  # The workflow passes an empty password, since GitHub refuses an empty secret.
+  gh secret set TAURI_SIGNING_PRIVATE_KEY -R "$repo" --env "$env" <"$updater_key"
+  say "   saved TAURI_SIGNING_PRIVATE_KEY in the $env environment on $repo"
+  say "   Back up $updater_key somewhere safe and offline. Without it, no release can be"
+  say "   signed for the copies already installed, and their players must reinstall by hand."
+fi
 
 say ""
 say "Done."

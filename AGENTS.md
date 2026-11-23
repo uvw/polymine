@@ -109,7 +109,9 @@ Prettier.
    stylesheet or put its SVG in the DOM; values go through
    `ui/src/lib/themes/format.ts`, and SVG files load only as images.
 6. **The webview makes no network requests.** Every request goes through
-   `crates/polymine-net`, and only `polymine-cli sync` uses it today.
+   `crates/polymine-net`, and only `polymine-cli sync` uses it today. The
+   updater in `src-tauri/src/updates.rs` is the one exception: Rust reaches
+   GitHub releases, for the player's own installed copy only.
 7. **A `rand` or `rand_chacha` update can move every mine layout.** Tests pin
    seeded layouts, so a failure there means saved games and shared seeds would
    break.

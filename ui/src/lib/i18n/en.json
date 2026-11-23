@@ -219,5 +219,22 @@
   "settings.newPlayer": "Player {n}",
   "menu.player": "Player",
   "stats.whose": "Whose stats",
-  "stats.allPlayers": "All players"
+  "stats.allPlayers": "All players",
+  "update.available": "Polymine {version} is available",
+  "update.notes": "Release notes",
+  "update.later": "Later",
+  "update.install": "Install and restart",
+  "update.retry": "Try again",
+  "update.downloading": "Downloading the update…",
+  "update.downloadingPercent": "Downloading the update: {percent}",
+  "update.installing": "Installing. Polymine restarts in a moment.",
+  "update.failed": "The update didn't install: {message}",
+  "settings.updates": "Updates",
+  "settings.checkForUpdates": "Check for updates automatically",
+  "settings.checkForUpdatesHelp": "Looks for a new release once a day. Nothing installs until you choose to.",
+  "settings.checkNow": "Check for updates",
+  "settings.checking": "Checking…",
+  "settings.upToDate": "Polymine is up to date.",
+  "settings.updateAvailable": "Polymine {version} is available.",
+  "settings.updateFailed": "The check didn't finish: {message}"
 }

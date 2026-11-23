@@ -24,10 +24,12 @@ pub struct Environment {
     pub instance: Option<String>,
     /// The system accent color as `0xRRGGBB`, when the platform has one.
     pub accent: Option<u32>,
+    /// Whether this copy checks for and installs updates.
+    pub updates: bool,
 }
 
 impl Environment {
-    pub fn current(material: bool, instance: Option<String>) -> Self {
+    pub fn current(material: bool, instance: Option<String>, updates: bool) -> Self {
         let platform = if cfg!(target_os = "windows") {
             Platform::Windows
         } else if cfg!(target_os = "macos") {
@@ -40,6 +42,7 @@ impl Environment {
             material,
             instance,
             accent: crate::accent::system_accent(),
+            updates,
         }
     }
 }
@@ -132,7 +135,7 @@ mod tests {
 
     #[test]
     fn reports_the_build_platform_and_material() {
-        let environment = Environment::current(true, Some("lab".into()));
+        let environment = Environment::current(true, Some("lab".into()), false);
         let expected = if cfg!(target_os = "windows") {
             Platform::Windows
         } else if cfg!(target_os = "macos") {
@@ -145,5 +148,6 @@ mod tests {
         let json = serde_json::to_string(&environment).unwrap();
         assert!(json.contains("\"material\":true"));
         assert!(json.contains("\"instance\":\"lab\""));
+        assert!(json.contains("\"updates\":false"));
     }
 }

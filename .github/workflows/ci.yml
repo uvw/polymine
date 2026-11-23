@@ -50,6 +50,8 @@ jobs:
       # The release notes are Markdown, checked with these same tools.
       - name: The release notes scripts pass their tests
         run: bash .github/workflows/hack/release-notes.sh test
+      - name: The updater manifest script passes its tests
+        run: bash .github/workflows/hack/updater-manifest.sh test
       - run: npm run check
       - run: npm run coverage
       - run: npm run build

@@ -29,6 +29,18 @@ pub enum AppError {
     NothingToSave,
     #[error("this system has no data folder for saves")]
     NoSavesFolder,
+    #[error("this copy of Polymine doesn't update itself")]
+    UpdatesOff,
+    #[error("could not check for updates: {0}")]
+    UpdateCheck(String),
+    #[error("there's no update to install; check for updates first")]
+    NoUpdate,
+    #[error("the update is already installing")]
+    UpdateBusy,
+    #[error("could not install the update: {0}")]
+    UpdateInstall(String),
+    #[error("could not open the release notes: {0}")]
+    OpenLink(std::io::Error),
 }
 
 impl From<polymine_core::ConfigError> for AppError {

@@ -29,6 +29,16 @@
       "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; connect-src ipc: http://ipc.localhost"
     }
   },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://github.com/uvw/polymine/releases/latest/download/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk5MzE1MTRDQjNCOEZGQUQKUldTdC83aXpURkV4bVhMN3NNaWQ5aDRrZjcyeEh4MXAyeTFCQkRyQ1QxZ3FaelVWQzNYL2tCdUoK",
+      "requireSignedVersion": true,
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

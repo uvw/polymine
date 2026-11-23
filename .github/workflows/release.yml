@@ -70,8 +70,8 @@ jobs:
     permissions:
       contents: read
 
-  # Builds the installers and the portable ZIP but publishes nothing. This job
-  # holds no token that can write or sign.
+  # Builds the installers, the updater archives, and the portable ZIP but
+  # publishes nothing. This job holds no token that can write or sign.
   build:
     name: Build (${{ matrix.name }})
     needs: [eligibility, ci]
@@ -84,14 +84,18 @@ jobs:
           - name: macOS Apple silicon
             os: macos-15
             target: aarch64-apple-darwin
-            bundles: dmg
+            arch: aarch64
+            # The app bundle is what the updater installs on macOS.
+            bundles: app,dmg
           - name: macOS Intel
             os: macos-15
             target: x86_64-apple-darwin
-            bundles: dmg
+            arch: x64
+            bundles: app,dmg
           - name: Windows x64
             os: windows-2025
             target: x86_64-pc-windows-msvc
+            arch: x64
             bundles: nsis
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -122,10 +126,14 @@ jobs:
           cp "target/$TARGET/release/polymine-cli$ext" \
             "src-tauri/binaries/polymine-cli-$TARGET$ext"
       # The Tauri CLI runs `npm run build` itself through `beforeBuildCommand`.
+      # It writes the updater artifacts only when it can sign them, so it signs
+      # with a key made for this run and thrown away. The sign job replaces
+      # each signature with one from the release key, which no build job holds.
       - name: Build and bundle the app
         shell: bash
         env:
           TARGET: ${{ matrix.target }}
+          ARCH: ${{ matrix.arch }}
           BUNDLES: ${{ matrix.bundles }}
           # No certificates exist yet. The `-` identity ad-hoc signs the macOS
           # bundle: Apple silicon refuses to launch a downloaded app with no
@@ -133,10 +141,21 @@ jobs:
           # Windows ignores it.
           APPLE_SIGNING_IDENTITY: "-"
         run: |
+          export TAURI_SIGNING_PRIVATE_KEY=$RUNNER_TEMP/throwaway.key TAURI_SIGNING_PRIVATE_KEY_PASSWORD=
+          npx tauri signer generate --ci -p "" -w "$TAURI_SIGNING_PRIVATE_KEY" >/dev/null
           npx tauri build --target "$TARGET" --bundles "$BUNDLES" \
-            --config src-tauri/tauri.bundle-cli.conf.json -- --locked
+            --config src-tauri/tauri.bundle-cli.conf.json \
+            --config src-tauri/tauri.updater.conf.json -- --locked
+          rm "$TAURI_SIGNING_PRIVATE_KEY" "$TAURI_SIGNING_PRIVATE_KEY.pub"
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          bundle=target/$TARGET/release/bundle
           mkdir -p dist
-          cp target/"$TARGET"/release/bundle/"$BUNDLES"/Polymine_* dist/
+          if [ "$RUNNER_OS" = macOS ]; then
+            cp "$bundle"/dmg/Polymine_*.dmg dist/
+            cp "$bundle/macos/Polymine.app.tar.gz" "dist/Polymine_${version}_${ARCH}.app.tar.gz"
+          else
+            cp "$bundle"/nsis/Polymine_*-setup.exe dist/
+          fi
       # A portable copy: no installer, and the `portable` marker keeps its data
       # in a `data` folder beside the executable.
       - name: Make the portable Windows ZIP
@@ -158,9 +177,71 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  # Signs each updater artifact with the release key and writes latest.json,
+  # the manifest installed copies read. The key reaches only this job, which
+  # builds nothing, runs no install scripts, and can't write to the repository.
+  sign:
+    name: Sign updates
+    needs: [eligibility, build]
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.eligibility.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      # For the Tauri CLI, whose native binary needs no install script.
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+      # The version goes into each signature, and the app refuses an update
+      # whose manifest names another.
+      - name: Sign the updater artifacts
+        env:
+          TAG: ${{ inputs.tag }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          # The key has no password, and GitHub refuses an empty secret.
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+        run: |
+          [[ -n $TAURI_SIGNING_PRIVATE_KEY ]] ||
+            { echo "::error::the release environment has no TAURI_SIGNING_PRIVATE_KEY (hack/release-tokens.sh)"; exit 1; }
+          bash .github/workflows/hack/updater-manifest.sh files dist "${TAG#v}" >"$RUNNER_TEMP/updater-files"
+          while read -r file; do
+            npx tauri signer sign --app-version "${TAG#v}" "$file" >/dev/null
+          done <"$RUNNER_TEMP/updater-files"
+      # The release notes go in when they pass the check the release page
+      # uses; the app itself shows the version and a link to the page.
+      - name: Write latest.json
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          notes=docs/release-notes/$TAG.md
+          if [[ ! -f $notes ]] || ! bash .github/workflows/hack/release-notes.sh verify "$notes"; then
+            notes=
+          fi
+          mkdir -p updater
+          bash .github/workflows/hack/updater-manifest.sh manifest dist "$TAG" "$notes" >updater/latest.json
+          cp dist/*.sig updater/
+          cat updater/latest.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: updater
+          path: updater/*
+          if-no-files-found: error
+
   attest:
     name: Attest provenance
-    needs: build
+    needs: [build, sign]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -173,9 +254,13 @@ jobs:
           pattern: dist-*
           merge-multiple: true
           path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: updater
+          path: dist
       - name: List every file's SHA-256 in checksums.txt
         working-directory: dist
-        run: sha256sum Polymine_* > checksums.txt && cat checksums.txt
+        run: sha256sum Polymine_* latest.json > checksums.txt && cat checksums.txt
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-checksums: dist/checksums.txt
@@ -207,6 +292,10 @@ jobs:
         with:
           pattern: dist-*
           merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: updater
           path: dist
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:

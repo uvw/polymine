@@ -104,6 +104,20 @@ export const commands = {
 	 *  manager, creating it first.
 	 */
 	openThemesFolder: () => __TAURI_INVOKE<null>("open_themes_folder"),
+	/**
+	 *  Looks for a release newer than this one. An automatic check runs only when
+	 *  the setting is on and a day has passed since the last one, and otherwise
+	 *  returns `None` without a request. A check by hand always runs.
+	 */
+	checkForUpdate: (automatic: boolean) => __TAURI_INVOKE<UpdateInfo_Serialize | null>("check_for_update", { automatic }),
+	/**
+	 *  Downloads the release the last check found, checks its signature, installs
+	 *  it, and restarts into it. Progress arrives as [`PROGRESS_EVENT`]. On
+	 *  Windows the installer runs in passive mode and starts the new version.
+	 */
+	installUpdate: () => __TAURI_INVOKE<null>("install_update"),
+	/**  Opens the notes of the release the last check found in the browser. */
+	openReleaseNotes: () => __TAURI_INVOKE<null>("open_release_notes"),
 };
 
 /* Types */
@@ -263,6 +277,8 @@ export type Environment_Deserialize = {
 	instance?: string | null,
 	/**  The system accent color as `0xRRGGBB`, when the platform has one. */
 	accent?: number | null,
+	/**  Whether this copy checks for and installs updates. */
+	updates: boolean,
 };
 
 export type Environment_Serialize = {
@@ -277,6 +293,8 @@ export type Environment_Serialize = {
 	instance: string | null,
 	/**  The system accent color as `0xRRGGBB`, when the platform has one. */
 	accent: number | null,
+	/**  Whether this copy checks for and installs updates. */
+	updates: boolean,
 };
 
 /**
@@ -479,6 +497,11 @@ export type Settings_Deserialize = {
 	 *  that draw counts as colors. Off makes a harder game.
 	 */
 	showCountKey?: boolean,
+	/**
+	 *  Look for a new release on startup, at most once a day, in a copy that
+	 *  updates itself.
+	 */
+	checkForUpdates?: boolean,
 };
 
 export type Settings_Serialize = {
@@ -522,6 +545,11 @@ export type Settings_Serialize = {
 	 *  that draw counts as colors. Off makes a harder game.
 	 */
 	showCountKey: boolean,
+	/**
+	 *  Look for a new release on startup, at most once a day, in a copy that
+	 *  updates itself.
+	 */
+	checkForUpdates: boolean,
 };
 
 /**  A theme folder that can't be used, and why, in words for the player. */
@@ -640,4 +668,42 @@ export type Update = {
 	status: GameStatus,
 	counters: Counters,
 };
+
+/**  A release newer than this one, as the window shows it. */
+export type UpdateInfo = UpdateInfo_Serialize;
+
+/**  A release newer than this one, as the window shows it. */
+export type UpdateInfo_Deserialize = {
+	version: string,
+	/**  The release notes from the manifest, as Markdown. */
+	notes?: string | null,
+	/**  When the release was published, in Unix milliseconds. */
+	dateMs?: number | null,
+};
+
+/**  A release newer than this one, as the window shows it. */
+export type UpdateInfo_Serialize = {
+	version: string,
+	/**  The release notes from the manifest, as Markdown. */
+	notes: string | null,
+	/**  When the release was published, in Unix milliseconds. */
+	dateMs: number | null,
+};
+
+/**  How far a download has come, sent as [`PROGRESS_EVENT`]. */
+export type UpdateProgress = UpdateProgress_Serialize;
+
+/**  How far a download has come, sent as [`PROGRESS_EVENT`]. */
+export type UpdateProgress_Deserialize = 
+/**  Bytes so far, and the whole size when the server sent it. */
+{ phase: "downloading"; downloaded: number; total?: number | null } | 
+/**  The download passed its signature check and is installing. */
+{ phase: "installing" };
+
+/**  How far a download has come, sent as [`PROGRESS_EVENT`]. */
+export type UpdateProgress_Serialize = 
+/**  Bytes so far, and the whole size when the server sent it. */
+{ phase: "downloading"; downloaded: number; total: number | null } | 
+/**  The download passed its signature check and is installing. */
+{ phase: "installing" };
 

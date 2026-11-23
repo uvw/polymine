@@ -15,6 +15,7 @@
   import Modal from "./Modal.svelte";
   import Switch from "./Switch.svelte";
   import ThemesPane from "./ThemesPane.svelte";
+  import { updates } from "../lib/updates.svelte";
 
   let { open = $bindable(false) }: { open?: boolean } = $props();
 
@@ -89,6 +90,23 @@
       }
     }, APPLY_DELAY_MS);
     return () => clearTimeout(timer);
+  });
+
+  /** What the last check from here found, in words. */
+  const updateStatus = $derived.by(() => {
+    const status = updates.status;
+    switch (status.kind) {
+      case "idle":
+        return "";
+      case "checking":
+        return t("settings.checking");
+      case "upToDate":
+        return t("settings.upToDate");
+      case "available":
+        return t("settings.updateAvailable", { version: status.version });
+      case "failed":
+        return t("settings.updateFailed", { message: status.message });
+    }
   });
 
   /** Saves the language and reloads, since strings on screen don't switch. */
@@ -294,6 +312,26 @@
             <Switch label={t("settings.fillWindow")} bind:checked={draft.fillWindow} />
             <Switch label={t("settings.hideToolbar")} bind:checked={draft.hideToolbar} />
           </div>
+
+          {#if updates.supported}
+            <h4 class="setting-heading">{t("settings.updates")}</h4>
+            <div class="setting-group">
+              <Switch
+                label={t("settings.checkForUpdates")}
+                help={t("settings.checkForUpdatesHelp")}
+                bind:checked={draft.checkForUpdates}
+              />
+              <div class="setting-row">
+                <span class="setting-text" aria-live="polite">{updateStatus}</span>
+                <button
+                  disabled={updates.status.kind === "checking"}
+                  onclick={() => void updates.check()}
+                >
+                  {t("settings.checkNow")}
+                </button>
+              </div>
+            </div>
+          {/if}
         {:else if pane === "themes"}
           <ThemesPane bind:draft idPrefix={id} />
         {:else if pane === "bot"}

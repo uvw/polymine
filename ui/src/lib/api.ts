@@ -4,7 +4,7 @@
  */
 import { isTauri } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { commands, type ExternalChange } from "./bindings";
+import { commands, type ExternalChange, type UpdateProgress } from "./bindings";
 
 export const hasShell = isTauri;
 
@@ -12,6 +12,9 @@ export const api = {
   /** Changes made from outside the window, by `polymine-cli`. */
   onExternalChange: (handler: (change: ExternalChange) => void): Promise<UnlistenFn> =>
     listen<ExternalChange>("polymine://external", (event) => handler(event.payload)),
+  /** How far an update's download has come, while one installs. */
+  onUpdateProgress: (handler: (progress: UpdateProgress) => void): Promise<UnlistenFn> =>
+    listen<UpdateProgress>("polymine://update-progress", (event) => handler(event.payload)),
   environment: commands.getEnvironment,
   accent: commands.getAccent,
   windowInFront: commands.windowInFront,
@@ -36,4 +39,7 @@ export const api = {
   listThemes: commands.listThemes,
   readTheme: commands.readTheme,
   openThemesFolder: commands.openThemesFolder,
+  checkForUpdate: commands.checkForUpdate,
+  installUpdate: commands.installUpdate,
+  openReleaseNotes: commands.openReleaseNotes,
 };

@@ -50,6 +50,17 @@ message. If you find a bug, fix it in the same change or leave a new item.
      2. Repeat with Windows in light mode.
    - **Added:** 2026-11-03, macOS session; narrowed by the Windows session.
 
+3. **Updating from one release to the next.**
+   - **What:** the updater (`src-tauri/src/updates.rs`, `UpdateNotice.svelte`)
+     with the NSIS installer in passive mode. Signing was checked locally with
+     throwaway keys; no installed copy has updated yet.
+   - **Verify:** install the first public release with its setup `.exe`, then
+     publish the next one. On launch, the notice offers it; Install and restart
+     shows the download, the installer's progress window, and then the new
+     version, with the game, the window's place, and `polymine-cli` on `PATH`
+     kept.
+   - **Added:** 2026-11-22, Windows session.
+
 ## macOS only
 
 1. **Window and vibrancy fixes, by hand.**
@@ -124,6 +135,23 @@ message. If you find a bug, fix it in the same change or leave a new item.
      2. Open Settings, toggle Smart click from the menu bar, close Settings: the
         toggle sticks.
    - **Added:** 2026-11-07, Windows session after the adversarial review.
+
+7. **Updating from one release to the next.**
+   - **What:** the updater (`src-tauri/src/updates.rs`, `UpdateNotice.svelte`)
+     and the release workflow's `app,dmg` bundles and Sign updates job. Windows
+     checked the signing with throwaway keys; no Mac has built the app archive
+     or installed an update.
+   - **Verify:**
+     1. In the first release's run, the macOS builds upload
+        `Polymine_X.Y.Z_aarch64.app.tar.gz` and `_x64.app.tar.gz`, and
+        `latest.json` lists both.
+     2. Install that release from its DMG, then publish the next one. On launch,
+        the notice offers it; Install and restart replaces the app in
+        Applications and reopens it at the new version, with the game and the
+        window's place kept.
+     3. Settings, General: switching off Check for updates automatically stops
+        the startup check, and Check for updates still works.
+   - **Added:** 2026-11-22, Windows session.
 
 ## Linux only
 

@@ -647,6 +647,7 @@
         <button class="chip" data-flow="themes" aria-pressed="false">Themes</button>
         <button class="chip" data-flow="sync" aria-pressed="false">Sync</button>
         <button class="chip" data-flow="release" aria-pressed="false">Release</button>
+        <button class="chip" data-flow="update" aria-pressed="false">Update</button>
       </nav>
       <div class="tools">
         <button class="btn" id="legendBtn" aria-expanded="false" aria-controls="legend">
@@ -979,7 +980,7 @@
           h: 112,
           t: "GitHub Releases",
           k: "draft release",
-          m: ["dmg · setup.exe", "portable Windows zip"],
+          m: ["dmg · setup.exe · zip", "signed updates · latest.json"],
         },
         // IPC crate
         {
@@ -1072,6 +1073,17 @@
           k: "api.github.com",
           m: ["history.jsonl for sync", "remote themes: planned"],
         },
+        {
+          id: "pl-updater",
+          cls: "svc",
+          x: 2000,
+          y: 560,
+          w: 200,
+          h: 112,
+          t: "Updater",
+          k: "src-tauri/src/updates.rs",
+          m: ["tauri-plugin-updater", "player's own copy only"],
+        },
         // On-disk data
         {
           id: "da-runtime",
@@ -1147,7 +1159,7 @@
           h: 112,
           t: "Tauri commands",
           k: "commands.rs · lib.rs",
-          m: ["23 typed commands", "slow ones on a thread pool"],
+          m: ["26 typed commands", "slow ones on a thread pool"],
         },
         {
           id: "sh-window",
@@ -1797,6 +1809,24 @@
           label: "HTTPS",
         },
         {
+          id: "e-commands-updater",
+          from: ["sh-commands", "top", 0.95],
+          to: ["pl-updater", "bottom", 0.5],
+          via: [
+            [1130, 740],
+            [2100, 740],
+          ],
+          label: "check · install",
+          lx: 1880,
+          ly: 734,
+        },
+        {
+          id: "e-updater-gh",
+          from: ["pl-updater", "top", 0.5],
+          to: ["b-gh", "bottom", 0.5],
+          label: "signed, HTTPS",
+        },
+        {
           id: "e-commands-themes",
           from: ["sh-commands", "top", { x: 1010 }],
           to: ["da-themes", "top", 0.5],
@@ -2127,6 +2157,7 @@
             "macOS: a dmg for Apple silicon and one for Intel, ad-hoc signed.",
             "Windows: setup.exe and a portable ZIP that keeps its data beside the executable.",
             "Builds aren't signed with a certificate or notarized yet. checksums.txt and build provenance attestations cover every file.",
+            "Updates: an app archive per Mac and the Windows installer, each with a minisign `.sig`, and latest.json, which installed copies read.",
           ],
         },
         "pl-net": {
@@ -2142,7 +2173,7 @@
             "crates/polymine-net/src/json.rs",
           ],
           rules: [
-            "polymine-cli uses it for `sync`. src-tauri doesn't depend on it yet, so the app makes no requests.",
+            "polymine-cli uses it for `sync`. src-tauri doesn't depend on it, so the app's only requests are the updater's.",
             "HTTPS on port 443 to listed hosts only, with timeouts, a 4 MiB cap, and five redirects, each checked again.",
             "The client blocks, so callers run it on a worker thread.",
             "Tests use a loopback server and never touch the real network.",
@@ -2157,6 +2188,23 @@
             "Sync reads the gist and writes it back with a PATCH request.",
             "Planned: remote themes pinned to a commit, downloaded into a staging folder within limits.",
             "Sync sends its token only to api.github.com. The client never passes a token to another origin.",
+          ],
+        },
+        "pl-updater": {
+          t: "Updater",
+          m: "src-tauri/src/updates.rs \u00b7 tauri-plugin-updater",
+          owns: "Whether this copy updates itself, when it last checked, and the commands that check for, install, and link to a release.",
+          files: [
+            "src-tauri/src/updates.rs",
+            "src-tauri/tauri.conf.json",
+            "ui/src/lib/updates.svelte.ts",
+            "ui/src/components/UpdateNotice.svelte",
+          ],
+          rules: [
+            "Only the default instance of an installed release build checks: never a named, portable, or debug copy.",
+            "On startup at most once a day, with the checkForUpdates setting on, and from Settings at any time.",
+            "Nothing installs until the player chooses Install and restart. The download must carry a signature from the key in tauri.conf.json that names its version.",
+            "The one request the app makes outside polymine-net, from Rust; the webview has no updater permission.",
           ],
         },
         "da-runtime": {
@@ -2663,6 +2711,18 @@
             "The eligibility job checks the tag is on main, and check-versions.mjs checks it against every version file.",
             "Each target builds polymine-cli first as the sidecar, then the Tauri CLI bundles the app. Windows also gets a portable ZIP.",
             "checksums.txt and an attestation cover every file, then the publish job uploads them, checks the tag hasn't moved, and publishes.",
+          ],
+        },
+        update: {
+          name: "Update",
+          edges: ["e-uiapp-api", "e-commands-updater", "e-updater-gh"],
+          nodes: ["ui-app", "ui-api", "sh-commands", "pl-updater", "b-gh"],
+          steps: [
+            "On startup App.svelte calls `check_for_update` when the environment says this copy updates itself.",
+            "The shell skips the request unless the setting is on and a day has passed, then reads latest.json from the latest release.",
+            "A newer version shows a notice in the corner of the board, with Release notes, Later, and Install and restart.",
+            "Install downloads the platform's artifact with progress events, checks its signature and signed version, saves the game, and installs.",
+            "macOS replaces the app bundle and restarts; Windows runs the NSIS installer in passive mode, which starts the new version.",
           ],
         },
       };

@@ -65,6 +65,7 @@ file current.
 | [54](#54-windows-releases-ship-the-nsis-installer-only)                          | Windows releases ship the NSIS installer only                           |
 | [55](#55-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
 | [56](#56-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
+| [57](#57-the-players-own-copy-updates-itself-from-signed-github-releases)        | The player's own copy updates itself from signed GitHub releases        |
 
 ## 1. Rust engine with a Tauri and Svelte shell
 
@@ -468,13 +469,13 @@ id on a game it can't play anyway.
 
 **Date:** 2026-11-03
 
-**Decision:** Every network request goes through `crates/polymine-net`, a
-blocking `ureq` 3 client with rustls, the ring crypto provider, and
-`rustls-platform-verifier`. A policy from the caller allows HTTPS on port 443 to
-listed hosts only. It caps time, response size, and redirects, and rechecks
-every redirect hop. Requests send `User-Agent: Polymine/<version>`, keep no
-cookies, and read no proxy from the environment. ISC is on the license
-allowlists in `deny.toml` and `about.toml`.
+**Decision:** Every network request but the updater's ([decision 57][d57]) goes
+through `crates/polymine-net`, a blocking `ureq` 3 client with rustls, the ring
+crypto provider, and `rustls-platform-verifier`. A policy from the caller allows
+HTTPS on port 443 to listed hosts only. It caps time, response size, and
+redirects, and rechecks every redirect hop. Requests send
+`User-Agent: Polymine/<version>`, keep no cookies, and read no proxy from the
+environment. ISC is on the license allowlists in `deny.toml` and `about.toml`.
 
 **Why:** A blocking client fits the shell, which already runs slow commands off
 the main thread, and the CLI, which has no async runtime. Tests drive it with a
@@ -488,6 +489,8 @@ roots an administrator adds, so no bundled root list goes stale. It also keeps
 webpki-roots and its CDLA license out. ISC grants the same rights as MIT;
 rustls-webpki, untrusted, and ring use it. `polymine-cli` depends on the crate
 for `sync`, so `npm run notices` lists these crates.
+
+[d57]: #57-the-players-own-copy-updates-itself-from-signed-github-releases
 
 **Alternatives:** reqwest with rustls on Tauri's tokio runtime, native-tls with
 each platform's TLS library, and `tauri-plugin-http`, which ties requests to the
@@ -1197,3 +1200,44 @@ without it.
 
 **Alternatives:** a portable copy that refuses to start while the installed one
 runs; and leaving the identity shared and saying so in the docs.
+
+## 57. The player's own copy updates itself from signed GitHub releases
+
+**Date:** 2026-11-22
+
+**Decision:** The installed app checks
+`https://github.com/uvw/polymine/releases/latest/download/latest.json` on
+startup, at most once a day, and when the player clicks Check for updates.
+`tauri-plugin-updater` does it from Rust, with its own reqwest client; the
+webview gets no updater permission and still makes no requests. Only the default
+instance of a release build checks: never a named instance, a portable copy, a
+copy with its own data folder, or a debug build. The `checkForUpdates` setting
+turns the automatic check off, and the last check's time lives in
+`updates.json`, not in the settings. A found release shows a notice with Install
+and restart, Later, and its release notes. Nothing installs until the player
+asks. The update must carry a minisign signature from the key in
+`tauri.conf.json` that names the version `latest.json` announces. Windows runs
+the NSIS installer in passive mode.
+
+The release workflow's build jobs sign their updater artifacts with a throwaway
+key, since Tauri writes them only when it can sign. A separate job, the only one
+that sees `TAURI_SIGNING_PRIVATE_KEY`, signs them again with the release key and
+writes `latest.json`.
+
+**Why:** The maintainer wanted updates from the day the repository goes public.
+Players otherwise stay on whatever they first installed, since neither the DMG
+nor the NSIS installer updates itself. The plugin knows each platform's install
+step: replacing the app bundle on macOS, and handing over to the installer on
+Windows. A signed version stops a tampered manifest from pairing a new version
+number with an older release. Keeping the key out of the build jobs means
+nothing compiled from a pull request's dependencies runs beside it. Named and
+portable copies are for tests, agents, and USB sticks, where an update the
+player didn't ask for would surprise. The plugin's reqwest client is the one
+place outside `polymine-net`: wrapping it would mean writing the download,
+signature, and install steps again, and it already uses rustls with ring and the
+system's certificate verifier.
+
+**Alternatives:** an update check through `polymine-net` that only links to the
+release page, which leaves every install by hand; the plugin's JavaScript API,
+which would give the webview a network permission; installing in the background
+without asking; and giving the build jobs the signing key.

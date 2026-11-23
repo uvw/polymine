@@ -8,6 +8,7 @@
   import SettingsDialog from "./components/SettingsDialog.svelte";
   import StatsDialog from "./components/StatsDialog.svelte";
   import TopBar from "./components/TopBar.svelte";
+  import UpdateNotice from "./components/UpdateNotice.svelte";
   import { api, hasShell } from "./lib/api";
   import { chromeStyle } from "./lib/themes/accent";
   import { applyWindowIcon } from "./lib/windowIcon";
@@ -17,6 +18,7 @@
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import { LEVELS, installMacMenu, type MenuState } from "./lib/menu";
   import { applyEnvironment, platform, prefersReducedMotion } from "./lib/platform.svelte";
+  import { updates } from "./lib/updates.svelte";
   import type { ChampionHighlight } from "./components/StatsDialog.svelte";
 
   type Dialog = "custom" | "saves" | "stats" | "settings" | "about";
@@ -70,6 +72,7 @@
       instance = environment.instance;
       game.accent = environment.accent ?? null;
       await game.init();
+      void updates.start(environment.updates);
       if (environment.platform === "macos") {
         syncMenu = await installMacMenu({
           newGame: () => void game.newGame(),
@@ -348,6 +351,7 @@
     <main class="stage">
       <BoardCanvas />
       <Overlays />
+      <UpdateNotice />
     </main>
   </div>
 

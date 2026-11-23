@@ -21,6 +21,7 @@ mod taskbar_icon;
 mod themes;
 #[cfg(target_os = "macos")]
 mod traffic_lights;
+mod updates;
 mod window_state;
 
 use std::panic::AssertUnwindSafe;
@@ -66,6 +67,7 @@ pub fn run() {
     // too and keeps the window position out of the platform's folders.
     let own_data = instance::data_dir_override();
     let player_profile = instance.is_default() && own_data.is_none();
+    let updates = updates::updates_itself(updates::RunningCopy::new(&instance, own_data.is_some()));
     let mut builder = tauri::Builder::default();
     if player_profile {
         // Must come first so a second launch hands off before anything else
@@ -84,25 +86,16 @@ pub fn run() {
     let (config_dir, data_dir) = instance::instance_dirs(&instance, app_config, app_data);
     // Named instances are for tests and must not move the player's window.
     let window_dir = config_dir.clone().filter(|_| player_profile);
-    let file_name = Some(instance::log_file_stem(&instance));
-    let log_target = match (&own_data, instance::log_dir()) {
-        (Some(_), Some(path)) => TargetKind::Folder { path, file_name },
-        _ => TargetKind::LogDir { file_name },
-    };
-    builder = builder.plugin(
-        // The plugin's default deletes the whole log at 40 KB, panics included.
-        tauri_plugin_log::Builder::new()
-            .level(log::LevelFilter::Info)
-            .max_file_size(LOG_FILE_BYTES)
-            .rotation_strategy(RotationStrategy::KeepSome(LOG_FILES_KEPT))
-            .targets([Target::new(TargetKind::Stdout), Target::new(log_target)])
-            .build(),
-    );
+    builder = builder.plugin(log_plugin(&instance, own_data.is_some()));
+    if updates {
+        builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    }
     let specta = specta_builder();
     let placement = window_dir
         .clone()
         .map(|dir| Arc::new(window_state::Tracker::new(dir)));
     let app = builder
+        .manage(Placement(placement.clone()))
         .on_window_event({
             let placement = placement.clone();
             move |window, event| {
@@ -143,9 +136,10 @@ pub fn run() {
                     .as_ref()
                     .is_some_and(|w| prepare_window(w, window_dir.as_deref()));
                 let named = (!instance.is_default()).then(|| instance.to_string());
-                app.manage(environment::Environment::current(material, named));
+                app.manage(environment::Environment::current(material, named, updates));
                 app.manage(app::App::load(config_dir.as_deref(), data_dir.as_deref()));
                 app.manage(themes::Themes::new(data_dir.as_deref()));
+                app.manage(updates::Updates::new(updates, data_dir.as_deref()));
                 let info = remote::InstanceInfo {
                     name: instance.clone(),
                     config_dir,
@@ -161,13 +155,27 @@ pub fn run() {
         .unwrap_or_else(|e| fatal::start_failed(&e));
     app.run(move |handle, event| {
         if let tauri::RunEvent::Exit = event {
-            if let Some(placement) = &placement {
-                placement.save();
-            }
-            save_game(handle);
+            save_on_exit(handle);
             let _ = Registry::shared().remove_own(&instance, std::process::id());
         }
     });
+}
+
+/// Logs to stdout and to the instance's log file, which sits in the data
+/// folder when the instance has one of its own.
+fn log_plugin(instance: &InstanceName, own_data: bool) -> tauri::plugin::TauriPlugin<tauri::Wry> {
+    let file_name = Some(instance::log_file_stem(instance));
+    let log_target = match instance::log_dir().filter(|_| own_data) {
+        Some(path) => TargetKind::Folder { path, file_name },
+        None => TargetKind::LogDir { file_name },
+    };
+    // The plugin's default deletes the whole log at 40 KB, panics included.
+    tauri_plugin_log::Builder::new()
+        .level(log::LevelFilter::Info)
+        .max_file_size(LOG_FILE_BYTES)
+        .rotation_strategy(RotationStrategy::KeepSome(LOG_FILES_KEPT))
+        .targets([Target::new(TargetKind::Stdout), Target::new(log_target)])
+        .build()
 }
 
 /// The commands the window calls. `tauri-specta` types them for the UI, and
@@ -199,14 +207,18 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             themes::list_themes,
             themes::read_theme,
             themes::open_themes_folder,
+            updates::check_for_update,
+            updates::install_update,
+            updates::open_release_notes,
         ])
-        // No command's signature brings these in: one is sent as an event,
+        // No command's signature brings these in: two are sent as events,
         // the other is only built by the UI.
         .typ::<remote::ExternalChange>()
+        .typ::<updates::UpdateProgress>()
         .typ::<polymine_core::Bounds>()
         .error_handling(tauri_specta::ErrorHandlingMode::Throw)
-        // Every 64-bit value the UI sees is a millisecond time or a change count,
-        // far below 2^53.
+        // Every 64-bit value the UI sees is a millisecond time, a change count,
+        // or a download's size in bytes, far below 2^53.
         .dangerously_cast_bigints_to_number()
 }
 
@@ -291,6 +303,18 @@ fn panic_message(payload: &(dyn std::any::Any + Send)) -> &str {
         .copied()
         .or_else(|| payload.downcast_ref::<String>().map(String::as_str))
         .unwrap_or("no message")
+}
+
+/// The main window's placement, for the code that saves it on the way out.
+struct Placement(Option<Arc<window_state::Tracker>>);
+
+/// Saves the window's place and the game, as quitting does. An update that
+/// ends the process itself calls this first.
+pub(crate) fn save_on_exit(handle: &tauri::AppHandle) {
+    if let Some(placement) = handle.try_state::<Placement>().and_then(|p| p.0.clone()) {
+        placement.save();
+    }
+    save_game(handle);
 }
 
 fn save_game(handle: &tauri::AppHandle) {

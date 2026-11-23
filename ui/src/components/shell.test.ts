@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { flushSync } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { gameOver, settings, snapshot } from "../test/fixtures";
+import type { UpdateInfo } from "../lib/bindings";
 
 const api = vi.hoisted(() => ({
   environment: vi.fn(),
@@ -19,6 +20,7 @@ const api = vi.hoisted(() => ({
   readTheme: vi.fn(),
   openThemesFolder: vi.fn(() => Promise.resolve(null)),
   listSaves: vi.fn(() => Promise.resolve([])),
+  checkForUpdate: vi.fn((): Promise<UpdateInfo | null> => Promise.resolve(null)),
 }));
 const appWindow = vi.hoisted(() => ({
   focusHandler: null as ((event: { payload: boolean }) => void) | null,
@@ -502,6 +504,15 @@ describe("App", () => {
     );
     expect(document.documentElement.dataset.material).toBe("default");
     expect(installMacMenu).not.toHaveBeenCalled();
+  });
+
+  it("checks for updates on startup and offers one it finds", async () => {
+    api.environment.mockResolvedValue({ platform: "windows", material: true, updates: true });
+    api.checkForUpdate.mockResolvedValueOnce({ version: "9.0.0", notes: null, dateMs: null });
+    render(App);
+    await started();
+    expect(api.checkForUpdate).toHaveBeenCalledWith(true);
+    expect(await screen.findByText("Polymine 9.0.0 is available")).toBeInTheDocument();
   });
 
   it("draws no window buttons once the shell reports Linux", async () => {

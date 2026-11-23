@@ -39,14 +39,20 @@ fn app_error(error: &AppError) -> ErrorBody {
         AppError::Game(e) => ErrorBody::new(ErrorCode::InvalidValue, e.to_string()),
         AppError::InvalidCell { len, .. } => moves::invalid_cell(error.to_string(), *len),
         AppError::Io(e) => ErrorBody::new(ErrorCode::Internal, e.to_string()),
-        // Only the window's theme and save commands raise these.
+        // Only the window's theme, save, and update commands raise these.
         AppError::Theme(_)
         | AppError::NoThemesFolder
         | AppError::OpenFolder(_)
         | AppError::SaveName(_)
         | AppError::NoSave(_)
         | AppError::NothingToSave
-        | AppError::NoSavesFolder => ErrorBody::new(ErrorCode::Internal, error.to_string()),
+        | AppError::NoSavesFolder
+        | AppError::UpdatesOff
+        | AppError::UpdateCheck(_)
+        | AppError::NoUpdate
+        | AppError::UpdateBusy
+        | AppError::UpdateInstall(_)
+        | AppError::OpenLink(_) => ErrorBody::new(ErrorCode::Internal, error.to_string()),
     }
 }
 

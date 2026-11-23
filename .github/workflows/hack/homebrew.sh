@@ -46,6 +46,9 @@ cask "polymine" do
   desc "Minesweeper on many tilings, with an assistant that plays for real"
   homepage "https://github.com/uvw/polymine"
 
+  # The app installs its own updates, so brew upgrade skips it unless --greedy.
+  auto_updates true
+
   app "Polymine.app"
   binary "#{appdir}/Polymine.app/Contents/MacOS/polymine-cli"
 
