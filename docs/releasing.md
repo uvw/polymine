@@ -122,7 +122,9 @@ token that can write.
    adds `.github/release-body.md` (downloads and first-launch steps for unsigned
    builds) below it, checks the tag still names the commit that was built, and
    publishes the release as the latest.
-6. **winget:** opens a pull request on microsoft/winget-pkgs for the new version
+6. **Homebrew tap:** pushes the cask for the new version to `uvw/homebrew-tap`
+   ([Homebrew](#homebrew)).
+7. **winget:** opens a pull request on microsoft/winget-pkgs for the new version
    ([winget](#winget)).
 
 Running the Release workflow by hand with an existing tag (re)publishes it.
@@ -131,6 +133,23 @@ Publish only what the workflow builds. A build made on a developer's machine
 records that machine's home folder in the binaries, and nothing attests it.
 `scripts/release-windows.ps1` (docs/windows.md) is for testing the Windows
 files.
+
+## Homebrew
+
+Once a release is published, the Homebrew job runs
+`.github/workflows/hack/homebrew.sh`, which writes `Casks/polymine.rb` in
+`uvw/homebrew-tap` from the release's `checksums.txt` and pushes it. Players
+install with `brew install --cask uvw/tap/polymine`. The cask installs
+`Polymine.app` for Apple silicon or Intel, links `polymine-cli` onto `PATH`, and
+removes the data, runtime, and log folders on `brew uninstall --zap`.
+
+1. The job runs in the `release` environment and needs `HOMEBREW_TAP_TOKEN`, a
+   fine-grained token with Contents set to read and write on `uvw/homebrew-tap`.
+   Without the secret, the job prints the cask and pushes nothing.
+2. The builds aren't signed or notarized, so macOS blocks the first launch after
+   a Homebrew install too. The cask's caveat says how to open the app; it
+   doesn't clear the quarantine flag itself.
+3. A failed Homebrew job doesn't touch the release. Rerun the job.
 
 ## winget
 
@@ -187,14 +206,16 @@ These live in GitHub's settings, not in the repository.
 
 ## Tokens
 
-The release workflows read three tokens, all secrets of the `release`
+The release workflows read four tokens, all secrets of the `release`
 environment, not of the repository:
 
 1. `RELEASE_PLEASE_TOKEN` opens and updates the release pull request, so its
    checks start without a maintainer's approval.
-2. `WINGET_TOKEN` opens the winget-pkgs pull requests from the uvw/winget-pkgs
+2. `HOMEBREW_TAP_TOKEN` pushes the cask to `uvw/homebrew-tap`
+   ([Homebrew](#homebrew)).
+3. `WINGET_TOKEN` opens the winget-pkgs pull requests from the uvw/winget-pkgs
    fork ([winget](#winget)).
-3. `COPILOT_TOKEN` lets Copilot CLI write the [release notes](#release-notes).
+4. `COPILOT_TOKEN` lets Copilot CLI write the [release notes](#release-notes).
 
 Each is optional: without it, its step is skipped with a notice, or, for
 `RELEASE_PLEASE_TOKEN`, falls back to the workflow's own token.

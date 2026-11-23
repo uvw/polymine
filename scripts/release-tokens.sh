@@ -4,6 +4,7 @@
 #
 #   RELEASE_PLEASE_TOKEN  opens and updates the release pull request, so its
 #                         checks start without a maintainer's approval
+#   HOMEBREW_TAP_TOKEN    pushes the cask to uvw/homebrew-tap
 #   WINGET_TOKEN          opens winget-pkgs pull requests from uvw/winget-pkgs
 #   COPILOT_TOKEN         lets Copilot CLI write the release notes
 #
@@ -18,6 +19,7 @@ set -euo pipefail
 
 repo=uvw/polymine
 env=release
+tap=uvw/homebrew-tap
 fork=uvw/winget-pkgs
 
 say() { printf '%s\n' "$*"; }
@@ -66,7 +68,7 @@ wanted() {
 
 for name in "$@"; do
   case $name in
-  RELEASE_PLEASE_TOKEN | WINGET_TOKEN | COPILOT_TOKEN) ;;
+  RELEASE_PLEASE_TOKEN | HOMEBREW_TAP_TOKEN | WINGET_TOKEN | COPILOT_TOKEN) ;;
   *) die "$name is not a secret this script sets" ;;
   esac
 done
@@ -105,7 +107,22 @@ if wanted RELEASE_PLEASE_TOKEN; then
 fi
 
 say ""
-say "3. WINGET_TOKEN: a classic token with the public_repo and workflow scopes"
+say "3. HOMEBREW_TAP_TOKEN: a fine-grained token that can push to $tap"
+if wanted HOMEBREW_TAP_TOKEN; then
+  say "   The page opens with the name, owner, expiry, and Contents: write filled in."
+  say "   Under Repository access, choose \"Only select repositories\" and pick"
+  say "   $tap, then Generate token and copy it. The token claudes uses works too,"
+  say "   if it's still valid: paste that one instead."
+  open_url "https://github.com/settings/personal-access-tokens/new?name=polymine+homebrew-tap+$today&description=Release+workflow+pushes+the+polymine+cask+to+$tap&target_name=uvw&expires_in=366&contents=write"
+  read_token "Homebrew tap"
+  push=$(GH_TOKEN=$token gh api "repos/$tap" -q .permissions.push 2>/dev/null) || push=
+  [[ $push == true ]] || die "that token cannot push to $tap; check its repository access and Contents permission"
+  printf '%s' "$token" | gh secret set HOMEBREW_TAP_TOKEN -R "$repo" --env "$env"
+  say "   saved HOMEBREW_TAP_TOKEN in the $env environment on $repo"
+fi
+
+say ""
+say "4. WINGET_TOKEN: a classic token with the public_repo and workflow scopes"
 if wanted WINGET_TOKEN; then
   say "   winget's tools open pull requests on microsoft/winget-pkgs from your fork,"
   say "   which only a classic token can do. Check that public_repo and workflow"
@@ -119,7 +136,7 @@ if wanted WINGET_TOKEN; then
 fi
 
 say ""
-say "4. COPILOT_TOKEN: a fine-grained token that can make Copilot requests"
+say "5. COPILOT_TOKEN: a fine-grained token that can make Copilot requests"
 if wanted COPILOT_TOKEN; then
   say "   The page opens with the name, owner, expiry, and the account permission"
   say "   Copilot Requests filled in. It needs no repository access. Generate the"

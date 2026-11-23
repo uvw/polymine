@@ -3,6 +3,8 @@
 - **macOS, Apple silicon (M1 and later):** `Polymine_VERSION_aarch64.dmg`
 - **macOS, Intel:** `Polymine_VERSION_x64.dmg`
 - **Windows:** `Polymine_VERSION_x64-setup.exe`
+- **macOS, with Homebrew:** `brew install --cask uvw/tap/polymine`, which also
+  puts `polymine-cli` on your `PATH`.
 - **Windows, portable:** `Polymine_VERSION_x64_portable.zip`. Unzip anywhere and
   run `Polymine.exe`; settings and games stay in the `data` folder beside it.
 
