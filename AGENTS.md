@@ -128,12 +128,10 @@ Prettier.
     `docs/CLI.md`.
 12. **A dependency change can change the notices file.** Run `npm run notices`
     and commit what it writes, or CI fails.
-13. **Never copy FastMines code, tables, or assets.** FastMines is GPL, and
-    Polymine is MIT or Apache.
-14. **`docs/decisions.md` is a living record.** Rewrite an entry when its rule
+13. **`docs/decisions.md` is a living record.** Rewrite an entry when its rule
     changes. After renumbering, update every `decision N` reference in the repo,
     since a wrong number misleads more than none.
-15. **Prettier wraps Markdown at 80 columns.** Run `npx prettier --write` on a
+14. **Prettier wraps Markdown at 80 columns.** Run `npx prettier --write` on a
     doc after editing it instead of wrapping by hand.
 
 ## Maintaining this file

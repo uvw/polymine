@@ -10,7 +10,7 @@ file current.
 | No.                                                                              | Decision                                                                |
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | [1](#1-rust-engine-with-a-tauri-and-svelte-shell)                                | Rust engine with a Tauri and Svelte shell                               |
-| [2](#2-mit-or-apache-license-with-a-clean-room-rule)                             | MIT or Apache license with a clean-room rule                            |
+| [2](#2-mit-or-apache-license)                                                    | MIT or Apache license                                                   |
 | [3](#3-game-state-lives-in-the-rust-backend)                                     | Game state lives in the Rust backend                                    |
 | [4](#4-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
 | [5](#5-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
@@ -81,15 +81,14 @@ with small installers. The web stack has the widest choice of animation tools.
 **Alternatives:** C# with Avalonia, Flutter, and a shared Rust engine with
 separate SwiftUI and WinUI front ends.
 
-## 2. MIT or Apache license with a clean-room rule
+## 2. MIT or Apache license
 
 **Date:** 2026-10-24
 
-**Decision:** Polymine is dual licensed under MIT or Apache 2.0. Nobody copies
-or translates FastMines code, tables, or assets.
+**Decision:** Polymine is dual licensed under MIT or Apache 2.0.
 
-**Why:** FastMines is GPL. Tilings and minesweeper rules are public math and
-ideas, so a new implementation can carry a permissive license.
+**Why:** It's the usual license pair for Rust projects, so the engine and the
+crates can be reused anywhere, and Apache 2.0 adds a patent grant.
 
 ## 3. Game state lives in the Rust backend
 

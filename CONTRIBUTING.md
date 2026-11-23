@@ -312,10 +312,3 @@ it:
 
 Prettier wraps Markdown at 80 columns. Run `npx prettier --write` on a doc after
 editing it rather than wrapping by hand.
-
-## Clean-room rule
-
-Polymine is MIT or Apache licensed. The original FastMines source is GPL, so
-never copy or translate its code, tables, or assets. Port behavior from a
-plain-language description, derive geometry from the math, and write new strings
-and art.
