@@ -206,45 +206,35 @@ in. No theme editor UI for now.
 
 ## Platform and release
 
-1. **Local release builds.** GitHub Actions minutes are used up until December
-   2026, so releases build on the owner's machines. Windows has
-   `scripts/release-windows.ps1`, and [windows.md](windows.md) has the steps.
-   macOS waits for the owner to pick one:
-   1. Build on the Mac by hand.
-   2. Register the Mac and this PC as self-hosted runners, which are free in
-      private repositories.
-   3. Make the repository public.
-2. **Installers, code signing and auto-update.**
+1. **Installers, code signing and auto-update.**
    1. Windows signing needs a code-signing certificate, or the Microsoft Store
-      (item 3), which signs for us.
+      (item 2), which signs for us.
    2. macOS needs an Apple Developer ID and notarization for downloads to open
       without a warning. Today the bundle is ad-hoc signed.
    3. Auto-update through `tauri-plugin-updater`, with a signed update manifest
       attached to each release.
-3. **Microsoft Store, winget, and MSIX before going public.** The Store signs
-   the build, so Windows shows no SmartScreen prompt and no certificate is
-   needed. winget can point at the GitHub release files. Both take the NSIS
-   `.exe` (decision 55), so neither needs an MSI. MSIX, the Store's own format,
-   gives a sandboxed install, a clean uninstall, and Store updates. First check
-   what it does to the CLI on `PATH`, the data folder, and the named pipe. If an
-   MSI is ever wanted, a WiX fragment through `bundle.windows.wix.fragmentPaths`
-   matches the NSIS hooks. It needs an `<Environment>` element for `PATH` and
-   the Util extension's `RemoveFolderEx` for the player's data.
-4. **A changelog.** Start a `CHANGELOG.md` with an Unreleased section once the
-   repository is public, and draw release notes from it.
-5. **A browser build.** The engine compiles to WASM, and the UI already talks
+2. **Microsoft Store, winget, and MSIX.** The Store signs the build, so Windows
+   shows no SmartScreen prompt and no certificate is needed. winget can point at
+   the GitHub release files. Both take the NSIS `.exe` (decision 55), so neither
+   needs an MSI. MSIX, the Store's own format, gives a sandboxed install, a
+   clean uninstall, and Store updates. First check what it does to the CLI on
+   `PATH`, the data folder, and the named pipe. If an MSI is ever wanted, a WiX
+   fragment through `bundle.windows.wix.fragmentPaths` matches the NSIS hooks.
+   It needs an `<Environment>` element for `PATH` and the Util extension's
+   `RemoveFolderEx` for the player's data.
+3. **A browser build.** The engine compiles to WASM, and the UI already talks
    only through `api.ts`, so a web build swaps the Tauri commands for direct
    engine calls. Open: where settings and history live (IndexedDB), and whether
    the CLI has any role there.
-6. **Specta 2.** Move to specta 2 and `tauri-specta` 2 once they ship, and drop
+4. **Specta 2.** Move to specta 2 and `tauri-specta` 2 once they ship, and drop
    the exact version pins in `Cargo.toml` and `src-tauri/Cargo.toml`.
-7. **Windows file checks for theme folders.** `same_file` in
+5. **Windows file checks for theme folders.** `same_file` in
    `crates/polymine-ipc/src/themes.rs` always passes on Windows, and a hard link
    to a file outside the folder reads fine. Open with
    `FILE_FLAG_OPEN_REPARSE_POINT` and compare file IDs.
-8. **A sturdier installer test.** A locked file in the `finally` block of
+6. **A sturdier installer test.** A locked file in the `finally` block of
    `scripts/windows-installer-test.ps1` stops the remaining restores. Wrap each
    restore on its own and print the backup path on any error.
-9. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
+7. **Tests for the docs that have none.** The `docs/CLI.md` tables, the
    `--timeout` floor, the player's guide's minimal theme, and the tiling table
    in `docs/design.md` can drift without a test failing.

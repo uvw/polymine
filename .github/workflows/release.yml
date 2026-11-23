@@ -1,114 +1,99 @@
 name: Release
 
+# release-please calls this once its release pull request merges and the draft
+# release and tag exist. Running it by hand (re)publishes an existing tag.
 on:
-  push:
-    tags: ["v*"]
+  workflow_call:
+    inputs:
+      tag:
+        description: The tag to release, such as v0.1.0.
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
-        description: Tag for the draft release, for example v0.1.0. GitHub creates it from this commit when the release is published.
+        description: An existing tag to release, such as v0.1.0.
         required: true
         type: string
 
 permissions: {}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+  group: release-${{ inputs.tag }}
   cancel-in-progress: false
 
-env:
-  RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
-
 jobs:
-  # No release from a commit that hasn't passed CI.
-  ci:
-    name: CI
-    uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository]
+  eligibility:
+    name: Release eligibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       contents: read
-
-  # The build jobs finish at different times, so the release is created once up
-  # front. Letting each build job create it races and can leave duplicate drafts.
-  create-release:
-    name: Create draft release
-    needs: ci
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    # Later jobs check out this commit, not the tag, so a tag moved mid-run
+    # can't slip an unchecked commit into the build.
     outputs:
-      release-id: ${{ steps.create.outputs.id }}
+      sha: ${{ steps.check.outputs.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          # Releases restore no cache, so nothing a pull request wrote reaches
-          # a published build.
           package-manager-cache: false
-      - name: Check that the tag matches every version
-        run: node scripts/check-versions.mjs "$RELEASE_TAG"
-      - name: Create draft release
-        id: create
+      - name: The tag is a version on main, and every version file agrees
+        id: check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_BODY: |
-            ## Downloads
-
-            - **macOS, Apple silicon (M1 and later):** `Polymine_<version>_aarch64.dmg`
-            - **macOS, Intel:** `Polymine_<version>_x64.dmg`
-            - **Windows:** `Polymine_<version>_x64-setup.exe`
-            - **Windows, portable:** `Polymine_<version>_x64_portable.zip`. Unzip anywhere and run `Polymine.exe`; settings and games stay in the `data` folder beside it.
-
-            ## Opening an unsigned build
-
-            These builds are not signed or notarized yet, so both systems warn on first launch.
-
-            **macOS:** open the `.dmg` and drag Polymine to Applications. macOS then blocks the first launch. Use one of these:
-
-            1. Try to open the app once, then go to **System Settings > Privacy & Security** and click **Open Anyway**.
-            2. In Terminal, run `xattr -dr com.apple.quarantine /Applications/Polymine.app`.
-            3. On macOS 14 or earlier, Control-click (or right-click) Polymine in Applications, choose **Open**, then **Open** again.
-
-            **Windows:** SmartScreen may show "Windows protected your PC". Click **More info**, then **Run anyway**.
-
-            ## Command line
-
-            `polymine-cli` comes with the app: next to `Polymine.exe` in the install folder on Windows, and at `/Applications/Polymine.app/Contents/MacOS/polymine-cli` on macOS. Run `polymine-cli skill` for the guide coding agents use.
+          TAG: ${{ inputs.tag }}
+        # Prereleases are refused: publish marks the release as latest.
         run: |
-          id=$(gh api --method POST "repos/$GITHUB_REPOSITORY/releases" \
-            -f tag_name="$RELEASE_TAG" \
-            -f target_commitish="$GITHUB_SHA" \
-            -f name="Polymine $RELEASE_TAG" \
-            -f body="$RELEASE_BODY" \
-            -F draft=true \
-            -F prerelease=false \
-            --jq .id)
-          echo "id=$id" >> "$GITHUB_OUTPUT"
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
+            { echo "::error::$TAG is not a vMAJOR.MINOR.PATCH tag"; exit 1; }
+          git merge-base --is-ancestor "refs/tags/$TAG" origin/main ||
+            { echo "::error::$TAG is not on main"; exit 1; }
+          node scripts/check-versions.mjs "$TAG"
+          echo "sha=$(git rev-parse "refs/tags/$TAG^{commit}")" >> "$GITHUB_OUTPUT"
 
+  ci:
+    name: CI
+    needs: eligibility
+    uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository]
+    with:
+      ref: ${{ needs.eligibility.outputs.sha }}
+    permissions:
+      contents: read
+
+  # Builds the installers and the portable ZIP but publishes nothing. This job
+  # holds no token that can write or sign.
   build:
     name: Build (${{ matrix.name }})
-    needs: create-release
+    needs: [eligibility, ci]
     permissions:
-      contents: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: macOS Apple silicon
-            os: macos-latest
+            os: macos-15
             target: aarch64-apple-darwin
+            bundles: dmg
           - name: macOS Intel
-            os: macos-latest
+            os: macos-15
             target: x86_64-apple-darwin
+            bundles: dmg
           - name: Windows x64
-            os: windows-latest
+            os: windows-2025
             target: x86_64-pc-windows-msvc
+            bundles: nsis
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.eligibility.outputs.sha }}
           persist-credentials: false
       # Installs the toolchain rust-toolchain.toml pins, plus the build target.
       - run: rustup toolchain install --target ${{ matrix.target }}
@@ -123,38 +108,137 @@ jobs:
       # by the target triple in the file name.
       - name: Build polymine-cli for the bundle
         shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
-          cargo build --release --locked -p polymine-cli --target ${{ matrix.target }}
+          cargo build --release --locked -p polymine-cli --target "$TARGET"
           ext=""; [ "$RUNNER_OS" = "Windows" ] && ext=".exe"
           mkdir -p src-tauri/binaries
-          cp "target/${{ matrix.target }}/release/polymine-cli$ext" \
-            "src-tauri/binaries/polymine-cli-${{ matrix.target }}$ext"
+          cp "target/$TARGET/release/polymine-cli$ext" \
+            "src-tauri/binaries/polymine-cli-$TARGET$ext"
       # The Tauri CLI runs `npm run build` itself through `beforeBuildCommand`.
-      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
+      - name: Build and bundle the app
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+          BUNDLES: ${{ matrix.bundles }}
           # No certificates exist yet. The `-` identity ad-hoc signs the macOS
           # bundle: Apple silicon refuses to launch a downloaded app with no
           # signature at all, and calls it damaged instead of offering Open.
           # Windows ignores it.
           APPLE_SIGNING_IDENTITY: "-"
-        with:
-          releaseId: ${{ needs.create-release.outputs.release-id }}
-          args: --target ${{ matrix.target }} --config src-tauri/tauri.bundle-cli.conf.json -- --locked
+        run: |
+          npx tauri build --target "$TARGET" --bundles "$BUNDLES" \
+            --config src-tauri/tauri.bundle-cli.conf.json -- --locked
+          mkdir -p dist
+          cp target/"$TARGET"/release/bundle/"$BUNDLES"/Polymine_* dist/
       # A portable copy: no installer, and the `portable` marker keeps its data
       # in a `data` folder beside the executable.
-      - name: Upload the portable Windows ZIP
+      - name: Make the portable Windows ZIP
         if: runner.os == 'Windows'
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
         run: |
           $version = (Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json).version
-          $release = "target/${{ matrix.target }}/release"
+          $release = "target/$env:TARGET/release"
           $stage = New-Item -ItemType Directory -Path "portable/Polymine"
           Copy-Item "$release/polymine.exe" "$stage/Polymine.exe"
           Copy-Item "$release/polymine-cli.exe" "$stage/polymine-cli.exe"
           Set-Content "$stage/portable" "Polymine keeps its settings, games and logs in the data folder here."
-          $zip = "Polymine_${version}_x64_portable.zip"
-          Compress-Archive -Path $stage -DestinationPath $zip
-          gh release upload "$env:RELEASE_TAG" $zip --repo "$env:GITHUB_REPOSITORY"
+          Compress-Archive -Path $stage -DestinationPath "dist/Polymine_${version}_x64_portable.zip"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  attest:
+    name: Attest provenance
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+      - name: List every file's SHA-256 in checksums.txt
+        working-directory: dist
+        run: sha256sum Polymine_* > checksums.txt && cat checksums.txt
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/checksums.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: checksums
+          path: dist/checksums.txt
+          if-no-files-found: error
+
+  # Runs last, so a release is only ever published complete, with every asset
+  # already attested. The release environment admits only main and v* tags
+  # (docs/releasing.md), so a dispatch from another branch can't publish.
+  publish:
+    name: Publish
+    needs: [eligibility, attest]
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # For the downloads section of the release notes.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.eligibility.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: checksums
+          path: dist
+      - name: Upload the assets to the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --verify-tag --generate-notes
+          fi
+          gh release upload "$TAG" dist/* --clobber
+      # release-please wrote the changelog into the draft. The downloads and
+      # first-launch steps go below it, once.
+      - name: Add the downloads to the release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          body=$(gh release view "$TAG" --json body -q .body)
+          if [[ $body != *"## Downloads"* ]]; then
+            { printf '%s\n\n' "$body"; sed "s/VERSION/${TAG#v}/g" .github/release-body.md; } >"$RUNNER_TEMP/body.md"
+            gh release edit "$TAG" --title "Polymine $TAG" --notes-file "$RUNNER_TEMP/body.md"
+          fi
+      - name: Publish the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          SHA: ${{ needs.eligibility.outputs.sha }}
+        # A release belongs to the tag's name, so the tag must still name the
+        # commit every job built and tested.
+        run: |
+          tagged=$(gh api "repos/$GH_REPO/commits/refs/tags/$TAG" --jq .sha)
+          [[ $tagged == "$SHA" ]] ||
+            { echo "::error::$TAG moved to $tagged after the build of $SHA"; exit 1; }
+          gh release edit "$TAG" --draft=false --latest

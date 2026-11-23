@@ -106,6 +106,8 @@ Update a doc in the same change as the code it describes.
    them. Update it when a component is added, removed, or wired differently.
 6. `docs/windows.md` holds the Windows installer test and the Windows release
    steps.
+7. `docs/releasing.md` describes how a release is made: release-please, the
+   release workflow, and the repository settings they need.
 
 Each repeated fact has one home, and other docs link to it instead of copying
 it:
@@ -185,6 +187,9 @@ Use Conventional Commits with a scope: `type(scope): subject`, with the subject
 in lowercase imperative, for example `fix(ui): keep menus inside the window`.
 Types are `feat`, `fix`, `docs`, `test`, `refactor`, `ci`, and `chore`. The
 scope names the area: `core`, `app`, `ui`, `cli`, `ipc`, `net`, `tilings`,
-`themes`, `windows`, `macos`, `release`, `docs`, or `todo`. Leave the scope out
-only when a commit spans several areas. Keep the body to one or two sentences
-about what changed and why.
+`themes`, `windows`, `macos`, `release`, `docs`, `todo`, or `deps`. Leave the
+scope out only when a commit spans several areas. Keep the body to one or two
+sentences about what changed and why.
+
+The type decides the release: release-please makes one for `feat` and `fix`, and
+lists them in `CHANGELOG.md` ([releasing.md](docs/releasing.md)).

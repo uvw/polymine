@@ -20,6 +20,7 @@ what an agent needs on top of them.
 | A Tauri command or the session              | `src-tauri/src/app.rs`, then `commands.rs`                         |
 | The board's drawing                         | `ui/src/lib/board`                                                 |
 | The Windows installer or a Windows release  | `docs/windows.md`                                                  |
+| How a release is made                       | `docs/releasing.md`                                                |
 | Which components talk to which              | `docs/architecture/overview.html`                                  |
 
 ## The owner's data

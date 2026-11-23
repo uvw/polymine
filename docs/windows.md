@@ -38,9 +38,12 @@ with and without the data, and the uninstall an update runs.
 
 ## Releasing from Windows
 
-`scripts/release-windows.ps1` makes the files the release workflow makes on
-Windows: the NSIS installer with `polymine-cli` bundled, and the portable ZIP.
-Set the version in every manifest first; the script checks the tag against them.
+Releases come from the release workflow ([releasing.md](releasing.md)).
+`scripts/release-windows.ps1` makes the same Windows files on this machine, the
+NSIS installer with `polymine-cli` bundled and the portable ZIP, for testing
+them. Don't publish them: a local build records this machine's home folder in
+the binaries, and nothing attests it. Set the version in every manifest first;
+the script checks the tag against them.
 
 ```powershell
 pwsh scripts/release-windows.ps1 -Tag v0.0.3
