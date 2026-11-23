@@ -104,8 +104,11 @@ jobs:
         with:
           ref: ${{ needs.eligibility.outputs.sha }}
           persist-credentials: false
-      # Installs the toolchain rust-toolchain.toml pins, plus the build target.
-      - run: rustup toolchain install --target ${{ matrix.target }}
+      # Installs the toolchain rust-toolchain.toml pins, then the build target.
+      # With the toolchain from that file, rustup ignores --target on install.
+      - run: |
+          rustup toolchain install
+          rustup target add ${{ matrix.target }}
       # No Rust or npm cache: releases build from scratch, so nothing a pull
       # request wrote to a cache reaches a published build.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
