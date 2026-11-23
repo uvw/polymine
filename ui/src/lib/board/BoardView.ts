@@ -9,6 +9,7 @@ import {
   Polygon,
   Sprite,
   Text,
+  Ticker,
   type FillInput,
   type RoundedPoint,
 } from "pixi.js";
@@ -262,6 +263,9 @@ export class BoardView {
     });
     window.addEventListener("blur", this.onWindowBlur);
     app.ticker.add((ticker) => this.tick(ticker.deltaMS));
+    // The renderer's scheduler, which runs Pixi's garbage collection, listens
+    // on the system ticker that `create` stops, so it advances with the board.
+    app.ticker.add(() => Ticker.system.update());
     this.motionQuery.addEventListener("change", this.onMotionChange);
     this.watchResolution();
     this.resizeObserver = new ResizeObserver(() => this.scheduleRelayout());
@@ -269,6 +273,12 @@ export class BoardView {
   }
 
   static async create(host: HTMLElement, theme: BoardTheme, handlers: BoardHandlers) {
+    // Pixi's event system adds a hover check to the system ticker, which then
+    // asks for a frame 60 times a second forever. The check only serves
+    // `dynamic` objects, and the board has none. Stopping the ticker before
+    // `init`, with autoStart off, keeps the listeners `init` adds from starting it.
+    Ticker.system.autoStart = false;
+    Ticker.system.stop();
     const app = new Application();
     await app.init({
       // Global move events hit-test every cell on each pointer move.

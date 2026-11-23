@@ -61,6 +61,47 @@ message. If you find a bug, fix it in the same change or leave a new item.
      kept.
    - **Added:** 2026-11-22, Windows session.
 
+4. **Board CPU and GPU before and after the idle fixes.**
+   - **What:** two pull requests cut the board's work in
+     `ui/src/lib/board/BoardView.ts`.
+     `fix(ui): stop pixi's system ticker so an idle board draws no frames` stops
+     Pixi's system ticker, which asked for a frame 60 times a second while
+     nothing moved.
+     `fix(ui): hit-test the board only for pointer moves that need it` turns off
+     Pixi's global move events, which walked every cell on each pointer move. On
+     a 2019 Intel MacBook Pro, idle CPU fell from 7.6% to 1.2%, paused from 7.7%
+     to 0.1%, WindowServer's extra load from 19 points to 0.7, and hover on a
+     30×20 board from 23.3% to 14.2%.
+   - **Verify:**
+     1. Compare v0.1.1, installed today, with a build from `main` once both pull
+        requests merge. Run the `main` build as a named instance.
+     2. Measure CPU and GPU for `polymine.exe`, the `msedgewebview2.exe`
+        processes (browser, renderer, and GPU), and `dwm.exe`. Take a baseline
+        with Polymine closed, then sample each scenario for 15 to 30 seconds
+        rather than reading Task Manager:
+
+        ```powershell
+        Get-Counter '\Process(*)\% Processor Time','\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 20
+        ```
+
+     3. Scenarios: idle while playing, paused, the window in the background, the
+        pointer moving over the board, play through `polymine-cli`, a window
+        resize, and a 120×80 board.
+     4. Run them with Frost (Acrylic) and Graphite (Mica), with Transparency
+        effects (Personalization, Colors) on and off, and with Animation effects
+        (Accessibility, Visual effects) on and off. Note the display scaling and
+        refresh rate.
+     5. After the hit-test fix: a left-button press dragged across cells moves
+        the press, a middle-button drag pans and keeps panning when the pointer
+        leaves the window mid-drag, a release outside the window ends the press
+        or the drag, and hover highlights cells. On a touch screen, a hold flags
+        and a pinch zooms.
+     6. After the ticker fix: the board still animates when it should, such as
+        on a win or a hint, and idle CPU is near zero.
+     7. Reply with the numbers in a table, one row per scenario and process, so
+        they line up with the Mac profile.
+   - **Added:** 2026-11-23, macOS session.
+
 ## macOS only
 
 1. **Window and vibrancy fixes, by hand.**

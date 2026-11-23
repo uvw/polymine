@@ -292,11 +292,30 @@ export class Polygon {
 }
 
 export class Ticker {
+  private static systemTicker: Ticker | null = null;
+  /** Pixi's system ticker, which starts itself on its first listener until autoStart is off. */
+  static get system(): Ticker {
+    if (!Ticker.systemTicker) {
+      Ticker.systemTicker = new Ticker();
+      Ticker.systemTicker.started = false;
+      Ticker.systemTicker.autoStart = true;
+    }
+    return Ticker.systemTicker;
+  }
+
   started = true;
+  autoStart = false;
   maxFPS = 0;
+  /** Calls to `update`, which runs the listeners whether or not the ticker is started. */
+  updates = 0;
   listeners: ((ticker: { deltaMS: number }) => void)[] = [];
   add(fn: (ticker: { deltaMS: number }) => void) {
     this.listeners.push(fn);
+    if (this.autoStart) this.start();
+  }
+  update() {
+    this.updates++;
+    for (const fn of this.listeners) fn({ deltaMS: 16 });
   }
   start() {
     this.started = true;
@@ -338,6 +357,8 @@ export class Application {
   };
   destroyed = false;
   async init(options: { resizeTo: HTMLElement; resolution?: number }) {
+    // The renderer's scheduler and the event system's hover check listen here.
+    Ticker.system.add(() => {});
     this.screen = { width: options.resizeTo.clientWidth, height: options.resizeTo.clientHeight };
     this.renderer.resolution = options.resolution ?? 1;
     Application.last = this;
