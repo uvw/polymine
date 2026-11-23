@@ -57,7 +57,7 @@ the parts and flows.
     9. [Loading and checks](#loading-and-checks)
 11. [Board rendering](#board-rendering)
 12. [Input and accessibility](#input-and-accessibility)
-13. [Licensing and clean room](#licensing-and-clean-room)
+13. [Licensing](#licensing)
 
 ## Goals
 
@@ -994,13 +994,11 @@ Settings opens, and when the window comes to the front.
 11. The board is one `role="application"` widget with the role description
     "minefield" and a label that names its keys.
 
-## Licensing and clean room
+## Licensing
 
-FastMines is GPL. Polymine ports behavior, never code. Geometry comes from the
-math of each tiling, the level densities are Polymine's own, and all strings and
-art are new. `cargo-deny` checks that dependencies stay permissive. The only
-exception is MPL-2.0, which applies per file and which Tauri's HTML parsing
-crates and `dirs` need.
+Polymine is dual licensed under MIT or Apache 2.0. `cargo-deny` checks that
+dependencies stay permissive. The only exception is MPL-2.0, which applies per
+file and which Tauri's HTML parsing crates and `dirs` need.
 
 The About window shows the licenses of everything that ships: the npm packages
 that reach the UI bundle, the Rust crates in the app and the CLI, and the
