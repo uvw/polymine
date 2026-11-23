@@ -58,27 +58,27 @@
         {
           "type": "toml",
           "path": "Cargo.lock",
-          "jsonpath": "$.package[?(@.name=='polymine')].version"
+          "jsonpath": "$.package[?(@.name.value=='polymine')].version"
         },
         {
           "type": "toml",
           "path": "Cargo.lock",
-          "jsonpath": "$.package[?(@.name=='polymine-cli')].version"
+          "jsonpath": "$.package[?(@.name.value=='polymine-cli')].version"
         },
         {
           "type": "toml",
           "path": "Cargo.lock",
-          "jsonpath": "$.package[?(@.name=='polymine-core')].version"
+          "jsonpath": "$.package[?(@.name.value=='polymine-core')].version"
         },
         {
           "type": "toml",
           "path": "Cargo.lock",
-          "jsonpath": "$.package[?(@.name=='polymine-ipc')].version"
+          "jsonpath": "$.package[?(@.name.value=='polymine-ipc')].version"
         },
         {
           "type": "toml",
           "path": "Cargo.lock",
-          "jsonpath": "$.package[?(@.name=='polymine-net')].version"
+          "jsonpath": "$.package[?(@.name.value=='polymine-net')].version"
         },
         {
           "type": "json",
