@@ -98,6 +98,7 @@
   "about.inspired": "Inspired by FastMines.",
   "about.version": "Version {version}",
   "about.license": "Licensed under MIT or Apache 2.0.",
+  "about.repository": "Source code on GitHub",
   "about.notices": "Third-party notices",
   "error.generic": "Something went wrong: {message}",
   "error.noShell": "Polymine runs inside its desktop shell. Start it with npm run app.",

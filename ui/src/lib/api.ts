@@ -42,4 +42,5 @@ export const api = {
   checkForUpdate: commands.checkForUpdate,
   installUpdate: commands.installUpdate,
   openReleaseNotes: commands.openReleaseNotes,
+  openRepository: commands.openRepository,
 };

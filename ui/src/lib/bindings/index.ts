@@ -87,6 +87,8 @@ export const commands = {
 	 *  while the window stays in front, so the UI asks before it pauses.
 	 */
 	windowInFront: () => __TAURI_INVOKE<boolean>("window_in_front"),
+	/**  Opens the project's repository in the browser. */
+	openRepository: () => __TAURI_INVOKE<null>("open_repository"),
 	/**
 	 *  Sets the window's big icon to `rgba`, a `size` by `size` image. A failure
 	 *  is logged and leaves the icon as it was. Other platforms have no such icon.

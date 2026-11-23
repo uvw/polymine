@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getVersion } from "@tauri-apps/api/app";
+  import { api } from "../lib/api";
   import { t } from "../lib/i18n";
   import Modal from "./Modal.svelte";
 
@@ -13,6 +14,14 @@
     if (open && !version) void getVersion().then((v) => (version = v));
     if (!open) showNotices = false;
   });
+
+  async function openRepository() {
+    try {
+      await api.openRepository();
+    } catch (error) {
+      console.warn("could not open the repository", error);
+    }
+  }
 
   async function toggleNotices() {
     showNotices = !showNotices;
@@ -31,6 +40,7 @@
       {#if version}<p class="dim">{t("about.version", { version })}</p>{/if}
       <p>{t("about.body")}</p>
       <p class="dim">{t("about.inspired")} {t("about.license")}</p>
+      <p><button class="link" onclick={openRepository}>{t("about.repository")}</button></p>
     </div>
   </div>
   {#if showNotices}
@@ -68,6 +78,20 @@
 
   p {
     margin: 6px 0 0;
+  }
+
+  /* The repository opens in the browser, so the button reads as a link. */
+  button.link {
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  button.link:hover:not(:disabled) {
+    background: none;
+    color: var(--accent-hover);
   }
 
   .dim {

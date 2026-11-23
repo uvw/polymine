@@ -22,6 +22,7 @@ use tauri_plugin_updater::{Update, Updater, UpdaterExt};
 
 use crate::app::App;
 use crate::error::AppError;
+use crate::links;
 
 /// The event that reports a download's progress to the window.
 pub const PROGRESS_EVENT: &str = "polymine://update-progress";
@@ -343,26 +344,7 @@ async fn download_and_install(
 pub fn open_release_notes(updates: State<'_, Updates>) -> Result<(), AppError> {
     let update = updates.found().ok_or(AppError::NoUpdate)?;
     let url = release_notes_url(&update.version).ok_or(AppError::NoUpdate)?;
-    open_url(&url).map_err(AppError::OpenLink)
-}
-
-/// Opens `url` in the default browser.
-fn open_url(url: &str) -> io::Result<()> {
-    // No shell sits between, so nothing in the URL is a command. cmd's start
-    // would cut it at an ampersand.
-    let mut command = if cfg!(target_os = "macos") {
-        std::process::Command::new("open")
-    } else if cfg!(target_os = "windows") {
-        let mut command = std::process::Command::new("rundll32.exe");
-        command.arg("url.dll,FileProtocolHandler");
-        command
-    } else {
-        std::process::Command::new("xdg-open")
-    };
-    let mut child = command.arg(url).spawn()?;
-    // Reaps the opener when it exits, so it doesn't linger as a zombie.
-    std::thread::spawn(move || child.wait());
-    Ok(())
+    links::open_url(&url).map_err(AppError::OpenLink)
 }
 
 #[cfg(test)]
