@@ -1,13 +1,13 @@
 {
   "url": "https://api.github.com/gists/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e",
   "id": "2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e",
-  "html_url": "https://gist.github.com/octo-themes/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e",
+  "html_url": "https://gist.github.com/polymine-fixture/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e",
   "files": {
     "notes.md": {
       "filename": "notes.md",
       "type": "text/markdown",
       "language": "Markdown",
-      "raw_url": "{{server}}/octo-themes/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e/raw/1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d/notes.md",
+      "raw_url": "{{server}}/polymine-fixture/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e/raw/1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d/notes.md",
       "size": 14,
       "truncated": false,
       "content": "Made for fun.\n",
@@ -17,7 +17,7 @@
       "filename": "theme.css",
       "type": "text/css",
       "language": "CSS",
-      "raw_url": "{{server}}/octo-themes/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e/raw/2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e/theme.css",
+      "raw_url": "{{server}}/polymine-fixture/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e/raw/2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e/theme.css",
       "size": 34,
       "truncated": false,
       "content": ":root {\n  --cell-fill: #1d2433;\n}\n",
@@ -28,7 +28,7 @@
   "created_at": "2026-10-30T18:22:41Z",
   "updated_at": "2026-11-02T09:05:13Z",
   "description": "Dusk, a Polymine theme",
-  "owner": { "login": "octo-themes", "id": 9919, "type": "User" },
+  "owner": { "login": "polymine-fixture", "id": 9919, "type": "User" },
   "truncated": false,
   "history": [
     {

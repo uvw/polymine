@@ -805,14 +805,14 @@ mod tests {
     use crate::test_server::{Reply, Seen, TestServer};
 
     const COMMIT: &str = "0123456789abcdef0123456789abcdef01234567";
-    const REPO: &str = "/repos/octo-themes/polymine-themes";
+    const REPO: &str = "/repos/polymine-fixture/polymine-themes";
     const TREE: &str = include_str!("../tests/fixtures/github/tree-dusk.json");
     const GIST: &str = include_str!("../tests/fixtures/github/gist-dusk.json");
     const THEME_CSS: &str = ":root {\n  --cell-fill: #1d2433;\n}\n";
     const PNG: &[u8] = b"\x89PNG\r\n\x1a\n";
 
     fn dusk() -> Source {
-        Source::parse("https://github.com/octo-themes/polymine-themes/tree/main/themes/dusk")
+        Source::parse("https://github.com/polymine-fixture/polymine-themes/tree/main/themes/dusk")
             .unwrap()
     }
 
@@ -842,7 +842,7 @@ mod tests {
         let tree = Arc::new(tree);
         TestServer::start(move |req: &Seen| {
             let path = req.path.as_str();
-            let raw_prefix = format!("/raw/octo-themes/polymine-themes/{COMMIT}/themes/dusk/");
+            let raw_prefix = format!("/raw/polymine-fixture/polymine-themes/{COMMIT}/themes/dusk/");
             if let Some(file) = path.strip_prefix(&raw_prefix) {
                 return files
                     .get(file)
@@ -975,7 +975,7 @@ mod tests {
     fn a_hand_built_source_is_checked_too() {
         let server = github_server(TREE.into(), files());
         let source = Source::Repo {
-            owner: "octo-themes".into(),
+            owner: "polymine-fixture".into(),
             repo: "polymine-themes".into(),
             reference: None,
             path: "../secrets".into(),
@@ -1041,7 +1041,7 @@ mod tests {
     #[test]
     fn the_default_branch_is_head() {
         let server = github_server(TREE.into(), files());
-        let source = Source::parse("https://github.com/octo-themes/polymine-themes").unwrap();
+        let source = Source::parse("https://github.com/polymine-fixture/polymine-themes").unwrap();
         // The fixture server has no tree for the repository root, so the
         // listing fails after both requests.
         let _ = github(&server).list(&source, &limits());
@@ -1292,9 +1292,10 @@ mod tests {
     fn a_gist_downloads_its_allowed_files() {
         let server = gist_server();
         let github = github(&server).with_token(Token::new("ghp_secret"));
-        let source =
-            Source::parse("https://gist.github.com/octo-themes/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e")
-                .unwrap();
+        let source = Source::parse(
+            "https://gist.github.com/polymine-fixture/2f6b1c9e8d7a4f3b5c0e1d2a3b4c5d6e",
+        )
+        .unwrap();
         let staging = tempfile::tempdir().unwrap();
         let target = staging.path().join("dusk");
         let download = github.download(&source, &target, &limits()).unwrap();
