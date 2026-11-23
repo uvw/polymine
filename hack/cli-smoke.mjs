@@ -3,7 +3,7 @@
 // untouched. It plays a seeded game through the CLI and checks the JSON replies
 // and exit codes. Build first: cargo build -p polymine -p polymine-cli
 //
-//   node scripts/cli-smoke.mjs [debug|release]
+//   node hack/cli-smoke.mjs [debug|release]
 
 import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";

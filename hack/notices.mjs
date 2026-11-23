@@ -20,10 +20,10 @@ const rule = "-".repeat(80);
 // Packages published without a license file, with the text from their
 // upstream repository.
 const LICENSE_OVERRIDES = {
-  "@pixi/colord": ["scripts/notices/pixi-colord.LICENSE.md"],
+  "@pixi/colord": ["hack/notices/pixi-colord.LICENSE.md"],
   "@tauri-apps/plugin-log": [
-    "scripts/notices/tauri-apps-plugin-log.LICENSE_APACHE-2.0",
-    "scripts/notices/tauri-apps-plugin-log.LICENSE_MIT",
+    "hack/notices/tauri-apps-plugin-log.LICENSE_APACHE-2.0",
+    "hack/notices/tauri-apps-plugin-log.LICENSE_MIT",
   ],
 };
 
@@ -227,14 +227,14 @@ const THEME_PALETTES = [
     palette: "Atom's One Dark and One Light syntax and UI themes, by GitHub's Atom team",
     url: "https://github.com/atom/atom/tree/master/packages",
     license: "MIT",
-    files: ["scripts/notices/palettes/atom.LICENSE"],
+    files: ["hack/notices/palettes/atom.LICENSE"],
   },
   {
     themes: "One Dark Pro",
     palette: "One Dark Pro, by Binaryify",
     url: "https://github.com/Binaryify/OneDark-Pro",
     license: "MIT",
-    files: ["scripts/notices/palettes/onedark-pro.LICENSE"],
+    files: ["hack/notices/palettes/onedark-pro.LICENSE"],
   },
   {
     themes: "Dracula and Alucard",
@@ -243,8 +243,8 @@ const THEME_PALETTES = [
     url: "https://draculatheme.com/spec, https://github.com/dracula/visual-studio-code, and https://github.com/dracula/dracula-theme",
     license: "MIT",
     files: [
-      "scripts/notices/palettes/dracula-visual-studio-code.LICENSE",
-      "scripts/notices/palettes/dracula-theme.LICENSE",
+      "hack/notices/palettes/dracula-visual-studio-code.LICENSE",
+      "hack/notices/palettes/dracula-theme.LICENSE",
     ],
   },
   {
@@ -259,8 +259,8 @@ const THEME_PALETTES = [
     url: "https://github.com/primer/github-vscode-theme and https://github.com/primer/primitives",
     license: "MIT",
     files: [
-      "scripts/notices/palettes/github-vscode-theme.LICENSE",
-      "scripts/notices/palettes/primer-primitives.LICENSE",
+      "hack/notices/palettes/github-vscode-theme.LICENSE",
+      "hack/notices/palettes/primer-primitives.LICENSE",
     ],
   },
   {
@@ -268,14 +268,14 @@ const THEME_PALETTES = [
     palette: "Solarized, by Ethan Schoonover",
     url: "https://ethanschoonover.com/solarized/",
     license: "MIT",
-    files: ["scripts/notices/palettes/solarized.LICENSE"],
+    files: ["hack/notices/palettes/solarized.LICENSE"],
   },
   {
     themes: "Catppuccin Latte",
     palette: "Catppuccin's Latte palette, by the Catppuccin project",
     url: "https://github.com/catppuccin/palette",
     license: "MIT",
-    files: ["scripts/notices/palettes/catppuccin-palette.LICENSE"],
+    files: ["hack/notices/palettes/catppuccin-palette.LICENSE"],
   },
 ];
 

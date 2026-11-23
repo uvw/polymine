@@ -827,7 +827,7 @@ alpha.
 ### Window icon
 
 The app icon in `ui/public/icon.svg` is a steel mine on a dark plate with a
-faint triangle lattice. `scripts/app-icon.mjs` turns it into the installer,
+faint triangle lattice. `hack/app-icon.mjs` turns it into the installer,
 executable, and bundle icons, with `ui/public/icon-small.svg`, four thick spikes
 and no shading, in the `.ico`'s 16 and 24 pixel images.
 

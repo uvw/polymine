@@ -82,8 +82,8 @@ explains the format and the code, and
    Relax a check with the header's `Relaxed:` line only for a look kept on
    purpose, and record why in `docs/decisions.md`.
 4. A theme that borrows another project's palette credits it: add an entry to
-   `THEME_PALETTES` in `scripts/notices.mjs`, put the license in
-   `scripts/notices/palettes`, and run `npm run notices`.
+   `THEME_PALETTES` in `hack/notices.mjs`, put the license in
+   `hack/notices/palettes`, and run `npm run notices`.
 5. Update the count of built-in themes and add a row to the theme table, both in
    `docs/design.md` "Themes".
 
@@ -130,7 +130,7 @@ editing it rather than wrapping by hand.
 `ui/public/icon.svg` is the source of the app icon, and
 `ui/public/icon-small.svg` is its simpler form for 16 and 24 pixels, where the
 full mine blurs. The favicon and the About dialog use `icon.svg` as is. After
-changing either, run `node scripts/app-icon.mjs` to regenerate the window,
+changing either, run `node hack/app-icon.mjs` to regenerate the window,
 installer, and store icons in `src-tauri/icons`, and commit them with the SVGs.
 
 ## Clean-room rule
@@ -153,8 +153,8 @@ npm run lint
 npm run lint:md
 npm run check
 npm run coverage
-cargo build -p polymine -p polymine-cli && node scripts/cli-smoke.mjs
-node scripts/check-versions.mjs
+cargo build -p polymine -p polymine-cli && node hack/cli-smoke.mjs
+node hack/check-versions.mjs
 cargo deny check
 npm run notices
 ```

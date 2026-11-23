@@ -14,7 +14,7 @@
 # passes one on a command line. A secret that is already set is skipped, unless
 # its name is given to renew it.
 #
-# Usage: scripts/release-tokens.sh [SECRET...]
+# Usage: hack/release-tokens.sh [SECRET...]
 set -euo pipefail
 
 repo=uvw/polymine

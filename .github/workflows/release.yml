@@ -58,7 +58,7 @@ jobs:
             { echo "::error::$TAG is not a vMAJOR.MINOR.PATCH tag"; exit 1; }
           git merge-base --is-ancestor "refs/tags/$TAG" origin/main ||
             { echo "::error::$TAG is not on main"; exit 1; }
-          node scripts/check-versions.mjs "$TAG"
+          node hack/check-versions.mjs "$TAG"
           echo "sha=$(git rev-parse "refs/tags/$TAG^{commit}")" >> "$GITHUB_OUTPUT"
 
   ci:

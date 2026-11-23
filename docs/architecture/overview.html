@@ -746,7 +746,7 @@
         { title: "UI", sub: "ui/src · svelte 5 · pixijs", x: 660, y: 40, w: 760, h: 400 },
         {
           title: "BUILD AND RELEASE",
-          sub: ".github/workflows · scripts",
+          sub: ".github/workflows · hack",
           x: 1480,
           y: 40,
           w: 760,
@@ -923,7 +923,7 @@
           w: 200,
           h: 112,
           t: "Third-party notices",
-          k: "scripts/notices.mjs",
+          k: "hack/notices.mjs",
           m: ["cargo-about + vite modules", "shown in the About window"],
         },
         {
@@ -967,7 +967,7 @@
           w: 200,
           h: 112,
           t: "CLI smoke test",
-          k: "scripts/cli-smoke.mjs",
+          k: "hack/cli-smoke.mjs",
           m: ["named instance, scratch data", "seeded game over the CLI"],
         },
         {
@@ -2058,13 +2058,9 @@
         },
         "b-notices": {
           t: "Third-party notices",
-          m: "scripts/notices.mjs",
+          m: "hack/notices.mjs",
           owns: "Writes the licenses the About window shows: the npm packages in the Vite bundle and the Rust crates the app and the CLI ship.",
-          files: [
-            "scripts/notices.mjs",
-            "about.toml",
-            "ui/src/lib/notices/THIRD-PARTY-NOTICES.txt",
-          ],
+          files: ["hack/notices.mjs", "about.toml", "ui/src/lib/notices/THIRD-PARTY-NOTICES.txt"],
           rules: [
             "Needs cargo-about 0.8.4, the version CI pins.",
             "CI fails when the committed file is out of date.",
@@ -2074,7 +2070,7 @@
           t: "CI",
           m: ".github/workflows/ci.yml",
           owns: "Runs on pushes to main, on pull requests, and from the release workflow.",
-          files: [".github/workflows/ci.yml", "deny.toml", "scripts/check-versions.mjs"],
+          files: [".github/workflows/ci.yml", "deny.toml", "hack/check-versions.mjs"],
           rules: [
             "Web job on Ubuntu: version check, Prettier, ESLint, svelte-check, coverage, and the build.",
             "Rust jobs on Windows and macOS: fmt, clippy with `-D warnings`, tests, and the CLI smoke test. They fail when the bindings drift.",
@@ -2090,7 +2086,7 @@
             ".github/workflows/release-please.yml",
             ".github/workflows/release.yml",
             ".github/release-please-config.json",
-            "scripts/check-versions.mjs",
+            "hack/check-versions.mjs",
             "src-tauri/tauri.bundle-cli.conf.json",
           ],
           rules: [
@@ -2115,9 +2111,9 @@
         },
         "b-smoke": {
           t: "CLI smoke test",
-          m: "scripts/cli-smoke.mjs",
+          m: "hack/cli-smoke.mjs",
           owns: "Starts a named instance with a scratch data folder and plays a seeded game through the CLI, checking JSON replies and exit codes.",
-          files: ["scripts/cli-smoke.mjs"],
+          files: ["hack/cli-smoke.mjs"],
           rules: [
             "Test a running app as a named instance, never the default one, so the player's settings and history stay untouched.",
           ],

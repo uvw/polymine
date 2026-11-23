@@ -8,7 +8,7 @@
 // minor version, which stops `tauri build`. Dependabot bumps them in separate
 // pull requests, so either can land first.
 //
-//   node scripts/check-versions.mjs [tag]
+//   node hack/check-versions.mjs [tag]
 
 import { readFileSync } from "node:fs";
 import process from "node:process";
