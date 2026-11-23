@@ -19,7 +19,7 @@
     "notices": "node scripts/notices.mjs",
     "coverage": "vitest run --coverage",
     "coverage:rust": "cargo llvm-cov --workspace --html --output-dir coverage/rust",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#target\" \"#scripts/notices\" \"#.claude/worktrees\" \"#docs/local\""
+    "lint:md": "markdownlint-cli2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
