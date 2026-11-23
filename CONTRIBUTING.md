@@ -283,8 +283,8 @@ Update a doc in the same change as the code it describes.
    rewrite its entry, or merge it with the entry it narrows, rather than adding
    one that replaces it. Keep the index table in step, and when entries are
    renumbered, update every `decision N` reference in the repo.
-3. `docs/todo.md` holds open work. Delete an item when it's done, or when a
-   decision settles it.
+3. `docs/todo.md` holds open engineering notes; features and bugs are GitHub
+   issues. Delete an item when it's done, or when a decision settles it.
 4. `docs/handoffs.md` holds work one machine leaves for another, such as a
    Windows-only change made on a Mac.
 5. `docs/architecture/overview.html` maps the components and the flows between

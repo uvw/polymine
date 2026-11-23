@@ -2151,12 +2151,8 @@
         "pl-github": {
           t: "GitHub gist",
           m: "api.github.com \u00b7 external",
-          owns: "The gist `polymine-cli sync` keeps a shared `history.jsonl` in. Remote themes from a repository folder or a gist are planned; docs/todo.md lists what is left.",
-          files: [
-            "crates/polymine-cli/src/sync.rs",
-            "crates/polymine-net/src/github.rs",
-            "docs/todo.md",
-          ],
+          owns: "The gist `polymine-cli sync` keeps a shared `history.jsonl` in. Remote themes from a repository folder or a gist are planned in issue #9.",
+          files: ["crates/polymine-cli/src/sync.rs", "crates/polymine-net/src/github.rs"],
           rules: [
             "Sync reads the gist and writes it back with a PATCH request.",
             "Planned: remote themes pinned to a commit, downloaded into a staging folder within limits.",

@@ -1146,7 +1146,7 @@ installs Polymine without putting `polymine-cli` on `PATH` and without offering
 to remove the player's data on uninstall. NSIS installs per user with no admin
 prompt, and winget and the Microsoft Store both take its `.exe`. MSIX, the
 Store's own format, is still to evaluate
-([todo.md](todo.md#platform-and-release)).
+([#15](https://github.com/uvw/polymine/issues/15)).
 
 **Alternatives:** shipping the MSI beside the NSIS installer as an equal choice,
 which hands some players an install without the CLI on `PATH`.
@@ -1172,7 +1172,7 @@ size limits, and a way to read well at 16 pixels.
 
 **Alternatives:** a static icon only; an optional `icon.svg` in the theme
 folder; and changing the macOS Dock icon at run time, which needs AppKit calls
-and can wait ([todo.md](todo.md#next)).
+and can wait ([#14](https://github.com/uvw/polymine/issues/14)).
 
 ## 56. Each data folder is an instance of its own
 

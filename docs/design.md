@@ -11,8 +11,9 @@ the system's light or dark mode and uses Mica on Windows 11 and vibrancy on
 macOS.
 
 This file describes how Polymine works today. The reasons behind each choice are
-in [decisions.md](decisions.md), and open work is in [todo.md](todo.md). An
-[interactive diagram](architecture/overview.html) maps the parts and flows.
+in [decisions.md](decisions.md), and open work is in the GitHub issues and
+[todo.md](todo.md). An [interactive diagram](architecture/overview.html) maps
+the parts and flows.
 
 ## Contents
 
