@@ -55,6 +55,10 @@ Element.prototype.animate ??= function () {
 };
 
 globalThis.ResizeObserver ??= class {
+  callback: ResizeObserverCallback;
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+  }
   observe() {}
   unobserve() {}
   disconnect() {}

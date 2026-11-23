@@ -6,7 +6,7 @@
 //   npm run notices
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import process from "node:process";
@@ -38,7 +38,7 @@ function fail(message) {
 /** The package directories behind every module that reaches the bundle. */
 async function bundledPackages() {
   // The UI imports this file, so it has to exist before the first build.
-  if (!existsSync(output)) writeFileSync(output, "");
+  writeFileSync(output, "", { flag: "a" });
   const result = await build({
     configFile: join(root, "vite.config.ts"),
     root: join(root, "ui"),

@@ -13,9 +13,12 @@ on:
 permissions:
   contents: read
 
+# A cancelled CodeQL run uploads a failed analysis to code scanning, and
+# release-please often pushes its branch twice within a minute, so its pull
+# requests run to the end.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--') }}
 
 jobs:
   codeql:
