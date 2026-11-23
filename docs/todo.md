@@ -156,7 +156,7 @@ in. No theme editor UI for now.
    mark `--question-outline`, which Glossy and Glass use under their glare.
    Swatch's dark question mark and flag pole still fade on dark accents such as
    Windows' Storm gray. Swatch could take a light `--question-outline`, and the
-   pole needs an outline of its own. Item 3 under
+   pole needs an outline of its own. Item 2 under
    [Windows only](handoffs.md#windows-only) in the handoffs checks Swatch under
    Storm. The theme tests check the question mark only in the editor themes,
    since most other built-in themes miss 3:1 for it on the flat closed color.

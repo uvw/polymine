@@ -76,8 +76,8 @@ message. If you find a bug, fix it in the same change or leave a new item.
 
 3. **Settings' General section at the minimum size.**
    - **What:** the player picker added a row and two buttons to General in
-     `ui/src/components/SettingsDialog.svelte`. The design says every section
-     fits without scrolling at 800 by 600 on macOS, which only a Mac shows.
+     `ui/src/components/SettingsDialog.svelte`. The design says General and Bot
+     fit without scrolling at 800 by 600 on macOS, which only a Mac shows.
    - **Verify:**
      1. Run a named instance, shrink the window to 800 by 600, and open
         Settings: General shows every row without scrolling.
@@ -90,8 +90,8 @@ message. If you find a bug, fix it in the same change or leave a new item.
      which WebGL2 allows only with `EXT_color_buffer_float`, and marches rays
      through the spikes in the fragment shader. It was built and tuned on
      WebView2 with a high-end desktop GPU.
-   - **Verify:** run `npm run tauri dev` as a named instance and pick
-     Ferrofluid, the last theme in the Signature section of Themes.
+   - **Verify:** run `npm run app` as a named instance and pick Ferrofluid, the
+     last theme in the Signature section of Themes.
      1. Closed cells are glossy black domes with white highlights, not flat
         black or white: the half-float targets work.
      2. Move the pointer over the board: spikes rise around it and lean up the
