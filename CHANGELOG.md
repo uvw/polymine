@@ -2,11 +2,14 @@
 
 ## [0.1.1](https://github.com/uvw/polymine/compare/v0.1.0...v0.1.1) (2026-11-23)
 
-
 ### Bug fixes
 
-* **ui:** hide a pinned hint while the game is paused ([#24](https://github.com/uvw/polymine/issues/24)) ([358b5b8](https://github.com/uvw/polymine/commit/358b5b8b458b4f0fb4724a7a6e8eb19b8410d140))
-* **ui:** link the repository from the About dialog ([#27](https://github.com/uvw/polymine/issues/27)) ([7909d80](https://github.com/uvw/polymine/commit/7909d806dc7a4629ad03b56b703bc1a7ea4a158c))
+- **ui:** hide a pinned hint while the game is paused
+  ([#24](https://github.com/uvw/polymine/issues/24))
+  ([358b5b8](https://github.com/uvw/polymine/commit/358b5b8b458b4f0fb4724a7a6e8eb19b8410d140))
+- **ui:** link the repository from the About dialog
+  ([#27](https://github.com/uvw/polymine/issues/27))
+  ([7909d80](https://github.com/uvw/polymine/commit/7909d806dc7a4629ad03b56b703bc1a7ea4a158c))
 
 ## [0.1.0](https://github.com/uvw/polymine/releases/tag/v0.1.0) (2026-11-23)
 
