@@ -58,7 +58,10 @@ item with what changed, how to verify it, and the date.
 
 ## Sharing the working tree
 
-Several agents often work in this checkout at once.
+Several agents often work in this checkout at once. Changes land through pull
+requests (CONTRIBUTING.md, "Pull requests"), each from its own branch: the
+ruleset on `main` refuses a direct push. A branch in its own worktree keeps your
+change apart from the other agents' uncommitted files.
 
 1. Commit only your own paths: `git add -- <paths>` and
    `git commit -m ... -- <paths>`. Never `git add -A`, stash, reset, or amend a

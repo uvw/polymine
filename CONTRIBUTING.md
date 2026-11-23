@@ -150,9 +150,22 @@ no session links.
 
 ## Pull requests
 
-Changes from outside the project come as pull requests from a fork, which
-squash-merge. The pull request title becomes the commit on `main`, so it follows
-the commit rules above, and CI checks it.
+Every change reaches `main` through a pull request, which squash-merges: the
+ruleset on `main` refuses a direct push. The pull request title becomes the
+commit on `main`, so it follows the commit rules above, and CI checks it.
+
+With write access to the repository:
+
+1. Branch from `main`: `git switch -c fix/short-name`, or
+   `git worktree add <folder> -b fix/short-name origin/main` to keep the change
+   apart from other work in the checkout.
+2. Run the [checks](#checks), push, and open the pull request with
+   `gh pr create --fill`. Turn on auto-merge with `gh pr merge --squash --auto`;
+   it merges once "CI (all green)" passes.
+
+### From a fork
+
+Without write access, work from a fork:
 
 1. Fork `uvw/polymine`, clone your fork, and branch from `main`.
 2. Run the [checks](#checks), then open the pull request against `uvw/polymine`
