@@ -432,9 +432,9 @@ effect reads these variables:
    4. Reduced motion jumps the magnet, drains cells at once, and skips both
       ends, leaving the final board.
 
-Measured on 2026-11-04 on a Windows machine with an RTX 4090, in WebView2, at
-1000 by 700: a frame with the magnet up takes under 1 ms, and drawing the field
-again takes 0.13 ms.
+Measured on 2026-11-04 on a Windows machine with a high-end desktop GPU, in
+WebView2, at 1000 by 700: a frame with the magnet up takes under 1 ms, and
+drawing the field again takes 0.13 ms.
 
 ### Tuning the ferrofluid
 

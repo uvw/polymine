@@ -23,17 +23,17 @@ what an agent needs on top of them.
 | How a release is made                       | `docs/releasing.md`                                                |
 | Which components talk to which              | `docs/architecture/overview.html`                                  |
 
-## The owner's data
+## The player's data
 
-The owner plays the default instance on this machine. Never start, stop, or
-drive it, and never touch its data folder, runtime folder, or logs. Test a
-running app only as a named instance with a scratch data folder
+The person you work for may be playing the default instance on this machine.
+Never start, stop, or drive it, and never touch its data folder, runtime folder,
+or logs. Test a running app only as a named instance with a scratch data folder
 (`POLYMINE_INSTANCE=<name>` and `POLYMINE_DATA_DIR=<scratch>`), and stop every
 instance you start before you finish.
 
-A named instance still registers in the per-user `instances` folder the owner's
+A named instance still registers in the per-user `instances` folder the default
 instance uses; that's expected. Don't run `polymine-cli instances`, though: it
-sends `status` to every registered instance, the owner's included, and deletes
+sends `status` to every registered instance, the player's included, and deletes
 the entries nobody listens for. Use `status` with `--instance <name>` instead.
 
 ## Handoffs

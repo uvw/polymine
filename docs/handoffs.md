@@ -68,7 +68,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
      accent color" off. Pride on a dense Crosses board draws counts from 9 as
      rings with open middles, lists 1 to 14 under the board, and shows the digit
      and lights its chip on hover. Changing the system accent and the light or
-     dark mode is left to the owner.
+     dark mode is left to the maintainer.
    - **Verify:**
      1. Pick Swatch. In Windows Settings, Personalization, Colors, pick Storm
         (dark gray), then Gold, then the default blue, switching back to
@@ -91,7 +91,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
         on the other: the window keeps its size in points.
      4. Switch between Frost and another theme a few times: Frost shows the
         frosted backdrop every time.
-   - **Added:** 2026-11-03, macOS session after the adversarial review.
+   - **Added:** 2026-11-03, macOS session.
 
 2. **VoiceOver pass.**
    - **What:** `9ce4d9c` (hint announcements name the cell), `706f2ab` (toolbar
@@ -99,7 +99,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
    - **Verify:** with VoiceOver on, ask for a hint: it reads "Row r, column c"
      before the hint. Move to the toolbar: flags left and time are read with
      their names.
-   - **Added:** 2026-11-03, macOS session after the adversarial review.
+   - **Added:** 2026-11-03, macOS session.
 
 3. **Settings' General section at the minimum size.**
    - **What:** the player picker added a row and two buttons to General in
@@ -116,7 +116,7 @@ message. If you find a bug, fix it in the same change or leave a new item.
    - **What:** `ui/src/lib/board/ferrofluid.ts` renders into half-float targets,
      which WebGL2 allows only with `EXT_color_buffer_float`, and marches rays
      through the spikes in the fragment shader. It was built and tuned on
-     WebView2 with an RTX 4090.
+     WebView2 with a high-end desktop GPU.
    - **Verify:** run `npm run tauri dev` as a named instance and pick
      Ferrofluid, the last theme in the Signature section of Themes.
      1. Closed cells are glossy black domes with white highlights, not flat
