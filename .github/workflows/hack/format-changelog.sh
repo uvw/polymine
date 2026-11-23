@@ -33,6 +33,9 @@ fi
 git fetch --quiet origin "refs/heads/$branch"
 git worktree add --quiet --detach "$work" FETCH_HEAD
 cd "$work"
+# Prettier loads the config's plugins from the worktree, which has no packages
+# of its own. Git ignores node_modules, so the link never shows in the diff.
+ln -s "$root/node_modules" node_modules
 "$prettier" --config "$root/.prettierrc.yaml" --write CHANGELOG.md
 if git diff --quiet -- CHANGELOG.md; then
   echo "CHANGELOG.md in $branch is already formatted"
