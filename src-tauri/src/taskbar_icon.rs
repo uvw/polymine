@@ -27,6 +27,10 @@ pub fn set_taskbar_icon(window: tauri::WebviewWindow, rgba: Vec<u8>, size: u32) 
 }
 
 /// What `CreateIcon` reads for a 32-bit icon.
+#[cfg_attr(
+    not(target_os = "windows"),
+    allow(dead_code, reason = "only the Windows icon code reads the fields")
+)]
 struct IconBits {
     /// The pixels as BGRA, top row first.
     bgra: Vec<u8>,
