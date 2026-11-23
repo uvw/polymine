@@ -4,6 +4,8 @@ Minesweeper on many tilings, with an assistant that can hint or play the whole
 game. Polymine is a desktop game for Windows and macOS, built with Rust, Tauri,
 and Svelte.
 
+![The assistant clears a professional game on hexagons in the Quanta theme](docs/media/demo.gif)
+
 ## Features
 
 - Tilings from squares and hexagons to herringbone bricks, kites, pentagon
