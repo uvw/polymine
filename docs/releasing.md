@@ -80,6 +80,12 @@ These live in GitHub's settings, not in the repository.
 3. **Actions, General:** allow GitHub Actions to create and approve pull
    requests, which release-please needs when it falls back to the workflow's
    token.
+4. **Rulesets:** import `.github/rulesets/main.json` and
+   `.github/rulesets/tags.json` under Settings, Rules, Rulesets. The first
+   requires a pull request, squash merges, the `CI (all green)` check, and no
+   CodeQL errors for `main`; the second protects `v*` tags. GitHub offers
+   rulesets on private repositories only with a paid plan, so they're imported
+   when the repository goes public.
 
 ## Verifying a download
 
