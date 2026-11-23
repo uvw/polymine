@@ -3,8 +3,8 @@
 ## Summary
 
 Testing the NSIS installer and building a release's Windows files by hand need a
-Windows machine. Both need the Rust toolchain and Node.js from the README's
-[Building from source](../README.md#building-from-source) section.
+Windows machine. Both need the Rust toolchain and Node.js from
+[Prerequisites](../CONTRIBUTING.md#prerequisites) in CONTRIBUTING.md.
 
 ## Testing the installer
 

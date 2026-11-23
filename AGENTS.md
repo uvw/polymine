@@ -9,6 +9,8 @@ what an agent needs on top of them.
 
 | You need                                    | Open                                                               |
 | ------------------------------------------- | ------------------------------------------------------------------ |
+| Every doc, by reader                        | `docs/README.md`                                                   |
+| Setup, dev commands, or the project layout  | `CONTRIBUTING.md`, from "Getting started" to "Project layout"      |
 | How a part of the game works                | `docs/design.md`                                                   |
 | Why something is the way it is              | `docs/decisions.md`                                                |
 | What's open, and what's left for you        | `docs/todo.md`, then your platform's section in `docs/handoffs.md` |
