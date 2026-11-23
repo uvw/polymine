@@ -60,7 +60,10 @@ Each instance listens on a local socket:
 1. On Windows, a named pipe called `dev.uvw.polymine.<SID>.<instance>` that only
    that user can open. The name is predictable, so the CLI opens the pipe for
    identification only, which never lets the server act as the caller, and
-   refuses a pipe whose server runs as another account.
+   refuses a pipe whose server runs as another account. Another account on the
+   same machine can't open the pipe. If it takes the pipe's name first, the CLI
+   refuses it, the player's own instance plays on without the CLI, and a named
+   instance stops.
 2. On macOS and Linux, `<instance>.sock` in the sockets folder that
    [design.md](design.md#data-and-runtime-folders) names. The app won't listen
    there, and the CLI won't connect there, unless only the user owns and can
