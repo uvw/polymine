@@ -4,6 +4,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # A week for a bad release to be noticed and yanked before it's proposed.
+    # Security updates aren't delayed.
+    cooldown:
+      default-days: 7
+    # A crate changes the shipped app, so its update is a fix that makes a
+    # release.
+    commit-message:
+      prefix: fix
+      include: scope
     # A dependency joins the first group that matches it, so the narrow groups
     # come first and each gets a pull request of its own.
     groups:
@@ -24,6 +33,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    # The runtime packages ship, so their updates are fixes. The dev packages
+    # are mostly tools; svelte and vite shape the build too, but their updates
+    # can wait for the next release.
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
     ignore:
       # svelte-check supports TypeScript up to 6.
       - dependency-name: typescript
@@ -33,7 +51,16 @@ updates:
         patterns: ["@tauri-apps/*"]
       npm:
         patterns: ["*"]
+  # The workflows' actions never reach the app, so their updates make no
+  # release. The prefix holds the deps scope itself, so titles start ci(deps):.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      actions:
+        patterns: ["*"]
