@@ -197,6 +197,12 @@ These live in GitHub's settings, not in the repository.
 3. **Actions, General:** allow GitHub Actions to create and approve pull
    requests, which release-please needs when it falls back to the workflow's
    token.
+4. **Rulesets:** import `.github/rulesets/main.json` and
+   `.github/rulesets/tags.json` under Settings, Rules, Rulesets. The first
+   requires a pull request, squash merges, the `CI (all green)` check, and no
+   CodeQL errors for `main`; the second protects `v*` tags. GitHub offers
+   rulesets on private repositories only with a paid plan, so they're imported
+   when the repository goes public.
 
 ## Tokens
 
@@ -228,7 +234,5 @@ token once the new secret is saved. Each fine-grained token lasts a year.
 
 ## Verifying a download
 
-```sh
-gh attestation verify Polymine_0.1.0_x64-setup.exe --repo uvw/polymine
-sha256sum --check checksums.txt
-```
+[SECURITY.md](../SECURITY.md) says how to check a download's attestation and
+checksum.

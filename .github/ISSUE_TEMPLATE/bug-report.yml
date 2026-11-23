@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in Polymine did the wrong thing.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what Polymine did, and what you expected.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Polymine version
+      description: From About in the menu, or `polymine-cli --version`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS]
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version
+      placeholder: Windows 11 24H2, macOS 15.5, ...
+  - type: input
+    id: board
+    attributes:
+      label: Tiling, level, and theme
+      description: Optional, when the bug shows on the board.
+      placeholder: Cairo, expert, Glass
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: >-
+        Optional. `polymine-cli log` prints the log's last lines. Remove
+        anything private, such as folder names.
+      render: text
