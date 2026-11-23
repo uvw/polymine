@@ -203,5 +203,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    secrets:
-      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    # The release environment's secrets reach a called workflow only through
+    # inherit, even in a job that names the environment. Listing them by name
+    # passes empty strings, since this job has no environment of its own.
+    secrets: inherit # zizmor: ignore[secrets-inherit]

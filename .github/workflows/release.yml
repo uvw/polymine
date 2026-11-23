@@ -9,11 +9,6 @@ on:
         description: The tag to release, such as v0.1.0.
         required: true
         type: string
-    # Optional: without it, winget is skipped. A secret of the release
-    # environment takes the place of the one passed here.
-    secrets:
-      WINGET_TOKEN:
-        required: false
   workflow_dispatch:
     inputs:
       tag:
