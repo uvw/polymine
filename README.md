@@ -106,6 +106,7 @@ through a gist, the output contract, and exit codes.
 | [Windows](docs/windows.md)                              | Testing the installer and building a release on Windows          |
 | [Releasing](docs/releasing.md)                          | How release-please and the release workflow make a release       |
 | [Changelog](CHANGELOG.md)                               | What changed in each release                                     |
+| [Security](SECURITY.md)                                 | How to report a problem, and how to check a download             |
 | [Contributing](CONTRIBUTING.md)                         | Rules for changes, the checks, and the commit format             |
 | [Agents](AGENTS.md)                                     | What coding agents need on top of CONTRIBUTING                   |
 | [Agent skill](skills/polymine-cli/SKILL.md)             | The guide `polymine-cli skill` prints for coding agents          |

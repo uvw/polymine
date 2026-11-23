@@ -89,7 +89,5 @@ These live in GitHub's settings, not in the repository.
 
 ## Verifying a download
 
-```sh
-gh attestation verify Polymine_0.1.0_x64-setup.exe --repo uvw/polymine
-sha256sum --check checksums.txt
-```
+[SECURITY.md](../SECURITY.md) says how to check a download's attestation and
+checksum.

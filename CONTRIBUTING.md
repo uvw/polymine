@@ -112,14 +112,15 @@ Update a doc in the same change as the code it describes.
 Each repeated fact has one home, and other docs link to it instead of copying
 it:
 
-| Fact                                  | Home                                                           |
-| ------------------------------------- | -------------------------------------------------------------- |
-| The tiling count                      | `docs/design.md`, and the `SKILL.md` front matter              |
-| The built-in theme count              | `docs/design.md`                                               |
-| Data, runtime, and log folders        | `docs/design.md`, with the player's folder in the README       |
-| CLI commands, replies, and exit codes | `docs/CLI.md`                                                  |
-| Theme test bars and the color filter  | `ui/src/lib/themes/filter.ts`, in prose `how-theming-works.md` |
-| Player keys                           | The README                                                     |
+| Fact                                     | Home                                                           |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| The tiling count                         | `docs/design.md`, and the `SKILL.md` front matter              |
+| The built-in theme count                 | `docs/design.md`                                               |
+| Data, runtime, and log folders           | `docs/design.md`, with the player's folder in the README       |
+| CLI commands, replies, and exit codes    | `docs/CLI.md`                                                  |
+| Theme test bars and the color filter     | `ui/src/lib/themes/filter.ts`, in prose `how-theming-works.md` |
+| Player keys                              | The README                                                     |
+| Reporting a problem, checking a download | `SECURITY.md`                                                  |
 
 Prettier wraps Markdown at 80 columns. Run `npx prettier --write` on a doc after
 editing it rather than wrapping by hand.
@@ -193,3 +194,21 @@ sentences about what changed and why.
 
 The type decides the release: release-please makes one for `feat` and `fix`, and
 lists them in `CHANGELOG.md` ([releasing.md](docs/releasing.md)).
+
+## Pull requests
+
+Changes from outside the project come as pull requests from a fork, which
+squash-merge. The pull request title becomes the commit on `main`, so it follows
+the commit rules above, and CI checks it.
+
+1. Fork `uvw/polymine`, clone your fork, and branch from `main`.
+2. Run the [checks](#checks), then open the pull request against `uvw/polymine`
+   with `gh pr create --fill`.
+3. On your first pull request, CI waits until a maintainer approves its runs.
+   Later ones run on every push. Runs from a fork get a read-only token and none
+   of the repository's secrets.
+4. A maintainer merges it once "CI (all green)" passes.
+
+Dependabot opens grouped pull requests weekly. Their titles start `fix(deps):`,
+`chore(deps-dev):`, or `ci(deps):`, which the title check accepts. Read the
+changelog of anything that changes behavior before merging.
