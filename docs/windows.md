@@ -17,14 +17,14 @@ New-Item -ItemType Directory -Force src-tauri/binaries
 Copy-Item target/release/polymine-cli.exe src-tauri/binaries/polymine-cli-x86_64-pc-windows-msvc.exe
 npx tauri build --bundles nsis --config src-tauri/tauri.bundle-cli.conf.json
 cargo build -p polymine-cli
-powershell -ExecutionPolicy Bypass -File scripts/windows-installer-test.ps1 -ResetPlayerData
+powershell -ExecutionPolicy Bypass -File hack/windows-installer-test.ps1 -ResetPlayerData
 ```
 
 The script uninstalls Polymine and deletes its data on purpose, so it refuses to
 run without `-ResetPlayerData`. It backs up `%APPDATA%\Polymine`, both
 `dev.uvw.polymine` folders, and the user's `PATH` first. It restores them at the
 end, whatever the outcome, and leaves the tested build installed. The header of
-`scripts/windows-installer-test.ps1` lists every check: install, quit, uninstall
+`hack/windows-installer-test.ps1` lists every check: install, quit, uninstall
 with and without the data, and the uninstall an update runs.
 
 1. The installer's hooks run `polymine-cli link` and `unlink` for the `PATH`,
@@ -39,14 +39,14 @@ with and without the data, and the uninstall an update runs.
 ## Building the release files on Windows
 
 Releases come from the release workflow ([releasing.md](releasing.md)).
-`scripts/release-windows.ps1` makes the same Windows files on this machine, the
+`hack/release-windows.ps1` makes the same Windows files on this machine, the
 NSIS installer with `polymine-cli` bundled and the portable ZIP, to test them.
 It publishes nothing: a local build records this machine's home folder in the
 binaries, and nothing attests it.
 
 ```powershell
-pwsh scripts/release-windows.ps1
-pwsh scripts/release-windows.ps1 -Tag v0.0.3 -InstallerTest
+pwsh hack/release-windows.ps1
+pwsh hack/release-windows.ps1 -Tag v0.0.3 -InstallerTest
 ```
 
 1. `-Tag` checks the tag against every version file first.

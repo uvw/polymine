@@ -10,7 +10,7 @@ ignores:
   - node_modules
   - target
   # Vendored license text, copied verbatim into the third-party notices.
-  - scripts/notices
+  - hack/notices
   # Copilot CLI's npm packages, for the release notes: vendored.
   - .github/release-notes/node_modules
   # Agent worktrees: copies of this checkout.

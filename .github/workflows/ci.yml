@@ -43,7 +43,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: node scripts/check-versions.mjs
+      - run: node hack/check-versions.mjs
       - run: npm run format:check
       - run: npm run lint
       - run: npm run lint:md
@@ -80,7 +80,7 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
       - name: CLI smoke test against a running app
-        run: cargo build -p polymine -p polymine-cli --locked && node scripts/cli-smoke.mjs
+        run: cargo build -p polymine -p polymine-cli --locked && node hack/cli-smoke.mjs
       - name: TypeScript bindings are up to date
         if: success() || failure()
         shell: bash

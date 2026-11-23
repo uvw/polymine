@@ -1,5 +1,5 @@
 # Third-party notices for the Rust crates that ship, read by cargo-about.
-# `npm run notices` runs it; see scripts/notices.mjs.
+# `npm run notices` runs it; see hack/notices.mjs.
 
 # The same licenses deny.toml allows.
 accepted = [

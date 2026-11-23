@@ -2,7 +2,7 @@
 // puts ui/public/icon-small.svg into icon.ico's 16 and 24 pixel slots, where
 // the full mine blurs into a blob.
 //
-//   node scripts/app-icon.mjs
+//   node hack/app-icon.mjs
 
 import { Buffer } from "node:buffer";
 import { spawnSync } from "node:child_process";

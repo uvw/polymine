@@ -27,7 +27,7 @@
 
 .EXAMPLE
   # Build the installer with polymine-cli bundled, as docs/windows.md shows.
-  pwsh scripts/windows-installer-test.ps1 -ResetPlayerData
+  pwsh hack/windows-installer-test.ps1 -ResetPlayerData
 #>
 param(
   [switch]$ResetPlayerData,

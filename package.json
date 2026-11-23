@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "bindings": "cargo test -p polymine --test bindings",
-    "notices": "node scripts/notices.mjs",
+    "notices": "node hack/notices.mjs",
     "coverage": "vitest run --coverage",
     "coverage:rust": "cargo llvm-cov --workspace --html --output-dir coverage/rust",
     "lint:md": "markdownlint-cli2"

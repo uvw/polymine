@@ -21,8 +21,8 @@ Before 1.0, a `feat` raises the minor version and a `fix` the patch version. A
 breaking change (`feat!:` or a `BREAKING CHANGE:` footer) raises the minor
 version too.
 
-release-please bumps these files together, and `scripts/check-versions.mjs`
-fails CI and the release when any of them disagree:
+release-please bumps these files together, and `hack/check-versions.mjs` fails
+CI and the release when any of them disagree:
 
 1. `Cargo.toml`, the workspace version.
 2. `Cargo.lock`, the five workspace crates' entries, so `--locked` builds pass.
@@ -131,8 +131,7 @@ Running the Release workflow by hand with an existing tag (re)publishes it.
 
 Publish only what the workflow builds. A build made on a developer's machine
 records that machine's home folder in the binaries, and nothing attests it.
-`scripts/release-windows.ps1` (docs/windows.md) is for testing the Windows
-files.
+`hack/release-windows.ps1` (docs/windows.md) is for testing the Windows files.
 
 ## Homebrew
 
@@ -220,16 +219,16 @@ environment, not of the repository:
 Each is optional: without it, its step is skipped with a notice, or, for
 `RELEASE_PLEASE_TOKEN`, falls back to the workflow's own token.
 
-`scripts/release-tokens.sh` sets them up. Run it once the repository is public
-and the `release` environment exists. It forks microsoft/winget-pkgs when the
-fork is missing, opens each token's page with its fields filled in, checks the
-token you paste, and saves it as a secret of the `release` environment. It never
+`hack/release-tokens.sh` sets them up. Run it once the repository is public and
+the `release` environment exists. It forks microsoft/winget-pkgs when the fork
+is missing, opens each token's page with its fields filled in, checks the token
+you paste, and saves it as a secret of the `release` environment. It never
 prints a token or passes one on a command line, and skips any secret that's
 already set.
 
 When a token expires, run it again with the secret's name, such as
-`scripts/release-tokens.sh WINGET_TOKEN`. Each token's name ends in the day it
-was made, since GitHub refuses a name another of your tokens has. Revoke the old
+`hack/release-tokens.sh WINGET_TOKEN`. Each token's name ends in the day it was
+made, since GitHub refuses a name another of your tokens has. Revoke the old
 token once the new secret is saved. Each fine-grained token lasts a year.
 
 ## Verifying a download

@@ -23,7 +23,7 @@ updates:
       specta:
         patterns: ["specta", "specta-*", "tauri-specta"]
       # Must keep the npm @tauri-apps packages' major and minor version, which
-      # scripts/check-versions.mjs checks.
+      # hack/check-versions.mjs checks.
       tauri:
         patterns: ["tauri", "tauri-*"]
         exclude-patterns: ["tauri-specta"]

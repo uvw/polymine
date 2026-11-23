@@ -4,7 +4,7 @@
 
 `ui/public/icon.svg` is the app icon: a steel mine on a dark plate with a faint
 triangle lattice, with `ui/public/icon-small.svg` for 16 and 24 pixels.
-`node scripts/app-icon.mjs` regenerates the platform icons in `src-tauri/icons`
+`node hack/app-icon.mjs` regenerates the platform icons in `src-tauri/icons`
 from both. While Polymine runs, the window shows the same mine in the active
 theme's colors, drawn by `ui/src/lib/themes/icon.ts`.
 [Design](../design.md#window-icon) explains how, and

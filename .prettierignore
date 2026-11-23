@@ -7,7 +7,7 @@ package-lock.json
 Cargo.lock
 
 # Vendored license text, copied verbatim into the third-party notices
-scripts/notices
+hack/notices
 
 # Generated icon concept sheets
 docs/icons/concepts

@@ -197,7 +197,7 @@ From a checkout, run the CLI with `cargo run -p polymine-cli -- <command>`.
 | `ui/src/lib/bindings`  | TypeScript types generated from the Rust types by `cargo test`                                                   |
 | `ui/src/themes`        | The built-in themes, one folder each                                                                             |
 | `docs`                 | The documents in the table above                                                                                 |
-| `scripts`              | Notices, version, smoke-test, and Windows release scripts                                                        |
+| `hack`                 | Housekeeping scripts: notices, versions, the smoke test, the app icon, and Windows builds                        |
 | `.github`              | CI and release workflows, and Dependabot                                                                         |
 
 ## Credits
