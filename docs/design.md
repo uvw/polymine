@@ -19,26 +19,40 @@ in [decisions.md](decisions.md), and open work is in [todo.md](todo.md). An
 1. [Goals](#goals)
 2. [Non-goals for now](#non-goals-for-now)
 3. [Stack](#stack)
-4. [Engine](#engine): [tilings](#tilings-as-data),
-   [levels](#levels-and-mine-density), [rules](#rules), and [solver](#solver)
-5. [App shell](#app-shell): [session](#session-and-clock),
-   [history](#history-and-statistics), [players](#players),
-   [boards that fill the window](#boards-that-fill-the-window),
-   [commands](#commands), [saved games](#saved-games), [settings](#settings),
-   [logs](#logs), [folders](#data-and-runtime-folders), and
-   [window state](#window-state)
+4. [Engine](#engine)
+   1. [Tilings as data](#tilings-as-data)
+   2. [Levels and mine density](#levels-and-mine-density)
+   3. [Rules](#rules)
+   4. [Solver](#solver)
+5. [App shell](#app-shell)
+   1. [Session and clock](#session-and-clock)
+   2. [History and statistics](#history-and-statistics)
+   3. [Players](#players)
+   4. [Boards that fill the window](#boards-that-fill-the-window)
+   5. [Commands](#commands)
+   6. [Saved games](#saved-games)
+   7. [Settings](#settings)
+   8. [Logs](#logs)
+   9. [Data and runtime folders](#data-and-runtime-folders)
+   10. [Window state](#window-state)
 6. [Command line](#command-line)
 7. [Network](#network)
-8. [Window and chrome](#window-and-chrome):
-   [toolbar and menus](#toolbar-and-menus), [dialogs](#dialogs), and
-   [Settings](#the-settings-dialog)
+8. [Window and chrome](#window-and-chrome)
+   1. [Toolbar and menus](#toolbar-and-menus)
+   2. [Dialogs](#dialogs)
+   3. [The Settings dialog](#the-settings-dialog)
+   4. [The Themes page](#the-themes-page)
 9. [Languages](#languages)
-10. [Themes](#themes): [built-in themes](#built-in-themes),
-    [readability](#readability), [color-only counts](#color-only-counts),
-    [light on cells](#light-on-cells), [editor themes](#editor-themes),
-    [the system accent](#the-system-accent),
-    [see-through themes](#see-through-themes), [window icon](#window-icon), and
-    [loading and checks](#loading-and-checks)
+10. [Themes](#themes)
+    1. [Built-in themes](#built-in-themes)
+    2. [Readability](#readability)
+    3. [Color-only counts](#color-only-counts)
+    4. [Light on cells](#light-on-cells)
+    5. [Editor themes](#editor-themes)
+    6. [The system accent](#the-system-accent)
+    7. [See-through themes](#see-through-themes)
+    8. [Window icon](#window-icon)
+    9. [Loading and checks](#loading-and-checks)
 11. [Board rendering](#board-rendering)
 12. [Input and accessibility](#input-and-accessibility)
 13. [Licensing and clean room](#licensing-and-clean-room)

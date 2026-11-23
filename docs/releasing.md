@@ -1,9 +1,9 @@
 # Releasing
 
+## Summary
+
 How a Polymine release is made. Nothing is released by hand: release-please
 opens the release pull request, and merging it builds and publishes the release.
-
-## Summary
 
 1. Commits on `main` follow Conventional Commits (CONTRIBUTING.md, "Commits").
    `feat` and `fix` make a release; the other types don't, though they still
@@ -231,7 +231,7 @@ When a token expires, run it again with the secret's name, such as
 made, since GitHub refuses a name another of your tokens has. Revoke the old
 token once the new secret is saved. Each fine-grained token lasts a year.
 
-## Verifying a download
+## Checking a download
 
 [SECURITY.md](../SECURITY.md) says how to check a download's attestation and
 checksum.

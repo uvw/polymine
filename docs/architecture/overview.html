@@ -1866,7 +1866,7 @@
         "cli-sync": {
           t: "History sync",
           m: "crates/polymine-cli/src/sync.rs",
-          owns: "`polymine-cli sync --gist <id>` shares a history between machines through a GitHub gist. It merges the gist's `history.jsonl` with the instance's own, writes the union back to the gist, and appends the games the instance lacked to its file.",
+          owns: "`polymine-cli sync --gist <id>` shares a history between machines through a GitHub gist. It adds to the gist's `history.jsonl` the ranked games it lacks, and appends to the instance's file the ranked games that file lacks. Other games stay on their machine.",
           files: [
             "crates/polymine-cli/src/sync.rs",
             "crates/polymine-core/src/stats.rs",
@@ -2234,7 +2234,7 @@
         "sh-commands": {
           t: "Tauri commands",
           m: "commands.rs \u00b7 themes.rs \u00b7 lib.rs",
-          owns: "The 23 commands the window calls: thin wrappers over App, the named-save commands, the player-theme commands, and the environment, material, accent, and foreground commands.",
+          owns: "The 24 commands the window calls: thin wrappers over App, the named-save commands, the player-theme commands, and the environment, material, accent, foreground, and taskbar icon commands.",
           files: ["src-tauri/src/commands.rs", "src-tauri/src/themes.rs", "src-tauri/src/lib.rs"],
           rules: [
             "src-tauri stays thin. Game rules belong in the engine.",
@@ -2635,7 +2635,7 @@
             "A player runs `polymine-cli sync --gist <id>` with a token that has the gist scope in `POLYMINE_GITHUB_TOKEN`.",
             "sync.rs reads the instance's `history.jsonl` straight from its data folder, so no app has to run.",
             "It fetches the gist from api.github.com through polymine-net. A file the API truncates is read whole from gist.githubusercontent.com.",
-            "The two histories merge into their union. The union goes back to the gist when the gist lacked games, and the games the instance lacked are appended to its file.",
+            "The ranked games the gist lacks go to the gist, only when there are any, and the ranked games the instance lacked are appended to its file.",
             "The reply counts the games and how many each side gained.",
           ],
         },
