@@ -10,9 +10,12 @@ on:
 permissions:
   contents: read
 
+# A pull request's pushes share a group, so a newer push cancels the older run.
+# Every other run gets a group of its own: GitHub drops a pending run when a
+# newer one joins its group, even without cancel-in-progress, so a shared group
+# would leave some commits on main without a result.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  # Every commit on main keeps its own result; only superseded PR pushes cancel.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
