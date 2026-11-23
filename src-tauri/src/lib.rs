@@ -12,6 +12,7 @@ mod fatal;
 mod files;
 mod foreground;
 mod history;
+mod links;
 mod remote;
 mod saves;
 mod session;
@@ -203,6 +204,7 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             environment::set_material,
             accent::get_accent,
             foreground::window_in_front,
+            links::open_repository,
             taskbar_icon::set_taskbar_icon,
             themes::list_themes,
             themes::read_theme,
