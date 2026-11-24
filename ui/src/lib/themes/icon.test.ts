@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { themeEntry } from "./entry";
-import { iconColors, iconPixels, iconSvg } from "./icon";
+import { iconColors, iconPixels, iconPng, iconSvg } from "./icon";
 import { resolveTheme, staticColors, type ThemeEnv } from "./resolve";
 
 const HEADER = "/*\n * Name: T\n * Author: A\n * Description: D\n * Version: 1\n * Format: 1\n */";
@@ -64,15 +64,15 @@ describe("iconSvg", () => {
   });
 });
 
-describe("iconPixels", () => {
-  // jsdom doesn't load images, so it has no `decode`.
-  function stubImage() {
-    Object.defineProperty(HTMLImageElement.prototype, "decode", {
-      value: () => Promise.resolve(),
-      configurable: true,
-    });
-  }
+// jsdom doesn't load images, so it has no `decode`.
+function stubImage() {
+  Object.defineProperty(HTMLImageElement.prototype, "decode", {
+    value: () => Promise.resolve(),
+    configurable: true,
+  });
+}
 
+describe("iconPixels", () => {
   it("draws the SVG on a canvas and returns its RGBA bytes", async () => {
     stubImage();
     const data = new Uint8ClampedArray(4 * 4 * 4).fill(7);
@@ -91,5 +91,35 @@ describe("iconPixels", () => {
     stubImage();
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null as never);
     expect(await iconPixels("<svg/>", 4)).toBeNull();
+  });
+});
+
+describe("iconPng", () => {
+  it("draws the SVG on a canvas and returns it as a PNG file", async () => {
+    stubImage();
+    const drawImage = vi.fn();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as never);
+    const toBlob = vi
+      .spyOn(HTMLCanvasElement.prototype, "toBlob")
+      .mockImplementation((done) => done(new Blob([new Uint8Array([137, 80, 78, 71])])));
+    const png = await iconPng("<svg/>", 8);
+    expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLImageElement), 0, 0, 8, 8);
+    expect(toBlob).toHaveBeenCalledWith(expect.any(Function), "image/png");
+    expect(Array.from(png ?? [])).toEqual([137, 80, 78, 71]);
+  });
+
+  it("gives null when the canvas can't make a PNG", async () => {
+    stubImage();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      drawImage: vi.fn(),
+    } as never);
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((done) => done(null));
+    expect(await iconPng("<svg/>", 8)).toBeNull();
+  });
+
+  it("gives null without a 2D canvas", async () => {
+    stubImage();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null as never);
+    expect(await iconPng("<svg/>", 8)).toBeNull();
   });
 });

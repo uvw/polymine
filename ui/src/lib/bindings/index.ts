@@ -90,10 +90,16 @@ export const commands = {
 	/**  Opens the project's repository in the browser. */
 	openRepository: () => __TAURI_INVOKE<null>("open_repository"),
 	/**
+	 *  Sets the macOS Dock icon to `png`, a square PNG of at most 1024 pixels.
+	 *  A failure is logged and leaves the icon as it was. Other platforms have no
+	 *  Dock.
+	 */
+	setDockIcon: (png: number[]) => __TAURI_INVOKE<void>("set_dock_icon", { png }),
+	/**
 	 *  Sets the window's big icon to `rgba`, a `size` by `size` image. A failure
 	 *  is logged and leaves the icon as it was. Other platforms have no such icon.
 	 */
-	setTaskbarIcon: (rgba: number[], size: number) => __TAURI_INVOKE<void>("set_taskbar_icon", { rgba, size }),
+	setTaskbarIcon: (rgba: number[], size: number) => __TAURI_INVOKE<null>("set_taskbar_icon", { rgba, size }),
 	/**
 	 *  Lists the player's themes. Folders that break the rules come back in
 	 *  `skipped`, and the log says why once.

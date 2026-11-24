@@ -296,6 +296,15 @@ Commands that can take long on a big board, such as moves, hints, new games, and
 snapshots, run on Tauri's thread pool instead of the main thread, so the window
 stays responsive. The UI queues its game calls, so they land in order.
 
+A command that panics answers with an error instead of never answering.
+`src-tauri/src/guard.rs` wraps each command's body, logs the panic, and returns
+`AppError::Panicked`, which the UI shows like any other error. The locks in
+`App` recover from the poisoning a panic leaves, so the next command runs on the
+game as the panic left it. `polymine-cli` requests go through the same guard and
+reply with an `internal` error. As a backstop, the UI's queue gives up on a call
+after 60 seconds, so one that never answers doesn't hold the clicks behind it
+([decision 58](decisions.md#58-a-command-that-panics-answers-with-an-error)).
+
 ### Saved games
 
 1. An unfinished game is saved to `game.json` in the data folder as its
@@ -332,7 +341,7 @@ file that isn't JSON moves there, and the defaults replace it.
 Logs go through `log` and `tauri-plugin-log` to stdout and the log folder. A
 panic hook logs each panic with its place and a backtrace, since release builds
 on Windows have no console. A panic in an autosave round is logged, and the next
-round runs as usual.
+round runs as usual, as does the next command after one that panics.
 
 The UI's console warnings and errors, uncaught errors, and unhandled promise
 rejections go to the same log through `@tauri-apps/plugin-log`, from
@@ -889,10 +898,12 @@ While Polymine runs, `ui/src/lib/themes/icon.ts` draws the same mine, without
 the lattice, in the active theme's colors. Tauri's `setIcon` gives it to the
 window as its small icon, and `set_taskbar_icon` in
 `src-tauri/src/taskbar_icon.rs` as its big one, which the taskbar and Alt+Tab
-draw on Windows. The plate follows the mode: a dark board's plate turns light in
-light mode, and a light one turns dark in dark mode. A theme can set the
-`--icon-*` variables to choose the colors. macOS has no window icon, so its Dock
-keeps the static one. [docs/icons](icons/README.md) holds the concept sheets.
+draw on Windows. macOS has no window icon, so there the UI draws the mine as a
+1024 pixel PNG, and `set_dock_icon` in the same file makes it the application's
+icon image, which the Dock and the app switcher draw until Polymine quits. The
+plate follows the mode: a dark board's plate turns light in light mode, and a
+light one turns dark in dark mode. A theme can set the `--icon-*` variables to
+choose the colors. [docs/icons](icons/README.md) holds the concept sheets.
 
 ### Loading and checks
 
@@ -931,7 +942,11 @@ Settings opens, and when the window comes to the front.
    can stop.
 5. Cells shrink to fit the window down to a 5 px inradius. A board that would
    need smaller cells scrolls instead, with Shift and the wheel or a
-   middle-button drag.
+   middle-button drag. While the window resizes, the canvas keeps its last
+   frame, scaled to fit without changing its proportions. 60 ms after the last
+   change the canvas takes the new size at the display's pixel density, and the
+   board lays out again. Reallocating the canvas on every resize event cost most
+   of a core during a drag.
 6. Zoom enlarges the cells from the fitted size up to a 64 px inradius, keeping
    the middle of the view in place.
 7. With reduced motion on, cells fade in over 120 ms, and the shake, glow,

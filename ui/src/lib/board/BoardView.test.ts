@@ -250,6 +250,80 @@ describe("layout", () => {
   });
 });
 
+describe("resizing", () => {
+  /** Gives the host a new size and tells the view, as the ResizeObserver does. */
+  function resizeHost(internals: Internals, width: number, height: number) {
+    const el = (internals as unknown as { host: HTMLElement }).host;
+    Object.defineProperty(el, "clientWidth", { value: width, configurable: true });
+    Object.defineProperty(el, "clientHeight", { value: height, configurable: true });
+    (
+      internals as unknown as { resizeObserver: { callback: () => void } }
+    ).resizeObserver.callback();
+  }
+
+  afterEach(() => vi.useRealTimers());
+
+  it("sizes the renderer to the host from the start, without following it", async () => {
+    const { internals } = await setup(400, 300);
+    expect(internals.app.options).not.toHaveProperty("resizeTo");
+    expect(internals.app.options).toMatchObject({ width: 400, height: 300, autoDensity: true });
+    expect(internals.app.screen).toEqual({ width: 400, height: 300 });
+    expect(internals.app.renderer.resizes).toEqual([]);
+  });
+
+  it("stretches the last frame while the host resizes, then sizes the canvas once", async () => {
+    vi.useFakeTimers();
+    const { internals, cell } = await setup(400, 400);
+    const before = cell(0);
+    const { canvas, renderer } = internals.app;
+    resizeHost(internals, 450, 420);
+    expect(canvas.style.width).toBe("100%");
+    expect(canvas.style.height).toBe("100%");
+    vi.advanceTimersByTime(40);
+    resizeHost(internals, 500, 450);
+    vi.advanceTimersByTime(59);
+    expect(renderer.resizes).toEqual([]);
+    expect(cell(0)).toBe(before);
+    vi.advanceTimersByTime(1);
+    expect(renderer.resizes).toEqual([[500, 450, 1]]);
+    expect(canvas.style.width).toBe("500px");
+    expect(canvas.style.height).toBe("450px");
+    expect(cell(0)).not.toBe(before);
+  });
+
+  it("pins the canvas again when the host ends up at the size it had", async () => {
+    vi.useFakeTimers();
+    const { internals } = await setup(400, 400);
+    const { canvas, renderer } = internals.app;
+    resizeHost(internals, 400, 400);
+    expect(canvas.style.width).toBe("100%");
+    vi.advanceTimersByTime(60);
+    expect(renderer.resizes).toEqual([]);
+    expect(canvas.style.width).toBe("400px");
+    expect(canvas.style.height).toBe("400px");
+  });
+
+  it("sizes the canvas before a board loads", async () => {
+    vi.useFakeTimers();
+    const view = await BoardView.create(host(300, 200), theme, {
+      primary: vi.fn(),
+      secondary: vi.fn(),
+      fieldSecondary: vi.fn(),
+      pointerPress: vi.fn(),
+      layoutChanged: vi.fn(),
+      inspect: vi.fn(),
+    });
+    const internals = view as unknown as Internals;
+    internals.app.ticker.stop();
+    resizeHost(internals, 320, 240);
+    vi.advanceTimersByTime(60);
+    expect(internals.app.renderer.resizes).toEqual([[320, 240, 1]]);
+    // A resized canvas is blank until the next frame draws it.
+    expect(internals.app.ticker.started).toBe(true);
+    view.destroy();
+  });
+});
+
 describe("touch input", () => {
   it("opens on a tap and flags on a long press", async () => {
     vi.useFakeTimers();

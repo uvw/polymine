@@ -48,6 +48,7 @@ const fakeBoard = vi.hoisted(() => ({
   anchorOf: vi.fn(() => ({ x: 50, y: 30, radius: 8 })),
 }));
 const installMacMenu = vi.hoisted(() => vi.fn());
+const applyWindowIcon = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 
 vi.mock("../lib/api", () => ({ api, hasShell: () => true }));
 vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => appWindow }));
@@ -55,6 +56,7 @@ vi.mock("@tauri-apps/api/app", () => ({ getVersion: () => Promise.resolve("0.1.0
 vi.mock("../lib/board/BoardView", () => ({
   BoardView: { create: vi.fn(() => Promise.resolve(fakeBoard)) },
 }));
+vi.mock("../lib/windowIcon", () => ({ applyWindowIcon }));
 vi.mock("../lib/menu", async (original) => ({
   ...(await original<typeof import("../lib/menu")>()),
   installMacMenu,
@@ -592,6 +594,35 @@ describe("App", () => {
     );
     expect(document.documentElement.dataset.material).toBe("default");
     expect(installMacMenu).not.toHaveBeenCalled();
+  });
+
+  it("gives the window the theme's icon once the shell names the platform", async () => {
+    render(App);
+    await started();
+    await vi.waitFor(() =>
+      expect(applyWindowIcon).toHaveBeenLastCalledWith(game.theme, "windows", expect.any(Function)),
+    );
+  });
+
+  it("gives the Dock the new theme's icon on macOS", async () => {
+    api.environment.mockResolvedValue({ platform: "macos", material: false });
+    render(App);
+    await started();
+    applyWindowIcon.mockClear();
+    game.settings = settings({ theme: "midnight" });
+    await vi.waitFor(() =>
+      expect(applyWindowIcon).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "midnight" }),
+        "macos",
+        expect.any(Function),
+      ),
+    );
+    const current = applyWindowIcon.mock.calls.at(-1) as unknown as [
+      unknown,
+      string,
+      () => boolean,
+    ];
+    expect(current[2]()).toBe(true);
   });
 
   it("checks for updates on startup and offers one it finds", async () => {

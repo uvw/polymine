@@ -92,8 +92,11 @@ export function iconSvg(c: IconColors, options: { lattice?: boolean } = {}): str
 <ellipse cx="42" cy="40" rx="7" ry="4.5" fill="#fff" opacity="0.6" transform="rotate(-30 42 40)"/></svg>`;
 }
 
-/** `svg` drawn at `size` by `size` pixels, as RGBA bytes, or null without a 2D canvas. */
-export async function iconPixels(svg: string, size: number): Promise<Uint8Array | null> {
+/** A canvas with `svg` drawn on it at `size` by `size` pixels, or null without a 2D canvas. */
+async function drawIcon(
+  svg: string,
+  size: number,
+): Promise<{ canvas: HTMLCanvasElement; context: CanvasRenderingContext2D } | null> {
   const image = new Image(size, size);
   image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   await image.decode();
@@ -102,5 +105,22 @@ export async function iconPixels(svg: string, size: number): Promise<Uint8Array 
   const context = canvas.getContext("2d");
   if (!context) return null;
   context.drawImage(image, 0, 0, size, size);
-  return new Uint8Array(context.getImageData(0, 0, size, size).data.buffer);
+  return { canvas, context };
+}
+
+/** `svg` drawn at `size` by `size` pixels, as RGBA bytes, or null without a 2D canvas. */
+export async function iconPixels(svg: string, size: number): Promise<Uint8Array | null> {
+  const drawn = await drawIcon(svg, size);
+  if (!drawn) return null;
+  return new Uint8Array(drawn.context.getImageData(0, 0, size, size).data.buffer);
+}
+
+/** `svg` drawn at `size` by `size` pixels, as a PNG file, or null without a 2D canvas. */
+export async function iconPng(svg: string, size: number): Promise<Uint8Array | null> {
+  const drawn = await drawIcon(svg, size);
+  if (!drawn) return null;
+  const blob = await new Promise<Blob | null>((resolve) =>
+    drawn.canvas.toBlob(resolve, "image/png"),
+  );
+  return blob ? new Uint8Array(await blob.arrayBuffer()) : null;
 }

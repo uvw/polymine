@@ -10,6 +10,8 @@ use std::fs::{self, File, Metadata};
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
+mod svg;
+
 /// The folder in an instance's data folder that holds player themes.
 pub const THEMES_DIR: &str = "themes";
 /// Themes past this many, in name order, are skipped.
@@ -98,6 +100,8 @@ pub enum ThemeError {
     NotSvg(String),
     #[error("{name} contains {what}, which themes can't use")]
     Refused { name: String, what: &'static str },
+    #[error("{name} points outside the file with {reference}, which themes can't use")]
+    OutsideReference { name: String, reference: String },
     #[error("{PREVIEW_FILE} is not a PNG image")]
     NotPng,
     #[error(
@@ -521,8 +525,9 @@ fn without_comments(css: &str) -> String {
 }
 
 /// The UI draws an SVG only as an image, which can't run scripts or fetch
-/// anything. These refusals catch what has no place in a glyph anyway, and
-/// entity declarations, which can blow up when parsed.
+/// anything. These refusals catch what has no place in a glyph anyway,
+/// entity declarations, which can blow up when parsed, and references outside
+/// the file, which the webview may draw as a broken picture.
 fn check_svg(name: &str, svg: &str) -> Result<(), ThemeError> {
     let lower = svg.to_ascii_lowercase();
     if !lower.contains("<svg") {
@@ -542,7 +547,17 @@ fn check_svg(name: &str, svg: &str) -> Result<(), ThemeError> {
             });
         }
     }
-    Ok(())
+    svg::check(svg).map_err(|problem| match problem {
+        svg::Problem::Malformed => ThemeError::NotSvg(name.to_owned()),
+        svg::Problem::Outside(reference) => ThemeError::OutsideReference {
+            name: name.to_owned(),
+            reference,
+        },
+        svg::Problem::Refused(what) => ThemeError::Refused {
+            name: name.to_owned(),
+            what,
+        },
+    })
 }
 
 /// A PNG whose header gives a size within [`MAX_PREVIEW_SIDE`].
@@ -724,6 +739,51 @@ mod tests {
             assert!(refused.contains("flag.svg contains"), "{svg}: {refused}");
         }
         assert!(reason(&[("theme.css", b"x"), ("flag.svg", b"<html/>")]).contains("not an SVG"));
+    }
+
+    #[test]
+    fn refuses_svg_references_outside_the_file() {
+        for (svg, refused) in [
+            (
+                "<svg><image href='http://example.com/a.png'/></svg>",
+                r#"flag.svg points outside the file with href="http://example.com/a.png", which themes can't use"#,
+            ),
+            (
+                "<svg><image href='pole.png'/></svg>",
+                r#"flag.svg points outside the file with href="pole.png""#,
+            ),
+            (
+                "<svg><image href='data:image/svg+xml,%3Csvg/%3E'/></svg>",
+                r#"flag.svg points outside the file with href="data:image/svg+xml,%3Csvg/%3E""#,
+            ),
+            (
+                "<svg xmlns:xlink='http://www.w3.org/1999/xlink'><use xlink:href='mine.svg#m'/></svg>",
+                r#"flag.svg points outside the file with xlink:href="mine.svg#m""#,
+            ),
+            (
+                "<svg><path style='fill: url(file.svg#x)'/></svg>",
+                "flag.svg points outside the file with url(file.svg#x)",
+            ),
+            (
+                "<svg><?xml-stylesheet href='x.css'?></svg>",
+                "flag.svg contains a processing instruction, which themes can't use",
+            ),
+            (
+                "<svg><image href=x.png/></svg>",
+                "flag.svg is not an SVG image",
+            ),
+        ] {
+            let got = reason(&[("theme.css", b"x"), ("flag.svg", svg.as_bytes())]);
+            assert!(got.contains(refused), "{svg}: {got}");
+        }
+        let (_root, dir) = theme(&[
+            ("theme.css", CSS.as_bytes()),
+            (
+                "mine.svg",
+                br##"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><radialGradient id="grad"/></defs><circle id="c" fill="url(#grad)"/><use xlink:href="#c"/><use href="#c"/></svg>"##,
+            ),
+        ]);
+        assert_eq!(read_folder(&dir).unwrap().glyphs.len(), 1);
     }
 
     #[test]

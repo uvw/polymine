@@ -339,6 +339,8 @@ export class Application {
   screen = { width: 0, height: 0 };
   renderer = {
     resolution: 1,
+    /** Every `resize`, as width, height, and resolution. */
+    resizes: [] as [number, number, number][],
     /** Every offscreen render, with what it drew and where. */
     renders: [] as { container: unknown; target: unknown }[],
     /** Maps window coordinates to the stage's, with the canvas at the window's corner. */
@@ -348,18 +350,28 @@ export class Application {
         point.y = y;
       },
     },
-    resize(_width: number, _height: number, resolution?: number) {
-      if (resolution !== undefined) this.resolution = resolution;
+    /** Sizes the screen and, as `autoDensity` does, the canvas's CSS size. */
+    resize: (width: number, height: number, resolution?: number) => {
+      if (resolution !== undefined) this.renderer.resolution = resolution;
+      this.renderer.resizes.push([width, height, this.renderer.resolution]);
+      this.screen.width = width;
+      this.screen.height = height;
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
     },
     render(options: { container: unknown; target: unknown }) {
       this.renders.push(options);
     },
   };
   destroyed = false;
-  async init(options: { resizeTo: HTMLElement; resolution?: number }) {
+  /** The options `init` got. */
+  options: Record<string, unknown> = {};
+  async init(options: { width?: number; height?: number; resolution?: number }) {
     // The renderer's scheduler and the event system's hover check listen here.
     Ticker.system.add(() => {});
-    this.screen = { width: options.resizeTo.clientWidth, height: options.resizeTo.clientHeight };
+    this.options = options;
+    this.screen.width = options.width ?? 800;
+    this.screen.height = options.height ?? 600;
     this.renderer.resolution = options.resolution ?? 1;
     Application.last = this;
   }

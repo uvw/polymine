@@ -33,6 +33,12 @@ const FILL_INRADIUS = 12;
 /** How long the window must stay one size before a fresh board follows it. */
 const REFILL_MS = 400;
 const ERROR_MS = 5000;
+/**
+ * How long a queued backend call may go unanswered before the queue moves on.
+ * The slowest legitimate one, a solver move on a big board, takes about half a
+ * second in a release build, so only a call that will never answer reaches it.
+ */
+export const CALL_TIMEOUT_MS = 60_000;
 const AUTOSTART_PAUSE_MS = 1800;
 
 export interface HintLabel {
@@ -566,15 +572,39 @@ export class GameStore {
     this.errorTimer = setTimeout(() => (this.error = null), ERROR_MS);
   }
 
-  /** Queues a backend call behind earlier ones and reports failures. */
+  /**
+   * Queues a backend call behind earlier ones and reports failures. A call
+   * still unanswered after `CALL_TIMEOUT_MS` fails, so later calls can run.
+   */
   private run<T>(task: () => Promise<T>): Promise<T | undefined> {
-    const next = this.queue.then(task).catch((error: unknown) => {
-      this.reportError(error);
-      return undefined;
-    });
+    const next = this.queue
+      .then(() => withTimeout(task(), CALL_TIMEOUT_MS))
+      .catch((error: unknown) => {
+        if (error instanceof CallTimeout) {
+          console.error(error.message);
+          this.reportError(t("error.noAnswer", { seconds: CALL_TIMEOUT_MS / 1000 }));
+        } else {
+          this.reportError(error);
+        }
+        return undefined;
+      });
     this.queue = next;
     return next;
   }
+}
+
+class CallTimeout extends Error {}
+
+/** `call`, or a `CallTimeout` rejection once `ms` pass without an answer. */
+function withTimeout<T>(call: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new CallTimeout(`a backend call went unanswered for ${ms} ms`)),
+      ms,
+    );
+  });
+  return Promise.race([call, timeout]).finally(() => clearTimeout(timer));
 }
 
 function describeSuggestion(s: Suggestion): string {
