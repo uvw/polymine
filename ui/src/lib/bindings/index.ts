@@ -93,7 +93,7 @@ export const commands = {
 	 *  Sets the window's big icon to `rgba`, a `size` by `size` image. A failure
 	 *  is logged and leaves the icon as it was. Other platforms have no such icon.
 	 */
-	setTaskbarIcon: (rgba: number[], size: number) => __TAURI_INVOKE<void>("set_taskbar_icon", { rgba, size }),
+	setTaskbarIcon: (rgba: number[], size: number) => __TAURI_INVOKE<null>("set_taskbar_icon", { rgba, size }),
 	/**
 	 *  Lists the player's themes. Folders that break the rules come back in
 	 *  `skipped`, and the log says why once.

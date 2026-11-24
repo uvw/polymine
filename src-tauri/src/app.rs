@@ -88,11 +88,16 @@ impl std::fmt::Debug for App {
     }
 }
 
+/// Locks `mutex`, recovering it from a panic in an earlier call, which
+/// [`crate::guard`] turned into an error. Losing the game to a poisoned lock
+/// would cost more than carrying on from the state the panic left.
 fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
-    // A panic in one command shouldn't lock the player out of the game.
-    mutex
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
+    mutex.lock().unwrap_or_else(|poisoned| {
+        log::warn!("carrying on from the state a panicked call left behind");
+        // Logged once per panic, not on every later lock.
+        mutex.clear_poison();
+        poisoned.into_inner()
+    })
 }
 
 fn unix_ms() -> i64 {

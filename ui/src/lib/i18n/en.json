@@ -101,6 +101,7 @@
   "about.repository": "Source code on GitHub",
   "about.notices": "Third-party notices",
   "error.generic": "Something went wrong: {message}",
+  "error.noAnswer": "Polymine stopped waiting after {seconds} seconds without an answer.",
   "error.noShell": "Polymine runs inside its desktop shell. Start it with npm run app.",
   "menu.exit": "Exit",
   "menu.edit": "Edit",

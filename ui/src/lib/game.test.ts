@@ -32,7 +32,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("./api", () => ({ api, hasShell: () => true }));
 
-const { GameStore, describeGameOver } = await import("./game.svelte");
+const { CALL_TIMEOUT_MS, GameStore, describeGameOver } = await import("./game.svelte");
 
 function fakeBoard() {
   return {
@@ -377,6 +377,28 @@ describe("playing", () => {
     void store.secondary(1);
     await vi.advanceTimersByTimeAsync(60);
     expect(order).toEqual(["primary", "secondary"]);
+  });
+
+  it("gives up on a call that never answers and runs the next one", async () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    api.primary.mockReturnValueOnce(new Promise(() => {}));
+    api.secondary.mockResolvedValue(
+      result([{ cell: 1, view: { kind: "closed", mark: "flag" }, wave: 0 }]),
+    );
+    const stuck = store.primary(0);
+    const next = store.secondary(1);
+    await vi.advanceTimersByTimeAsync(CALL_TIMEOUT_MS - 1);
+    expect(api.secondary).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(await stuck).toBeUndefined();
+    expect(store.error).toBe(
+      "Something went wrong: Polymine stopped waiting after 60 seconds without an answer.",
+    );
+    expect(logged).toHaveBeenCalledWith(expect.stringContaining("unanswered"));
+    await next;
+    expect(api.secondary).toHaveBeenCalledWith(1);
+    expect(board.apply).toHaveBeenCalled();
+    logged.mockRestore();
   });
 
   it("shows backend errors and clears them later", async () => {

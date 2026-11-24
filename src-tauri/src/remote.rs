@@ -12,6 +12,7 @@ use serde_json::{Value, json};
 
 use crate::app::{ActionResult, App, CellAction};
 use crate::error::AppError;
+use crate::guard;
 use crate::session::NewGameRequest;
 
 /// The event the window listens to for changes made from outside it.
@@ -39,7 +40,7 @@ fn app_error(error: &AppError) -> ErrorBody {
         AppError::Game(e) => ErrorBody::new(ErrorCode::InvalidValue, e.to_string()),
         AppError::InvalidCell { len, .. } => moves::invalid_cell(error.to_string(), *len),
         AppError::Io(e) => ErrorBody::new(ErrorCode::Internal, e.to_string()),
-        // Only the window's theme, save, and update commands raise these.
+        // Only the window's commands raise these.
         AppError::Theme(_)
         | AppError::NoThemesFolder
         | AppError::OpenFolder(_)
@@ -52,7 +53,8 @@ fn app_error(error: &AppError) -> ErrorBody {
         | AppError::NoUpdate
         | AppError::UpdateBusy
         | AppError::UpdateInstall(_)
-        | AppError::OpenLink(_) => ErrorBody::new(ErrorCode::Internal, error.to_string()),
+        | AppError::OpenLink(_)
+        | AppError::Panicked(_) => ErrorBody::new(ErrorCode::Internal, error.to_string()),
     }
 }
 
@@ -91,8 +93,25 @@ fn play(
 
 /// Answers one request. Returns the reply and the changes to show.
 pub fn handle(app: &App, info: &InstanceInfo, request: Request) -> (Response, Vec<ExternalChange>) {
+    respond(|changes| answer(app, info, request, changes))
+}
+
+/// Runs `answer` through [`guard`]. A panic replies with an internal error,
+/// and the window reloads, since the request may have changed the game
+/// before it panicked.
+fn respond(
+    answer: impl FnOnce(&mut Vec<ExternalChange>) -> Result<Value, ErrorBody>,
+) -> (Response, Vec<ExternalChange>) {
     let mut changes = Vec::new();
-    let result = answer(app, info, request, &mut changes);
+    let result =
+        guard::catch("a polymine-cli request", || answer(&mut changes)).unwrap_or_else(|| {
+            changes.push(ExternalChange::Reload);
+            Err(ErrorBody::new(
+                ErrorCode::Internal,
+                "the request failed with an internal error",
+            )
+            .with_hint("the app's log has the details"))
+        });
     let response = match result {
         Ok(value) => Response::Result(value),
         Err(error) => Response::Error(error),
@@ -228,6 +247,20 @@ mod tests {
         let (response, changes) = handle(app, info, request);
         assert_eq!(result(response)["cells"].as_array().unwrap().len(), 100);
         changes
+    }
+
+    #[test]
+    fn a_panicking_request_answers_and_the_next_one_runs() {
+        let (_dir, app, info) = setup();
+        let (response, changes) = respond(|_| app.with_game(|_| panic!("solver bug")));
+        let failed = error(response);
+        assert_eq!(failed.code, ErrorCode::Internal);
+        assert!(failed.hint.unwrap().contains("log"));
+        assert!(matches!(changes[..], [ExternalChange::Reload]));
+        // The panic poisoned the session's lock while it held it.
+        new_square(&app, &info);
+        let status = result(handle(&app, &info, Request::Status).0);
+        assert_eq!(status["game"]["tiling"], json!(TilingId::Square));
     }
 
     #[test]

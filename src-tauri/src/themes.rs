@@ -11,6 +11,7 @@ use serde::Serialize;
 use tauri::State;
 
 use crate::error::AppError;
+use crate::guard;
 
 /// Where player themes live, when the platform has a data folder.
 #[derive(Debug)]
@@ -173,8 +174,8 @@ fn base64(bytes: &[u8]) -> String {
     clippy::needless_pass_by_value,
     reason = "Tauri injects command arguments by value"
 )]
-pub fn list_themes(themes: State<'_, Themes>) -> ThemeList {
-    themes.list()
+pub fn list_themes(themes: State<'_, Themes>) -> Result<ThemeList, AppError> {
+    guard::command("list_themes", || Ok(themes.list()))
 }
 
 /// Every file of the player theme `id`.
@@ -185,8 +186,10 @@ pub fn list_themes(themes: State<'_, Themes>) -> ThemeList {
     reason = "Tauri injects command arguments by value"
 )]
 pub fn read_theme(themes: State<'_, Themes>, id: String) -> Result<ThemeFiles, AppError> {
-    let dir = themes.dir.as_deref().ok_or(AppError::NoThemesFolder)?;
-    Ok(themes::read_theme(dir, &id)?.into())
+    guard::command("read_theme", || {
+        let dir = themes.dir.as_deref().ok_or(AppError::NoThemesFolder)?;
+        Ok(themes::read_theme(dir, &id)?.into())
+    })
 }
 
 /// Opens the themes folder in Finder, Explorer, or the desktop's file
@@ -198,26 +201,28 @@ pub fn read_theme(themes: State<'_, Themes>, id: String) -> Result<ThemeFiles, A
     reason = "Tauri injects command arguments by value"
 )]
 pub fn open_themes_folder(themes: State<'_, Themes>) -> Result<(), AppError> {
-    let dir = themes.dir.as_deref().ok_or(AppError::NoThemesFolder)?;
-    std::fs::create_dir_all(dir).map_err(AppError::OpenFolder)?;
-    let opener = if cfg!(target_os = "macos") {
-        "open"
-    } else if cfg!(target_os = "windows") {
-        "explorer"
-    } else {
-        "xdg-open"
-    };
-    // Explorer opens Documents instead of a folder written with forward
-    // slashes, which a data folder override such as `C:/scratch` produces.
-    #[cfg(target_os = "windows")]
-    let dir = std::path::PathBuf::from(dir.to_string_lossy().replace('/', "\\"));
-    let mut child = Command::new(opener)
-        .arg(dir)
-        .spawn()
-        .map_err(AppError::OpenFolder)?;
-    // Reaps the opener when it exits, so it doesn't linger as a zombie.
-    std::thread::spawn(move || child.wait());
-    Ok(())
+    guard::command("open_themes_folder", || {
+        let dir = themes.dir.as_deref().ok_or(AppError::NoThemesFolder)?;
+        std::fs::create_dir_all(dir).map_err(AppError::OpenFolder)?;
+        let opener = if cfg!(target_os = "macos") {
+            "open"
+        } else if cfg!(target_os = "windows") {
+            "explorer"
+        } else {
+            "xdg-open"
+        };
+        // Explorer opens Documents instead of a folder written with forward
+        // slashes, which a data folder override such as `C:/scratch` produces.
+        #[cfg(target_os = "windows")]
+        let dir = std::path::PathBuf::from(dir.to_string_lossy().replace('/', "\\"));
+        let mut child = Command::new(opener)
+            .arg(dir)
+            .spawn()
+            .map_err(AppError::OpenFolder)?;
+        // Reaps the opener when it exits, so it doesn't linger as a zombie.
+        std::thread::spawn(move || child.wait());
+        Ok(())
+    })
 }
 
 #[cfg(test)]

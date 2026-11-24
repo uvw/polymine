@@ -52,8 +52,8 @@ fn pack(r: u8, g: u8, b: u8) -> u32 {
 /// The accent color now, for the UI to refresh when the window regains focus.
 #[tauri::command]
 #[specta::specta]
-pub fn get_accent() -> Option<u32> {
-    system_accent()
+pub fn get_accent() -> Result<Option<u32>, crate::error::AppError> {
+    crate::guard::command("get_accent", || Ok(system_accent()))
 }
 
 #[cfg(test)]

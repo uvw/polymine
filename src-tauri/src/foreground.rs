@@ -9,8 +9,8 @@
     clippy::needless_pass_by_value,
     reason = "Tauri hands commands the window by value"
 )]
-pub fn window_in_front(window: tauri::WebviewWindow) -> bool {
-    in_front(&window)
+pub fn window_in_front(window: tauri::WebviewWindow) -> Result<bool, crate::error::AppError> {
+    crate::guard::command("window_in_front", || Ok(in_front(&window)))
 }
 
 #[cfg(target_os = "windows")]

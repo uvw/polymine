@@ -5,6 +5,7 @@
 use std::io;
 
 use crate::error::AppError;
+use crate::guard;
 
 /// The project's home on GitHub, from the workspace's `Cargo.toml`.
 pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
@@ -13,7 +14,9 @@ pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 #[tauri::command]
 #[specta::specta]
 pub fn open_repository() -> Result<(), AppError> {
-    open_url(REPOSITORY).map_err(AppError::OpenLink)
+    guard::command("open_repository", || {
+        open_url(REPOSITORY).map_err(AppError::OpenLink)
+    })
 }
 
 /// Opens `url` in the default browser.

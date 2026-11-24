@@ -22,6 +22,7 @@ use tauri_plugin_updater::{Update, Updater, UpdaterExt};
 
 use crate::app::App;
 use crate::error::AppError;
+use crate::guard;
 use crate::links;
 
 /// The event that reports a download's progress to the window.
@@ -264,37 +265,40 @@ pub async fn check_for_update(
     game: State<'_, App>,
     automatic: bool,
 ) -> Result<Option<UpdateInfo>, AppError> {
-    if !updates.enabled {
-        return if automatic {
-            Ok(None)
-        } else {
-            Err(AppError::UpdatesOff)
+    guard::command_async("check_for_update", async {
+        if !updates.enabled {
+            return if automatic {
+                Ok(None)
+            } else {
+                Err(AppError::UpdatesOff)
+            };
+        }
+        let now = unix_ms();
+        if automatic && !updates.due(game.settings().check_for_updates, now) {
+            return Ok(None);
+        }
+        let checked = match updater(&app) {
+            Ok(client) => client.check().await,
+            Err(e) => Err(e),
         };
-    }
-    let now = unix_ms();
-    if automatic && !updates.due(game.settings().check_for_updates, now) {
-        return Ok(None);
-    }
-    let checked = match updater(&app) {
-        Ok(client) => client.check().await,
-        Err(e) => Err(e),
-    };
-    let update = checked.map_err(|e| {
-        log::warn!("could not check for updates: {e}");
-        AppError::UpdateCheck(plain(&e))
-    })?;
-    updates.checked(now);
-    let info = update.as_ref().map(|u| UpdateInfo {
-        version: u.version.clone(),
-        notes: u.body.clone(),
-        date_ms: u.date.map(|d| d.unix_timestamp() * 1000),
-    });
-    match &info {
-        Some(info) => log::info!("Polymine {} is available", info.version),
-        None => log::info!("Polymine is up to date"),
-    }
-    *lock(&updates.found) = update.map(Found);
-    Ok(info)
+        let update = checked.map_err(|e| {
+            log::warn!("could not check for updates: {e}");
+            AppError::UpdateCheck(plain(&e))
+        })?;
+        updates.checked(now);
+        let info = update.as_ref().map(|u| UpdateInfo {
+            version: u.version.clone(),
+            notes: u.body.clone(),
+            date_ms: u.date.map(|d| d.unix_timestamp() * 1000),
+        });
+        match &info {
+            Some(info) => log::info!("Polymine {} is available", info.version),
+            None => log::info!("Polymine is up to date"),
+        }
+        *lock(&updates.found) = update.map(Found);
+        Ok(info)
+    })
+    .await
 }
 
 /// Downloads the release the last check found, checks its signature, installs
@@ -307,9 +311,13 @@ pub async fn install_update(app: AppHandle, updates: State<'_, Updates>) -> Resu
     if updates.installing.swap(true, Ordering::SeqCst) {
         return Err(AppError::UpdateBusy);
     }
-    let result = download_and_install(&app, &update).await;
+    // Guarded on its own, so a panic still clears `installing`.
+    let result = guard::command_async("install_update", async {
+        Ok(download_and_install(&app, &update).await)
+    })
+    .await;
     updates.installing.store(false, Ordering::SeqCst);
-    result.map_err(|e| {
+    result?.map_err(|e| {
         log::error!("could not install Polymine {}: {e}", update.version);
         AppError::UpdateInstall(plain(&e))
     })?;
@@ -342,9 +350,11 @@ async fn download_and_install(
 #[tauri::command]
 #[specta::specta]
 pub fn open_release_notes(updates: State<'_, Updates>) -> Result<(), AppError> {
-    let update = updates.found().ok_or(AppError::NoUpdate)?;
-    let url = release_notes_url(&update.version).ok_or(AppError::NoUpdate)?;
-    links::open_url(&url).map_err(AppError::OpenLink)
+    guard::command("open_release_notes", || {
+        let update = updates.found().ok_or(AppError::NoUpdate)?;
+        let url = release_notes_url(&update.version).ok_or(AppError::NoUpdate)?;
+        links::open_url(&url).map_err(AppError::OpenLink)
+    })
 }
 
 #[cfg(test)]
