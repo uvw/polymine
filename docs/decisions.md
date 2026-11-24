@@ -15,7 +15,7 @@ file current.
 | [4](#4-the-shells-logic-is-a-plain-struct)                                       | The shell's logic is a plain struct                                     |
 | [5](#5-types-and-commands-come-from-tauri-specta)                                | Types and commands come from tauri-specta                               |
 | [6](#6-logs-go-through-log-and-tauri-plugin-log)                                 | Logs go through `log` and `tauri-plugin-log`                            |
-| [7](#7-eight-modules-may-use-unsafe-code)                                        | Eight modules may use unsafe code                                       |
+| [7](#7-nine-modules-may-use-unsafe-code)                                         | Nine modules may use unsafe code                                        |
 | [8](#8-third-party-notices-ship-in-the-about-window)                             | Third-party notices ship in the About window                            |
 | [9](#9-tilings-are-data)                                                         | Tilings are data                                                        |
 | [10](#10-chacha8-for-mine-placement)                                             | ChaCha8 for mine placement                                              |
@@ -140,12 +140,12 @@ lost. Release builds have no devtools either, so UI warnings and errors would
 never reach a file. The official plugin needs only the `log:default` permission,
 where a custom command would add app code and generated bindings.
 
-## 7. Eight modules may use unsafe code
+## 7. Nine modules may use unsafe code
 
 **Date:** 2026-11-05
 
 **Decision:** The workspace lints deny `unsafe_code` instead of forbidding it.
-Eight modules allow it, each for platform calls that no safe crate wraps, and
+Nine modules allow it, each for platform calls that no safe crate wraps, and
 each `unsafe` block carries a `SAFETY` comment:
 
 1. `windows_user` in `crates/polymine-ipc/src/transport.rs` reads the user's SID
@@ -166,6 +166,9 @@ each `unsafe` block carries a `SAFETY` comment:
 8. `windows_icon` in `src-tauri/src/taskbar_icon.rs` gives the window its big
    icon, which the taskbar and Alt+Tab draw. Tauri's `set_icon` sets only the
    small one.
+9. `dock_icon` in the same file gives the macOS app the theme's icon, which the
+   Dock and the app switcher draw. `objc2-app-kit` marks the setter unsafe,
+   since it can't tell whether `AppKit` takes nil.
 
 A new `allow(unsafe_code)` gets a line here in the same change.
 
@@ -1159,13 +1162,15 @@ which hands some players an install without the CLI on `PATH`.
 **Date:** 2026-11-07
 
 **Decision:** The static app icon is a steel mine on a dark plate with a faint
-triangle lattice. While Polymine runs on Windows or Linux, the window's icon is
-the same mine drawn in the active theme's colors: its board plate, closed cell,
-mine, and mine spark. The plate matches light or dark mode. Every theme gets
-one, and a theme may set `--icon-plate`, `--icon-metal`, `--icon-mine`, and
+triangle lattice. While Polymine runs, its icon is the same mine drawn in the
+active theme's colors: its board plate, closed cell, mine, and mine spark. On
+Windows and Linux it's the window's icon. macOS has no window icon, so there
+it's the application's icon image, which the Dock and the app switcher draw,
+rendered at Apple's 1024 pixel app icon size. When Polymine quits, the Dock
+shows the static icon again. The plate matches light or dark mode. Every theme
+gets one, and a theme may set `--icon-plate`, `--icon-metal`, `--icon-mine`, and
 `--icon-spark` to choose its colors. The icon is drawn from a template, never
-from a theme's own SVG. macOS has no window icon, and the Dock keeps the static
-one.
+from a theme's own SVG.
 
 **Why:** The maintainer wanted the icon to match the theme, and picked the dark
 "Poly grid" plate from the concept sheets in `docs/icons`. Deriving the colors
@@ -1173,9 +1178,13 @@ gives player themes an icon for free. Variables keep a theme's input to colors
 that pass the usual checks. An `icon.svg` would need a new file type, its own
 size limits, and a way to read well at 16 pixels.
 
+Setting the Dock's icon needs one unsafe `AppKit` call (decision 7). The UI
+sends it as a PNG, since raw pixels at that size would be 4 MB, and several
+times that as JSON.
+
 **Alternatives:** a static icon only; an optional `icon.svg` in the theme
-folder; and changing the macOS Dock icon at run time, which needs AppKit calls
-and can wait ([#14](https://github.com/uvw/polymine/issues/14)).
+folder; and a static Dock icon on macOS, which would leave the Dock as the one
+place the theme doesn't reach.
 
 ## 56. Each data folder is an instance of its own
 
