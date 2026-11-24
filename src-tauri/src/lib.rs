@@ -19,6 +19,7 @@ mod session;
 mod settings;
 mod sleep;
 mod taskbar_icon;
+mod theme_catalog;
 mod themes;
 #[cfg(target_os = "macos")]
 mod traffic_lights;

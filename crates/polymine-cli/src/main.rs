@@ -12,6 +12,7 @@ mod sync;
 mod user_path;
 
 use std::io::IsTerminal;
+use std::path::PathBuf;
 use std::time::Duration;
 
 use clap::error::ErrorKind;
@@ -21,7 +22,7 @@ use polymine_ipc::instance::{self, INSTANCE_ENV, InstanceName};
 use polymine_ipc::{ErrorBody, ErrorCode, Registry, Request, Response, transport};
 use serde_json::{Map, Value, json};
 
-use cli::{Cli, Command};
+use cli::{Cli, Command, ThemeCommand};
 
 const SKILL: &str = include_str!("../../../skills/polymine-cli/SKILL.md");
 
@@ -125,9 +126,23 @@ fn run(cli: &Cli) -> Result<Output, ErrorBody> {
             tiling: tiling.map(cli::TilingArg::id),
             level: level.map(cli::LevelArg::level),
         },
+        Command::Theme {
+            command: ThemeCommand::List,
+        } => Request::Themes,
+        Command::Theme {
+            command: ThemeCommand::Use { id },
+        } => Request::UseTheme { id: id.clone() },
         Command::Instances => return Ok(Output::Json(instances())),
-        Command::Paths => return Ok(Output::Json(paths(&instance_name(cli)?))),
-        Command::Log { lines } => return log(&instance_name(cli)?, *lines).map(Output::Text),
+        Command::Paths => {
+            let name = instance_name(cli)?;
+            let folders = folders(&name, |request| call(cli, &name, request));
+            return Ok(Output::Json(paths(&name, folders)));
+        }
+        Command::Log { lines } => {
+            let name = instance_name(cli)?;
+            let folders = folders(&name, |request| call(cli, &name, request));
+            return log(folders.log.as_deref(), *lines).map(Output::Text);
+        }
         Command::Link { dir } => return link(dir.as_deref()).map(Output::Json),
         Command::Unlink { dir } => return unlink(dir.as_deref()).map(Output::Json),
         Command::Sync { gist } => return sync::sync(&instance_name(cli)?, gist).map(Output::Json),
@@ -136,16 +151,16 @@ fn run(cli: &Cli) -> Result<Output, ErrorBody> {
     };
     let response = match &cli.local {
         Some(game) => local::handle(&local::games_dir(), game, request),
-        None => transport::call(
-            &instance_name(cli)?,
-            &request,
-            Duration::from_millis(cli.timeout.max(100)),
-        ),
+        None => call(cli, &instance_name(cli)?, &request),
     };
     match response {
         Response::Result(value) => Ok(Output::Json(value)),
         Response::Error(error) => Err(error),
     }
+}
+
+fn call(cli: &Cli, name: &InstanceName, request: &Request) -> Response {
+    transport::call(name, request, Duration::from_millis(cli.timeout.max(100)))
 }
 
 /// A clap error as the documented `usage` error. Clap's tips become the hint.
@@ -210,29 +225,64 @@ fn list_instances(registry: &Registry, call: impl Fn(&str) -> Response) -> Vec<V
         .collect()
 }
 
-fn paths(name: &InstanceName) -> Value {
-    json!({
+/// An instance's log and data folders, and where they were found.
+#[derive(Debug)]
+struct Folders {
+    /// `instance` when the running instance said, `environment` when they
+    /// come from this shell's environment.
+    source: &'static str,
+    log: Option<PathBuf>,
+    data: Option<PathBuf>,
+    /// Why a running instance didn't say.
+    error: Option<ErrorBody>,
+}
+
+/// Asks the instance for its folders through `call`, since it may have been
+/// started with another environment. When it doesn't answer, they come from
+/// this one.
+fn folders(name: &InstanceName, call: impl FnOnce(&Request) -> Response) -> Folders {
+    let path = |value: &Value| serde_json::from_value(value.clone()).ok().flatten();
+    match call(&Request::Status) {
+        Response::Result(status) => Folders {
+            source: "instance",
+            log: path(&status["log"]),
+            data: path(&status["dataDir"]),
+            error: None,
+        },
+        Response::Error(error) => {
+            let (config, data) = instance::app_dirs();
+            Folders {
+                source: "environment",
+                log: instance::log_file(name),
+                data: instance::instance_dirs(name, config, data).1,
+                error: (error.code != ErrorCode::NotRunning).then_some(error),
+            }
+        }
+    }
+}
+
+fn paths(name: &InstanceName, folders: Folders) -> Value {
+    let mut paths = json!({
         "instance": name,
+        "source": folders.source,
         "socket": transport::socket_address(name),
         "registry": Registry::shared().dir(),
-        "log": instance::log_file(name),
+        "log": folders.log,
+        "dataDir": folders.data,
+        "themes": folders.data.as_deref().map(polymine_ipc::themes::themes_dir),
         "games": local::games_dir(),
         "dataOverride": instance::data_dir_override(),
-        "themes": themes_dir(name),
-    })
+    });
+    if let Some(error) = folders.error {
+        paths["instanceError"] = json!(error);
+    }
+    paths
 }
 
-/// Where the instance's app reads player themes from.
-fn themes_dir(name: &InstanceName) -> Option<std::path::PathBuf> {
-    let (config, data) = instance::app_dirs();
-    let (_, data) = instance::instance_dirs(name, config, data);
-    data.as_deref().map(polymine_ipc::themes::themes_dir)
-}
-
-fn log(name: &InstanceName, lines: usize) -> Result<String, ErrorBody> {
-    let path = instance::log_file(name)
-        .ok_or_else(|| ErrorBody::new(ErrorCode::Internal, "no log folder on this system"))?;
-    let text = std::fs::read_to_string(&path).map_err(|e| {
+fn log(path: Option<&std::path::Path>, lines: usize) -> Result<String, ErrorBody> {
+    let path =
+        path.ok_or_else(|| ErrorBody::new(ErrorCode::Internal, "no log folder on this system"))?;
+    let text = std::fs::read_to_string(path).map_err(|e| {
         ErrorBody::new(
             ErrorCode::Usage,
             format!("can't read {}: {e}", path.display()),
@@ -362,14 +412,27 @@ fn describe() -> Value {
             "values": arg.get_possible_values().iter().map(|v| v.get_name().to_owned()).collect::<Vec<_>>(),
         })
     };
+    let command_json = |name: String, c: &clap::Command| {
+        json!({
+            "name": name,
+            "about": c.get_about().map(ToString::to_string),
+            "args": c.get_arguments().filter(|a| !a.is_global_set() && a.get_id() != "help").map(arg_json).collect::<Vec<_>>(),
+        })
+    };
+    // A command with commands of its own, such as `theme`, lists each of them.
     let commands: Vec<Value> = root
         .get_subcommands()
-        .map(|c| {
-            json!({
-                "name": c.get_name(),
-                "about": c.get_about().map(ToString::to_string),
-                "args": c.get_arguments().filter(|a| !a.is_global_set() && a.get_id() != "help").map(arg_json).collect::<Vec<_>>(),
-            })
+        .flat_map(|c| {
+            let nested: Vec<Value> = c
+                .get_subcommands()
+                .filter(|s| s.get_name() != "help")
+                .map(|s| command_json(format!("{} {}", c.get_name(), s.get_name()), s))
+                .collect();
+            if nested.is_empty() {
+                vec![command_json(c.get_name().to_owned(), c)]
+            } else {
+                nested
+            }
         })
         .collect();
     let global: Vec<Value> = root
@@ -493,6 +556,37 @@ mod tests {
     }
 
     #[test]
+    fn folders_come_from_the_running_instance_first() {
+        let name = InstanceName::new("lab").unwrap();
+        let asked = folders(&name, |request| {
+            assert_eq!(request, &Request::Status);
+            Response::Result(
+                json!({ "log": "/elsewhere/Polymine-lab.log", "dataDir": "/elsewhere" }),
+            )
+        });
+        assert_eq!(asked.source, "instance");
+        let listed = paths(&name, asked);
+        assert_eq!(listed["log"], "/elsewhere/Polymine-lab.log");
+        assert_eq!(listed["dataDir"], "/elsewhere");
+        let themes = std::path::Path::new("/elsewhere").join("themes");
+        assert_eq!(listed["themes"], json!(themes));
+        assert!(listed.get("instanceError").is_none());
+
+        let gone = folders(&name, |_| {
+            Response::Error(ErrorBody::new(ErrorCode::NotRunning, "no"))
+        });
+        assert_eq!(gone.source, "environment");
+        assert_eq!(gone.log, instance::log_file(&name));
+        assert!(gone.error.is_none());
+
+        let busy = folders(&name, |_| {
+            Response::Error(ErrorBody::new(ErrorCode::Busy, "no"))
+        });
+        assert_eq!(busy.source, "environment");
+        assert_eq!(paths(&name, busy)["instanceError"]["code"], "busy");
+    }
+
+    #[test]
     fn errors_map_to_documented_exit_codes() {
         assert_eq!(exit_code(ErrorCode::Usage), 2);
         assert_eq!(exit_code(ErrorCode::NotRunning), 3);
@@ -525,7 +619,18 @@ mod tests {
             .map(|c| c["name"].as_str().unwrap())
             .collect();
         for expected in [
-            "status", "board", "new", "open", "flag", "unflag", "hint", "step", "stats", "skill",
+            "status",
+            "board",
+            "new",
+            "open",
+            "flag",
+            "unflag",
+            "hint",
+            "step",
+            "stats",
+            "theme list",
+            "theme use",
+            "skill",
         ] {
             assert!(
                 names.contains(&expected),

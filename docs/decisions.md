@@ -66,6 +66,7 @@ file current.
 | [55](#55-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
 | [56](#56-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
 | [57](#57-the-players-own-copy-updates-itself-from-signed-github-releases)        | The player's own copy updates itself from signed GitHub releases        |
+| [58](#58-the-cli-picks-themes-from-the-shells-copy-of-the-catalog)               | The CLI picks themes from the shell's copy of the catalog               |
 
 ## 1. Rust engine with a Tauri and Svelte shell
 
@@ -1241,3 +1242,29 @@ system's certificate verifier.
 release page, which leaves every install by hand; the plugin's JavaScript API,
 which would give the webview a network permission; installing in the background
 without asking; and giving the build jobs the signing key.
+
+## 58. The CLI picks themes from the shell's copy of the catalog
+
+**Date:** 2026-11-23
+
+**Decision:** `polymine-cli theme use` and `theme list` ask the running
+instance, which checks ids against its own copy of the window's catalog in
+`src-tauri/src/theme_catalog.rs`. `build.rs` lists the built-in ids from the
+folders in `ui/src/themes`. The experiments and the renamed ids are lists there
+that a test holds to `EXPERIMENTAL_THEMES` and `RENAMED_BUILT_INS` in
+`ui/src/lib/themes/builtin.ts`. Player themes come from the themes folder,
+through the same folder rules as the window's. A switch goes through
+`App::update_settings`, as Settings does, and tells the window to read the
+settings and the themes folder again, so using the current theme reloads its
+files. It never marks the game as assisted.
+
+**Why:** The window bundles the built-in themes, and the shell can't ask it
+while answering a request, since the window only hears events. A theme folder
+made a moment ago must be usable at once, which only a fresh read of the folder
+gives. Accepting any id would let the window fall back to the default while the
+CLI reported success.
+
+**Alternatives:** having the window report its catalog to the shell, which
+misses folders made since its last read; accepting any id, which hides typos;
+and a separate `theme reload` command, which `theme use` with the current id
+already covers.

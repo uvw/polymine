@@ -300,22 +300,22 @@ export type Environment_Serialize = {
 };
 
 /**
- *  A change made from outside the window: one action to animate, or a new
- *  game or state the window should reload.
+ *  A change made from outside the window: one action to animate, a new game
+ *  or state the window should reload, or a theme it should read again.
  */
 export type ExternalChange = ExternalChange_Serialize;
 
 /**
- *  A change made from outside the window: one action to animate, or a new
- *  game or state the window should reload.
+ *  A change made from outside the window: one action to animate, a new game
+ *  or state the window should reload, or a theme it should read again.
  */
-export type ExternalChange_Deserialize = { kind: "action"; result: ActionResult_Deserialize } | { kind: "reload" };
+export type ExternalChange_Deserialize = { kind: "action"; result: ActionResult_Deserialize } | { kind: "reload" } | { kind: "themes" };
 
 /**
- *  A change made from outside the window: one action to animate, or a new
- *  game or state the window should reload.
+ *  A change made from outside the window: one action to animate, a new game
+ *  or state the window should reload, or a theme it should read again.
  */
-export type ExternalChange_Serialize = { kind: "action"; result: ActionResult_Serialize } | { kind: "reload" };
+export type ExternalChange_Serialize = { kind: "action"; result: ActionResult_Serialize } | { kind: "reload" } | { kind: "themes" };
 
 export type GameConfig = {
 	tiling: TilingId,

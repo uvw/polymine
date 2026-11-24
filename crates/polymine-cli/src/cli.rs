@@ -133,11 +133,18 @@ pub enum Command {
         #[arg(long)]
         level: Option<LevelArg>,
     },
+    /// Lists a running instance's themes, or switches its theme.
+    Theme {
+        #[command(subcommand)]
+        command: ThemeCommand,
+    },
     /// Registered instances. Entries no app listens for any more are removed.
     Instances,
     /// Where the instance's log, player themes, and the headless games live.
+    /// A running instance says where its folders are; otherwise they come
+    /// from this shell's environment.
     Paths,
-    /// The last lines of an instance's log.
+    /// The last lines of an instance's log, found as `paths` finds it.
     Log {
         #[arg(long, default_value_t = 50)]
         lines: usize,
@@ -170,4 +177,19 @@ pub enum Command {
     /// The usage guide for coding agents, as Markdown.
     #[command(after_help = "Example: polymine-cli skill > .claude/skills/polymine-cli/SKILL.md")]
     Skill,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ThemeCommand {
+    /// Every theme the instance can show, where each comes from, and the one
+    /// it shows.
+    List,
+    /// Switches the instance's theme, as Settings does, and saves it. The
+    /// window reads the themes folder again, so using the current theme
+    /// reloads its files.
+    #[command(after_help = "Example: polymine-cli theme use graphite")]
+    Use {
+        /// A theme id from `theme list`.
+        id: String,
+    },
 }

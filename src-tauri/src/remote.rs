@@ -13,17 +13,21 @@ use serde_json::{Value, json};
 use crate::app::{ActionResult, App, CellAction};
 use crate::error::AppError;
 use crate::session::NewGameRequest;
+use crate::theme_catalog::{self, Catalog};
 
 /// The event the window listens to for changes made from outside it.
 pub const EXTERNAL_EVENT: &str = "polymine://external";
 
-/// A change made from outside the window: one action to animate, or a new
-/// game or state the window should reload.
+/// A change made from outside the window: one action to animate, a new game
+/// or state the window should reload, or a theme it should read again.
 #[derive(Clone, Debug, Serialize, Deserialize, specta::Type)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum ExternalChange {
     Action { result: ActionResult },
     Reload,
+    // The theme may be a folder just made or edited, so the window reads the
+    // themes folder again along with the settings.
+    Themes,
 }
 
 /// What `status` reports about the instance itself.
@@ -182,7 +186,30 @@ fn answer(
                 None
             )))
         }
+        Request::Themes => {
+            let mut listed = json!(themes(info));
+            listed["current"] = json!(app.settings().theme);
+            Ok(listed)
+        }
+        Request::UseTheme { id } => {
+            let source = themes(info).check(&id)?;
+            let mut settings = app.settings();
+            let previous = std::mem::replace(&mut settings.theme, id);
+            let saved = app.update_settings(settings);
+            // Even unsaved, the new theme is the app's, so the window shows it.
+            changes.push(ExternalChange::Themes);
+            let saved = saved.map_err(|e| app_error(&e))?;
+            Ok(json!({ "theme": saved.theme, "source": source, "previous": previous }))
+        }
     }
+}
+
+fn themes(info: &InstanceInfo) -> Catalog {
+    let folder = info
+        .data_dir
+        .as_deref()
+        .map(polymine_ipc::themes::themes_dir);
+    Catalog::read(folder.as_deref(), theme_catalog::experiments())
 }
 
 #[cfg(test)]
@@ -372,6 +399,75 @@ mod tests {
             .0,
         );
         assert_eq!(records["champions"], json!([]));
+    }
+
+    fn with_data(dir: &tempfile::TempDir) -> InstanceInfo {
+        InstanceInfo {
+            name: InstanceName::new("test").unwrap(),
+            config_dir: Some(dir.path().join("c")),
+            data_dir: Some(dir.path().join("d")),
+        }
+    }
+
+    fn use_theme(app: &App, info: &InstanceInfo, id: &str) -> (Response, Vec<ExternalChange>) {
+        handle(app, info, Request::UseTheme { id: id.to_owned() })
+    }
+
+    #[test]
+    fn a_theme_switch_saves_the_settings_and_leaves_the_game_unassisted() {
+        let (dir, app, _) = setup();
+        let info = with_data(&dir);
+        app.primary(CellId(0)).unwrap();
+        let (response, changes) = use_theme(&app, &info, "graphite");
+        let switched = result(response);
+        assert_eq!(switched["theme"], "graphite");
+        assert_eq!(switched["source"], "builtIn");
+        assert_eq!(switched["previous"], "frost");
+        assert!(matches!(changes.as_slice(), [ExternalChange::Themes]));
+        assert!(!app.snapshot().assisted);
+        assert_eq!(app.settings().recent_themes, ["graphite"]);
+        let reloaded = App::load(Some(&dir.path().join("c")), Some(&dir.path().join("d")));
+        assert_eq!(reloaded.settings().theme, "graphite");
+        let listed = result(handle(&app, &info, Request::Themes).0);
+        assert_eq!(listed["current"], "graphite");
+    }
+
+    #[test]
+    fn a_player_theme_is_read_again_each_time_it_is_used() {
+        let (dir, app, _) = setup();
+        let info = with_data(&dir);
+        let theme = dir.path().join("d/themes/dusk");
+        std::fs::create_dir_all(&theme).unwrap();
+        std::fs::write(theme.join("theme.css"), "/* Name: Dusk */ :root {}").unwrap();
+        let listed = result(handle(&app, &info, Request::Themes).0);
+        let dusk = listed["themes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|t| t["id"] == "dusk")
+            .unwrap();
+        assert_eq!(dusk["source"], "player");
+        assert_eq!(result(use_theme(&app, &info, "dusk").0)["source"], "player");
+        // The current theme again: the window reads the folder again.
+        let (again, changes) = use_theme(&app, &info, "dusk");
+        assert_eq!(result(again)["previous"], "dusk");
+        assert!(matches!(changes.as_slice(), [ExternalChange::Themes]));
+        std::fs::write(theme.join("notes.txt"), "x").unwrap();
+        let broken = error(use_theme(&app, &info, "dusk").0);
+        assert_eq!(broken.code, ErrorCode::InvalidValue);
+        assert!(broken.message.contains("notes.txt"), "{}", broken.message);
+    }
+
+    #[test]
+    fn an_unknown_theme_changes_nothing() {
+        let (dir, app, _) = setup();
+        let info = with_data(&dir);
+        let (response, changes) = use_theme(&app, &info, "made-up");
+        let unknown = error(response);
+        assert_eq!(unknown.code, ErrorCode::InvalidValue);
+        assert!(unknown.hint.unwrap().contains("graphite"));
+        assert!(changes.is_empty());
+        assert_eq!(app.settings().theme, "frost");
     }
 
     #[test]

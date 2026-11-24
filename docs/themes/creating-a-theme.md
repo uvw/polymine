@@ -66,7 +66,9 @@ letter or a digit, such as `dusk` or `neon-2`.
 
 Polymine reads the folder when it starts, when you open Settings, and each time
 its window comes to the front. To try a change, save the file and click back
-into Polymine.
+into Polymine. From a terminal, `polymine-cli theme use dusk` switches to the
+theme without leaving your editor, and running it again after an edit reloads
+the folder. [CLI.md](../CLI.md#themes) has the details.
 
 ## A minimal theme
 
