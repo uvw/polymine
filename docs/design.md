@@ -296,6 +296,15 @@ Commands that can take long on a big board, such as moves, hints, new games, and
 snapshots, run on Tauri's thread pool instead of the main thread, so the window
 stays responsive. The UI queues its game calls, so they land in order.
 
+A command that panics answers with an error instead of never answering.
+`src-tauri/src/guard.rs` wraps each command's body, logs the panic, and returns
+`AppError::Panicked`, which the UI shows like any other error. The locks in
+`App` recover from the poisoning a panic leaves, so the next command runs on the
+game as the panic left it. `polymine-cli` requests go through the same guard and
+reply with an `internal` error. As a backstop, the UI's queue gives up on a call
+after 60 seconds, so one that never answers doesn't hold the clicks behind it
+([decision 58](decisions.md#58-a-command-that-panics-answers-with-an-error)).
+
 ### Saved games
 
 1. An unfinished game is saved to `game.json` in the data folder as its
@@ -332,7 +341,7 @@ file that isn't JSON moves there, and the defaults replace it.
 Logs go through `log` and `tauri-plugin-log` to stdout and the log folder. A
 panic hook logs each panic with its place and a backtrace, since release builds
 on Windows have no console. A panic in an autosave round is logged, and the next
-round runs as usual.
+round runs as usual, as does the next command after one that panics.
 
 The UI's console warnings and errors, uncaught errors, and unhandled promise
 rejections go to the same log through `@tauri-apps/plugin-log`, from

@@ -4,6 +4,9 @@
 use serde::{Deserialize, Serialize};
 use tauri::{State, WebviewWindow};
 
+use crate::error::AppError;
+use crate::guard;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub enum Platform {
@@ -84,37 +87,39 @@ pub fn apply_material(window: &WebviewWindow) -> bool {
     clippy::needless_pass_by_value,
     reason = "Tauri injects command arguments by value"
 )]
-pub fn set_material(window: WebviewWindow, frosted: bool) -> bool {
-    #[cfg(target_os = "windows")]
-    let result = if frosted {
-        let _ = window_vibrancy::clear_mica(&window);
-        window_vibrancy::apply_acrylic(&window, Some((24, 26, 32, 96)))
-    } else {
-        let _ = window_vibrancy::clear_acrylic(&window);
-        window_vibrancy::apply_mica(&window, None)
-    };
-    // Applying adds another effect view on top of the last one, so clear it.
-    #[cfg(target_os = "macos")]
-    let result = window_vibrancy::clear_vibrancy(&window).and_then(|_| {
-        window_vibrancy::apply_vibrancy(
-            &window,
-            if frosted {
-                window_vibrancy::NSVisualEffectMaterial::UnderWindowBackground
-            } else {
-                window_vibrancy::NSVisualEffectMaterial::Sidebar
-            },
-            Some(window_vibrancy::NSVisualEffectState::FollowsWindowActiveState),
-            None,
-        )
-    });
-    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
-    let result: Result<(), String> = {
-        let _ = (&window, frosted);
-        Err("no backdrop material on this platform".to_owned())
-    };
-    result
-        .map_err(|e| log::info!("window material unavailable: {e}"))
-        .is_ok()
+pub fn set_material(window: WebviewWindow, frosted: bool) -> Result<bool, AppError> {
+    guard::command("set_material", || {
+        #[cfg(target_os = "windows")]
+        let result = if frosted {
+            let _ = window_vibrancy::clear_mica(&window);
+            window_vibrancy::apply_acrylic(&window, Some((24, 26, 32, 96)))
+        } else {
+            let _ = window_vibrancy::clear_acrylic(&window);
+            window_vibrancy::apply_mica(&window, None)
+        };
+        // Applying adds another effect view on top of the last one, so clear it.
+        #[cfg(target_os = "macos")]
+        let result = window_vibrancy::clear_vibrancy(&window).and_then(|_| {
+            window_vibrancy::apply_vibrancy(
+                &window,
+                if frosted {
+                    window_vibrancy::NSVisualEffectMaterial::UnderWindowBackground
+                } else {
+                    window_vibrancy::NSVisualEffectMaterial::Sidebar
+                },
+                Some(window_vibrancy::NSVisualEffectState::FollowsWindowActiveState),
+                None,
+            )
+        });
+        #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+        let result: Result<(), String> = {
+            let _ = (&window, frosted);
+            Err("no backdrop material on this platform".to_owned())
+        };
+        Ok(result
+            .map_err(|e| log::info!("window material unavailable: {e}"))
+            .is_ok())
+    })
 }
 
 /// The platform, the backdrop material, the instance, and the accent color
@@ -125,8 +130,8 @@ pub fn set_material(window: WebviewWindow, frosted: bool) -> bool {
     clippy::needless_pass_by_value,
     reason = "Tauri injects command arguments by value"
 )]
-pub fn get_environment(environment: State<'_, Environment>) -> Environment {
-    environment.inner().clone()
+pub fn get_environment(environment: State<'_, Environment>) -> Result<Environment, AppError> {
+    guard::command("get_environment", || Ok(environment.inner().clone()))
 }
 
 #[cfg(test)]

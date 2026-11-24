@@ -66,6 +66,7 @@ file current.
 | [55](#55-the-window-icon-follows-the-theme)                                      | The window icon follows the theme                                       |
 | [56](#56-each-data-folder-is-an-instance-of-its-own)                             | Each data folder is an instance of its own                              |
 | [57](#57-the-players-own-copy-updates-itself-from-signed-github-releases)        | The player's own copy updates itself from signed GitHub releases        |
+| [58](#58-a-command-that-panics-answers-with-an-error)                            | A command that panics answers with an error                             |
 
 ## 1. Rust engine with a Tauri and Svelte shell
 
@@ -1245,3 +1246,31 @@ system's certificate verifier.
 release page, which leaves every install by hand; the plugin's JavaScript API,
 which would give the webview a network permission; installing in the background
 without asking; and giving the build jobs the signing key.
+
+## 58. A command that panics answers with an error
+
+**Date:** 2026-11-23
+
+**Decision:** Every Tauri command body and every `polymine-cli` request runs
+through `src-tauri/src/guard.rs`, which catches a panic, logs it at error level,
+and answers with an error: `AppError::Panicked` for the window, an `internal`
+error for the CLI. The locks in `App` recover from the poisoning a panic leaves,
+log a warning once, and carry on from the state the panic left. The UI's game
+queue also gives up on a call after 60 seconds, so a call that never answers for
+any other reason doesn't hold every later click.
+
+**Why:** Tauri never answers an `async` command that panics: the task dies on
+its thread pool with the reply unsent, so the UI's queue waits forever. On macOS
+a panic in a sync command unwinds into the webview's IPC handler, an
+`extern "C"` callback, and aborts the process. Either way the player had to
+restart Polymine. A poisoned session lock would then fail every later command.
+Recovering from it risks a half-changed game, but the next snapshot shows what
+the game holds, and losing it outright is worse. The slowest legitimate call, a
+solver move on a big board, takes about half a second in a release build, so 60
+seconds never cuts one short.
+
+**Alternatives:** the timeout alone, which unblocks the queue but leaves the
+call running and the error unexplained; aborting on panic, which loses the game;
+a lock that doesn't poison, such as `parking_lot`, which adds a dependency and
+hides that a panic happened; and a timeout in `api.ts` around every command,
+which would cut short the update download.

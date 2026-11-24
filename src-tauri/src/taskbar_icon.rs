@@ -10,20 +10,27 @@
     clippy::needless_pass_by_value,
     reason = "Tauri hands commands the window and buffers by value"
 )]
-pub fn set_taskbar_icon(window: tauri::WebviewWindow, rgba: Vec<u8>, size: u32) {
-    let Some(bits) = icon_bits(&rgba, size) else {
-        log::warn!(
-            "taskbar icon refused: {} bytes for {size} by {size}",
-            rgba.len()
-        );
-        return;
-    };
-    #[cfg(target_os = "windows")]
-    if let Err(e) = windows_icon::set(&window, &bits, size) {
-        log::warn!("taskbar icon not set: {e}");
-    }
-    #[cfg(not(target_os = "windows"))]
-    let _ = (window, bits);
+pub fn set_taskbar_icon(
+    window: tauri::WebviewWindow,
+    rgba: Vec<u8>,
+    size: u32,
+) -> Result<(), crate::error::AppError> {
+    crate::guard::command("set_taskbar_icon", || {
+        let Some(bits) = icon_bits(&rgba, size) else {
+            log::warn!(
+                "taskbar icon refused: {} bytes for {size} by {size}",
+                rgba.len()
+            );
+            return Ok(());
+        };
+        #[cfg(target_os = "windows")]
+        if let Err(e) = windows_icon::set(&window, &bits, size) {
+            log::warn!("taskbar icon not set: {e}");
+        }
+        #[cfg(not(target_os = "windows"))]
+        let _ = (window, bits);
+        Ok(())
+    })
 }
 
 /// What `CreateIcon` reads for a 32-bit icon.

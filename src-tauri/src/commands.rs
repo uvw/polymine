@@ -1,4 +1,5 @@
-//! Tauri commands: thin wrappers that expose `App` to the UI.
+//! Tauri commands: thin wrappers that expose `App` to the UI. Each body runs
+//! through [`guard::command`], so a panic answers with an error.
 //!
 //! Sync commands run on the main thread and block the window while they work.
 //! Commands that can take long on a big board, through the solver, a new
@@ -14,21 +15,22 @@ use tauri::State;
 
 use crate::app::{ActionResult, App, AssistResult, StatsView, TilingPreview};
 use crate::error::AppError;
+use crate::guard;
 use crate::session::{GameSnapshot, NewGameRequest};
 use crate::settings::Settings;
 
 /// The game in play: the board, each cell's view, the status, and the clock.
 #[tauri::command(async)]
 #[specta::specta]
-pub fn snapshot(app: State<'_, App>) -> GameSnapshot {
-    app.snapshot()
+pub fn snapshot(app: State<'_, App>) -> Result<GameSnapshot, AppError> {
+    guard::command("snapshot", || Ok(app.snapshot()))
 }
 
 /// One small board per tiling, in menu order, for the tiling picker.
 #[tauri::command]
 #[specta::specta]
-pub fn tiling_previews() -> Vec<TilingPreview> {
-    App::previews()
+pub fn tiling_previews() -> Result<Vec<TilingPreview>, AppError> {
+    guard::command("tiling_previews", || Ok(App::previews()))
 }
 
 /// Starts a game from a random seed and saves its tiling and level in the
@@ -36,7 +38,7 @@ pub fn tiling_previews() -> Vec<TilingPreview> {
 #[tauri::command(async)]
 #[specta::specta]
 pub fn new_game(app: State<'_, App>, request: NewGameRequest) -> Result<GameSnapshot, AppError> {
-    app.new_game(request)
+    guard::command("new_game", || app.new_game(request))
 }
 
 /// A left click on `cell`: opens a closed cell or runs smart click on a
@@ -44,7 +46,7 @@ pub fn new_game(app: State<'_, App>, request: NewGameRequest) -> Result<GameSnap
 #[tauri::command(async)]
 #[specta::specta]
 pub fn primary(app: State<'_, App>, cell: CellId) -> Result<ActionResult, AppError> {
-    app.primary(cell)
+    guard::command("primary", || app.primary(cell))
 }
 
 /// A right click on `cell`: cycles the mark on a closed cell. A paused game,
@@ -52,15 +54,15 @@ pub fn primary(app: State<'_, App>, cell: CellId) -> Result<ActionResult, AppErr
 #[tauri::command(async)]
 #[specta::specta]
 pub fn secondary(app: State<'_, App>, cell: CellId) -> Result<ActionResult, AppError> {
-    app.secondary(cell)
+    guard::command("secondary", || app.secondary(cell))
 }
 
 /// The assistant's next move without playing it, or `None` once the game is
 /// over. A hint counts the game as assisted.
 #[tauri::command(async)]
 #[specta::specta]
-pub fn hint(app: State<'_, App>) -> Option<Suggestion> {
-    app.hint()
+pub fn hint(app: State<'_, App>) -> Result<Option<Suggestion>, AppError> {
+    guard::command("hint", || Ok(app.hint()))
 }
 
 /// Lets the assistant play one move, which counts the game as assisted.
@@ -69,21 +71,21 @@ pub fn hint(app: State<'_, App>) -> Option<Suggestion> {
 #[tauri::command(async)]
 #[specta::specta]
 pub fn assist(app: State<'_, App>, allow_guess: bool) -> Result<Option<AssistResult>, AppError> {
-    app.assist(allow_guess)
+    guard::command("assist", || app.assist(allow_guess))
 }
 
 /// Pauses or resumes the clock of a game in play. Pausing saves the game.
 #[tauri::command(async)]
 #[specta::specta]
-pub fn set_paused(app: State<'_, App>, paused: bool) -> GameSnapshot {
-    app.set_paused(paused)
+pub fn set_paused(app: State<'_, App>, paused: bool) -> Result<GameSnapshot, AppError> {
+    guard::command("set_paused", || Ok(app.set_paused(paused)))
 }
 
 /// The player's settings.
 #[tauri::command]
 #[specta::specta]
-pub fn get_settings(app: State<'_, App>) -> Settings {
-    app.settings()
+pub fn get_settings(app: State<'_, App>) -> Result<Settings, AppError> {
+    guard::command("get_settings", || Ok(app.settings()))
 }
 
 /// Replaces the settings and saves them, and the game in play takes the new
@@ -91,7 +93,7 @@ pub fn get_settings(app: State<'_, App>) -> Settings {
 #[tauri::command]
 #[specta::specta]
 pub fn update_settings(app: State<'_, App>, settings: Settings) -> Result<Settings, AppError> {
-    app.update_settings(settings)
+    guard::command("update_settings", || app.update_settings(settings))
 }
 
 /// Statistics and champions for one board, of one player or, with `None`, of
@@ -103,8 +105,10 @@ pub fn get_stats(
     tiling: TilingId,
     level: Level,
     player: Option<String>,
-) -> StatsView {
-    app.stats(tiling, level, player.as_deref())
+) -> Result<StatsView, AppError> {
+    guard::command("get_stats", || {
+        Ok(app.stats(tiling, level, player.as_deref()))
+    })
 }
 
 /// A board size in logical columns and rows.
@@ -119,28 +123,35 @@ pub struct BoardSize {
 /// plenty here and reach TypeScript as plain numbers.
 #[tauri::command(async)]
 #[specta::specta]
-pub fn fit_board(tiling: TilingId, width: u32, height: u32, inradius: u32) -> BoardSize {
-    let (cols, rows) = polymine_core::Board::fit(
-        tiling,
-        f64::from(width),
-        f64::from(height),
-        f64::from(inradius),
-    );
-    BoardSize { cols, rows }
+pub fn fit_board(
+    tiling: TilingId,
+    width: u32,
+    height: u32,
+    inradius: u32,
+) -> Result<BoardSize, AppError> {
+    guard::command("fit_board", || {
+        let (cols, rows) = polymine_core::Board::fit(
+            tiling,
+            f64::from(width),
+            f64::from(height),
+            f64::from(inradius),
+        );
+        Ok(BoardSize { cols, rows })
+    })
 }
 
 /// The named saves, newest first.
 #[tauri::command]
 #[specta::specta]
-pub fn list_saves(app: State<'_, App>) -> Vec<crate::saves::SaveInfo> {
-    app.list_saves()
+pub fn list_saves(app: State<'_, App>) -> Result<Vec<crate::saves::SaveInfo>, AppError> {
+    guard::command("list_saves", || Ok(app.list_saves()))
 }
 
 /// Keeps the game in play as `name`, replacing a save of that name.
 #[tauri::command]
 #[specta::specta]
 pub fn save_as(app: State<'_, App>, name: String) -> Result<crate::saves::SaveInfo, AppError> {
-    app.save_as(&name)
+    guard::command("save_as", || app.save_as(&name))
 }
 
 /// Replaces the game in play with the save `name`. It comes back paused and
@@ -148,12 +159,12 @@ pub fn save_as(app: State<'_, App>, name: String) -> Result<crate::saves::SaveIn
 #[tauri::command]
 #[specta::specta]
 pub fn load_save(app: State<'_, App>, name: String) -> Result<GameSnapshot, AppError> {
-    app.load_save(&name)
+    guard::command("load_save", || app.load_save(&name))
 }
 
 /// Deletes the save `name`.
 #[tauri::command]
 #[specta::specta]
 pub fn delete_save(app: State<'_, App>, name: String) -> Result<(), AppError> {
-    app.delete_save(&name)
+    guard::command("delete_save", || app.delete_save(&name))
 }

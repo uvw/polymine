@@ -11,6 +11,7 @@ mod error;
 mod fatal;
 mod files;
 mod foreground;
+mod guard;
 mod history;
 mod links;
 mod remote;

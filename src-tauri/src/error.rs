@@ -41,6 +41,9 @@ pub enum AppError {
     UpdateInstall(String),
     #[error("could not open the release notes: {0}")]
     OpenLink(std::io::Error),
+    /// The command of that name panicked; see [`crate::guard`].
+    #[error("{0} failed with an internal error; the log has the details")]
+    Panicked(&'static str),
 }
 
 impl From<polymine_core::ConfigError> for AppError {
