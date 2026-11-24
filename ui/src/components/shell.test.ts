@@ -63,7 +63,7 @@ vi.mock("../lib/menu", async (original) => ({
 const { game } = await import("../lib/game.svelte");
 const { applyEnvironment } = await import("../lib/platform.svelte");
 const { default: TopBar } = await import("./TopBar.svelte");
-const { default: Overlays } = await import("./Overlays.svelte");
+const { default: Overlays, DRIFT_MS } = await import("./Overlays.svelte");
 const { default: BoardCanvas } = await import("./BoardCanvas.svelte");
 const { default: App } = await import("../App.svelte");
 const { default: AboutDialog } = await import("./AboutDialog.svelte");
@@ -356,6 +356,82 @@ describe("Overlays", () => {
     render(Overlays);
     await fireEvent.contextMenu(screen.getByRole("presentation"));
     expect(pause).toHaveBeenCalled();
+  });
+
+  describe("the drifting dots", () => {
+    let hidden = false;
+    beforeEach(() => {
+      vi.useFakeTimers();
+      hidden = false;
+      vi.spyOn(document, "hidden", "get").mockImplementation(() => hidden);
+      vi.spyOn(document, "hasFocus").mockReturnValue(true);
+    });
+    afterEach(() => vi.useRealTimers());
+
+    const dots = () => screen.getByRole("presentation");
+
+    it("drift for a while after the pause shows, then stop", () => {
+      game.paused = true;
+      render(Overlays);
+      expect(dots()).not.toHaveClass("settled");
+      vi.advanceTimersByTime(DRIFT_MS - 1);
+      flushSync();
+      expect(dots()).not.toHaveClass("settled");
+      vi.advanceTimersByTime(1);
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+    });
+
+    it("stop at once when the window loses focus, and drift again on its return", () => {
+      game.paused = true;
+      render(Overlays);
+      window.dispatchEvent(new FocusEvent("blur"));
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+      window.dispatchEvent(new FocusEvent("focus"));
+      flushSync();
+      expect(dots()).not.toHaveClass("settled");
+      vi.advanceTimersByTime(DRIFT_MS);
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+    });
+
+    it("keep still while the page is hidden, and drift once it's shown", () => {
+      game.paused = true;
+      render(Overlays);
+      hidden = true;
+      document.dispatchEvent(new Event("visibilitychange"));
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+      // No timer may start them again while the page is hidden.
+      vi.advanceTimersByTime(DRIFT_MS * 2);
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+      hidden = false;
+      document.dispatchEvent(new Event("visibilitychange"));
+      flushSync();
+      expect(dots()).not.toHaveClass("settled");
+    });
+
+    it("never start when the game pauses with the window away", () => {
+      vi.mocked(document.hasFocus).mockReturnValue(false);
+      game.paused = true;
+      render(Overlays);
+      expect(dots()).toHaveClass("settled");
+      document.dispatchEvent(new Event("visibilitychange"));
+      flushSync();
+      expect(dots()).toHaveClass("settled");
+    });
+
+    it("stop listening once the game resumes", () => {
+      const remove = vi.spyOn(window, "removeEventListener");
+      game.paused = true;
+      render(Overlays);
+      game.paused = false;
+      flushSync();
+      expect(remove).toHaveBeenCalledWith("blur", expect.any(Function));
+      expect(remove).toHaveBeenCalledWith("focus", expect.any(Function));
+    });
   });
 
   it("raises errors as alerts and keeps a live region", () => {
