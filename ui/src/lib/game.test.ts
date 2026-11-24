@@ -203,6 +203,26 @@ describe("loading", () => {
     expect(store.theme.board.glyphs.flag?.src).toMatch(/^data:image\/svg\+xml/);
   });
 
+  it("shows a theme picked from outside, with the folder read again", async () => {
+    const css = "/* Name: Dusk\n Author: A\n Description: D\n Version: 1\n Format: 1 */ :root {}";
+    api.listThemes.mockResolvedValue({
+      folder: "/themes",
+      themes: [{ id: "dusk", css, preview: null, glyphs: ["flag"] }],
+      skipped: [],
+    });
+    api.readTheme.mockResolvedValue({
+      id: "dusk",
+      css,
+      preview: null,
+      glyphs: [{ name: "flag", svg: "<svg/>" }],
+    });
+    api.getSettings.mockResolvedValue(settings({ theme: "dusk" }));
+    external?.({ kind: "themes" });
+    await flush();
+    expect(store.theme.id).toBe("dusk");
+    expect(store.theme.board.glyphs.flag?.src).toMatch(/^data:image\/svg\+xml/);
+  });
+
   it("reads the themes folder again when asked, and opens it", async () => {
     const calls = api.listThemes.mock.calls.length;
     await store.reloadThemes();

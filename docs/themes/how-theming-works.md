@@ -117,7 +117,8 @@ called only from `ui/src/lib/api.ts`:
    or `xdg-open`.
 
 `ThemeLibrary` in `lib/themes/library.svelte.ts` calls them at startup, when
-Settings opens, and whenever the window comes to the front. An entry whose files
+Settings opens, whenever the window comes to the front, and when
+`polymine-cli theme use` picks a theme (decision 59). An entry whose files
 didn't change keeps its object, so nothing redraws, and the resolved themes stay
 cached.
 

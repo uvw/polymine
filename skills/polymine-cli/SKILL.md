@@ -3,10 +3,11 @@ name: polymine-cli
 description: >-
   Plays and inspects games of Polymine, a Minesweeper-style game on 18 tilings,
   through polymine-cli. Covers the board, opening and flagging cells, the
-  assistant's hints and steps, headless practice games, statistics, and gist
-  sync. Use when the user asks to play Polymine or Minesweeper, to watch an
-  agent play, to solve a board, to get a hint, or to check stats, champions, or
-  game status, or mentions polymine-cli.
+  assistant's hints and steps, headless practice games, statistics, switching
+  and reloading themes, and gist sync. Use when the user asks to play Polymine
+  or Minesweeper, to watch an agent play, to solve a board, to get a hint, to
+  check stats, champions, or game status, or to try a theme, or mentions
+  polymine-cli.
 ---
 
 # polymine-cli
@@ -66,6 +67,25 @@ A headless name keeps its last saved game. A new name starts on `square` at
 `stats [--tiling <id>] [--level <level>]` reads statistics and champions. It
 needs a running instance.
 
+## Themes
+
+```sh
+polymine-cli theme list --fields current,themes.id,skipped
+polymine-cli theme use graphite
+```
+
+Both need a running instance. `theme list` gives every theme's `id` and its
+`source`: `builtIn`, `experimental`, or `player` for a folder in the themes
+folder `paths` names. `skipped` holds the player's folders the window leaves
+out, with each `reason`. `current` is the theme in the settings.
+
+`theme use <id>` switches the theme as Settings does and saves it. It replies
+with `theme`, `source`, and `previous`. After editing a player theme, run
+`theme use` with its id again: the window reads the folder again. An unknown id
+or a broken folder is `invalid_value`, and the hint lists the ids or the reason.
+A theme whose CSS the window can't read shows the default, and `log` says why.
+Switching themes is settings, not play, so the game isn't marked as assisted.
+
 ## Reading the board
 
 - `state` is `closed`, `flagged`, `question`, `open`, and after a loss `mine`,
@@ -123,7 +143,7 @@ optional.
 | ---- | ------------------ | ------------------------------------------------ |
 | 1    | `invalid_cell`     | Take a real id from `board`                      |
 | 1    | `not_playable`     | Start another game with `new`                    |
-| 1    | `invalid_value`    | Bring the value into range                       |
+| 1    | `invalid_value`    | Bring the value into range, or pick a real theme |
 | 1    | `version_mismatch` | Use the CLI that came with this Polymine         |
 | 1    | `internal`         | Read `message`, then `log`                       |
 | 2    | `usage`            | Fix the arguments or the missing setup           |
@@ -132,7 +152,11 @@ optional.
 | 5    | `busy`             | Nothing was played; retry                        |
 
 Missing setup is no headless game under that name, no log, no token, or `stats`
-with `--local`.
+or `theme` with `--local`.
+
+`paths` and `log` ask the running instance where its log and data folders are,
+and use this shell's environment when nothing answers. `paths` says which in
+`source`, `instance` or `environment`.
 
 A timed-out move may have landed, and `open` again on a cell that opened as a
 number chords it. Raise `--timeout <ms>` (default 10000) on slow machines, and

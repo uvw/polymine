@@ -255,8 +255,9 @@ explains the format and the code, and
 2. Add the id to `BUILT_IN_ORDER` in `ui/src/lib/themes/builtin.ts`, or to
    `EDITOR_COLUMNS` there when it takes a code editor's color scheme. An
    experiment that only development builds list goes in `EXPERIMENTAL_THEMES`
-   instead. Settings shows the header's `Name`, `Description`, and `Author`, as
-   for a player's theme.
+   instead, and in `EXPERIMENTAL_THEMES` in `src-tauri/src/theme_catalog.rs`,
+   which `polymine-cli theme` checks ids against. Settings shows the header's
+   `Name`, `Description`, and `Author`, as for a player's theme.
 3. Run `npm test`. The theme tests check contrast and color-blind separation.
    Relax a check with the header's `Relaxed:` line only for a look kept on
    purpose, and record why in `docs/decisions.md`.

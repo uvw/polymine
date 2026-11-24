@@ -6,7 +6,7 @@ use serde_json::Value;
 
 /// Bumped when a request or reply changes shape. The app refuses other
 /// versions, so a stale CLI fails clearly instead of misreading replies.
-pub const VERSION: u32 = 2;
+pub const VERSION: u32 = 3;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "method", content = "params", rename_all = "camelCase")]
@@ -40,6 +40,12 @@ pub enum Request {
     Stats {
         tiling: Option<TilingId>,
         level: Option<Level>,
+    },
+    /// Every theme the instance can show, and the one it shows.
+    Themes,
+    /// Shows the theme `id`, as picking it in Settings would.
+    UseTheme {
+        id: String,
     },
 }
 
@@ -139,7 +145,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             line,
-            r#"{"version":2,"method":"open","params":{"cells":[3]}}"#
+            r#"{"version":3,"method":"open","params":{"cells":[3]}}"#
         );
         let back: Envelope = serde_json::from_str(&line).unwrap();
         assert_eq!(
@@ -148,8 +154,28 @@ mod tests {
                 cells: vec![CellId(3)]
             }
         );
-        let status: Envelope = serde_json::from_str(r#"{"version":2,"method":"status"}"#).unwrap();
+        let status: Envelope = serde_json::from_str(r#"{"version":3,"method":"status"}"#).unwrap();
         assert_eq!(status.request, Request::Status);
+    }
+
+    #[test]
+    fn theme_requests_round_trip() {
+        for (request, line) in [
+            (Request::Themes, r#"{"version":3,"method":"themes"}"#),
+            (
+                Request::UseTheme {
+                    id: "dusk".to_owned(),
+                },
+                r#"{"version":3,"method":"useTheme","params":{"id":"dusk"}}"#,
+            ),
+        ] {
+            let envelope = Envelope {
+                version: VERSION,
+                request,
+            };
+            assert_eq!(serde_json::to_string(&envelope).unwrap(), line);
+            assert_eq!(serde_json::from_str::<Envelope>(line).unwrap(), envelope);
+        }
     }
 
     #[test]

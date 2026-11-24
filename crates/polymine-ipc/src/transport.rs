@@ -708,7 +708,7 @@ mod tests {
         let binary = usage_message(send_raw(&address, b"{\"version\":1,\xff}\n"));
         assert!(binary.contains("UTF-8"), "{binary}");
         // A request of exactly the limit still gets through.
-        let status = r#"{"version":2,"method":"status"}"#;
+        let status = format!(r#"{{"version":{VERSION},"method":"status"}}"#);
         let padded = format!("{status:<64}\n");
         assert_eq!(
             send_raw(&address, padded.as_bytes()),
@@ -758,14 +758,17 @@ mod tests {
 
     #[test]
     fn a_newer_request_shape_still_reports_the_version() {
-        let newer = r#"{"version":3,"method":"teleport","params":{"to":[1,2]}}"#;
+        let newer = format!(
+            r#"{{"version":{},"method":"teleport","params":{{"to":[1,2]}}}}"#,
+            VERSION + 1
+        );
         assert_eq!(
-            parse_request(newer).unwrap_err().code,
+            parse_request(&newer).unwrap_err().code,
             ErrorCode::VersionMismatch
         );
-        let older_shape = r#"{"version":2,"method":"teleport"}"#;
+        let older_shape = format!(r#"{{"version":{VERSION},"method":"teleport"}}"#);
         assert_eq!(
-            parse_request(older_shape).unwrap_err().code,
+            parse_request(&older_shape).unwrap_err().code,
             ErrorCode::Usage
         );
     }

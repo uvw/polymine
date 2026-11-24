@@ -190,6 +190,11 @@ fn answer(dir: &Path, name: &str, request: Request) -> Result<Value, ErrorBody> 
             "statistics belong to the app; headless games keep none",
         )
         .with_hint("drop --local to ask a running instance")),
+        Request::Themes | Request::UseTheme { .. } => Err(ErrorBody::new(
+            ErrorCode::Usage,
+            "themes belong to the app; headless games have none",
+        )
+        .with_hint("drop --local to ask a running instance")),
         request => {
             let mut saved = saved.ok_or_else(no_game)?;
             let mut game = saved.replay()?;
@@ -254,7 +259,10 @@ fn play(
         Request::Open { cells } => (MoveKind::Open, cells),
         Request::Flag { cells } => (MoveKind::Flag, cells),
         Request::Unflag { cells } => (MoveKind::Unflag, cells),
-        Request::NewGame { .. } | Request::Stats { .. } => unreachable!("answered before replay"),
+        Request::NewGame { .. }
+        | Request::Stats { .. }
+        | Request::Themes
+        | Request::UseTheme { .. } => unreachable!("answered before replay"),
     };
     moves::check_move(game, &cells)?;
     let mut updates = Vec::new();
@@ -469,6 +477,10 @@ mod tests {
             level: None,
         };
         assert_eq!(code(handle(dir.path(), "t", stats)), ErrorCode::Usage);
+        assert_eq!(
+            code(handle(dir.path(), "t", Request::Themes)),
+            ErrorCode::Usage
+        );
     }
 
     #[test]

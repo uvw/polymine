@@ -119,6 +119,8 @@ practice and agents, not records.
 | `hint`                               | The assistant's next move, not played, or `null`    |
 | `step`                               | The assistant plays one move, or replies `null`     |
 | `stats [--tiling] [--level]`         | Statistics and champions, from a running instance   |
+| `theme list`                         | The instance's themes and the one it shows          |
+| `theme use <id>`                     | Switches the instance's theme, as Settings does     |
 | `instances`                          | Running instances                                   |
 | `paths`                              | The instance, its socket, log, and folders          |
 | `link [--dir]`                       | Puts `polymine-cli` on `PATH`                       |
@@ -130,6 +132,47 @@ practice and agents, not records.
 
 `stats` defaults to the running game's tiling and level. For a custom game it
 reads Beginner, since custom levels keep no statistics.
+
+## Folders
+
+`paths` and `log` ask the running instance for its log and data folders, from
+its `status`. An instance started with `POLYMINE_DATA_DIR` then needs no such
+variable in the CLI's shell. When the instance doesn't answer, they come from
+the CLI's own environment. `paths` says which in `source`: `instance` or
+`environment`. An instance that answered with an error, such as `busy` or
+`version_mismatch`, adds that error as `instanceError`.
+
+The `paths` reply holds these fields:
+
+1. `instance`, `socket`, and `registry`: the instance and where the CLI finds
+   it.
+2. `log`, `dataDir`, and `themes`: the instance's log file, data folder, and
+   player themes folder, from `source`.
+3. `games` and `dataOverride`: the CLI's headless games folder, and its own
+   `POLYMINE_DATA_DIR` or portable `data` folder.
+
+## Themes
+
+`theme list` and `theme use` need a running instance, and `--local` is a usage
+error. They let a theme author switch themes and reload one from a terminal.
+
+`theme list` replies with the instance's themes folder as `folder`, the
+setting's theme as `current`, and every theme it can show under `themes`, each
+with its `id` and `source`. Sources are `builtIn`, `experimental` for the
+built-in experiments a development build shows, and `player` for a folder in the
+themes folder. `skipped` lists the player's folders the window leaves out, with
+each `reason`, such as a broken file or a name a built-in theme has.
+
+`theme use <id>` sets the theme as Settings does: it saves the settings and adds
+the theme to the recent ones. The window reads the settings and the themes
+folder again, so using the current theme reloads its files after an edit. The
+reply holds `theme`, its `source`, and the `previous` one. It's settings, not
+play, so it never marks the game as assisted.
+
+An unknown id is `invalid_value`, with a hint that lists the ids there are. So
+is a player theme whose folder breaks the rules, with the reason. The window
+checks the CSS as it loads it; a theme it can't read shows the default instead,
+and `log` says why.
 
 ## Sharing history
 
@@ -193,7 +236,7 @@ The reply holds these fields:
 | 5    | The instance is busy; retry in a moment         |
 
 Missing setup is a game, a log, or a GitHub token that isn't there, or `stats`
-with `--local`, since headless games keep no statistics.
+or `theme` with `--local`, since headless games keep no statistics or themes.
 
 Busy has its own code, apart from timeout. A busy app answered at once without
 playing anything, so a retry is safe. A move that timed out may still land.
@@ -209,7 +252,7 @@ playing anything, so a retry is safe. A move that timed out may still land.
 | `version_mismatch` | The CLI and the app speak different protocols   |
 | `invalid_cell`     | A cell id is outside the board                  |
 | `not_playable`     | The game is over                                |
-| `invalid_value`    | A value is out of range                         |
+| `invalid_value`    | A value is out of range, or an unknown theme    |
 | `internal`         | Something failed in the app, on disk, or online |
 
 ## For coding agents

@@ -84,6 +84,24 @@ try {
     JSON.stringify(step.out),
   );
 
+  const themed = cli("theme", "use", "graphite");
+  check("a theme switch lands", themed.out?.theme === "graphite", JSON.stringify(themed));
+  const listed = cli("theme", "list", "--fields", "current");
+  check("the theme list shows it", listed.out?.current === "graphite", JSON.stringify(listed));
+  const unknown = cli("theme", "use", "made-up");
+  check(
+    "an unknown theme exits 1",
+    unknown.code === 1 && unknown.err?.error?.code === "invalid_value",
+    JSON.stringify(unknown),
+  );
+
+  const asked = cli("paths");
+  check(
+    "paths asks the instance",
+    asked.out?.source === "instance" && asked.out?.dataDir === data,
+    JSON.stringify(asked.out),
+  );
+
   const bad = cli("open", "99999");
   check("a cell off the board exits 1", bad.code === 1, bad.code);
   check("it says why", bad.err?.error?.code === "invalid_cell", JSON.stringify(bad.err));

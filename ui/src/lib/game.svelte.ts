@@ -395,8 +395,8 @@ export class GameStore {
   }
 
   /**
-   * Shows a move or new game made from outside the window, in order with
-   * clicks. Events arrive outside the backend's lock, so one can be older
+   * Shows a move, new game, or theme chosen from outside the window, in order
+   * with clicks. Events arrive outside the backend's lock, so one can be older
    * than an update already shown: its cells then come from a fresh snapshot.
    */
   private external(change: ExternalChange): Promise<void> {
@@ -407,6 +407,13 @@ export class GameStore {
         const [snapshot, settings] = await Promise.all([api.snapshot(), api.getSettings()]);
         this.settings = settings;
         if (snapshot.revision >= this.revision) this.load(snapshot);
+      } else if (change.kind === "themes") {
+        // The folder loads before the setting changes, so a theme just made
+        // shows at once instead of the default.
+        const settings = await api.getSettings();
+        await this.library.load();
+        await this.library.loadGlyphs(settings.theme);
+        this.settings = settings;
       } else if (!this.applyResult(change.result)) {
         await this.resync(change.result.gameOver);
       }
