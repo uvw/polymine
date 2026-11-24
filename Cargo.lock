@@ -2929,7 +2929,7 @@ dependencies = [
 
 [[package]]
 name = "polymine"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "log",
  "objc2",
@@ -2956,7 +2956,7 @@ dependencies = [
 
 [[package]]
 name = "polymine-cli"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "clap",
  "polymine-core",
@@ -2970,7 +2970,7 @@ dependencies = [
 
 [[package]]
 name = "polymine-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "proptest",
  "rand",
@@ -2983,7 +2983,7 @@ dependencies = [
 
 [[package]]
 name = "polymine-ipc"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "interprocess",
@@ -3000,7 +3000,7 @@ dependencies = [
 
 [[package]]
 name = "polymine-net"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "log",
  "percent-encoding",
