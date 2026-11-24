@@ -288,7 +288,10 @@
     transform: translate(-50%, 0);
   }
 
+  /* While a resize goes on, the board stretches the last frame over the host;
+     contain keeps its proportions. */
   .board :global(canvas) {
     display: block;
+    object-fit: contain;
   }
 </style>

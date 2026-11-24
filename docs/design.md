@@ -922,7 +922,11 @@ Settings opens, and when the window comes to the front.
    can stop.
 5. Cells shrink to fit the window down to a 5 px inradius. A board that would
    need smaller cells scrolls instead, with Shift and the wheel or a
-   middle-button drag.
+   middle-button drag. While the window resizes, the canvas keeps its last
+   frame, scaled to fit without changing its proportions. 60 ms after the last
+   change the canvas takes the new size at the display's pixel density, and the
+   board lays out again. Reallocating the canvas on every resize event cost most
+   of a core during a drag.
 6. Zoom enlarges the cells from the fitted size up to a 64 px inradius, keeping
    the middle of the view in place.
 7. With reduced motion on, cells fade in over 120 ms, and the shake, glow,
