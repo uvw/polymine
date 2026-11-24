@@ -311,11 +311,12 @@ SVG files in the theme's folder replace the drawn marks and numbers:
    so you can mark counts with shapes as well as colors. It also takes the place
    of the digit the cell under the pointer shows.
 4. Polymine shows each SVG as a picture. Scripts in it never run, and it can't
-   load anything from the internet or your disk. An `<image>` that points
-   outside the file doesn't load, and the webview may draw a broken-picture box
-   in its place, so keep everything in the one file. Everything inside it works,
-   including `<defs>`, gradients, filters such as a glow, and a `<style>`
-   element.
+   load anything from the internet or your disk. Keep everything in the one
+   file: every `href` and every `url()` must point at an `id` in it, such as
+   `href="#pole"` or `fill="url(#glow)"`. Everything inside it works, including
+   `<defs>`, gradients, filters such as a glow, `<use>`, and a `<style>`
+   element. To use a picture, draw it in SVG; a bitmap in a `data:` URL is
+   refused.
 5. The flag and question mark sit on closed cells and the mine on open ones, so
    give each glyph an outline or colors that show on that cell.
 
@@ -661,8 +662,16 @@ bottom, as "dusk didn't load:" and the reason.
       characters `@`, `{`, `}`, `<`, `>`, and `!` in a value, and any function
       besides colors, `color-mix()`, `light-dark()`, `var()`, `calc()`, `min()`,
       `max()`, `clamp()`, and gradients.
-   2. In an SVG: scripts, `foreignObject`, DOCTYPE and entity declarations, and
-      `javascript:` links.
+   2. In an SVG: scripts, `foreignObject`, DOCTYPE and entity declarations,
+      `javascript:` links, and anything that points outside the file. That's an
+      `href`, `xlink:href`, or `src` on any element that doesn't start with `#`,
+      including a `data:` URL, and a `url()` anywhere in the file, comments
+      included, that doesn't start with `#`. `@import`, `image-set()`,
+      `xml:base`, an animation of `href`, and processing instructions other than
+      `<?xml ...?>` are refused too. Namespace declarations such as
+      `xmlns:xlink` are fine. Polymine reads the SVG files when you pick the
+      theme, so a refused one shows in the log, as `could not read theme`, and
+      the theme draws its own marks instead.
    3. Polymine looks for `url(`, `@import`, and backslashes in the whole of
       `theme.css`, comments and the header included. A header line such as
       `Description: see url(...)` gets the theme skipped.
@@ -670,8 +679,9 @@ bottom, as "dusk didn't load:" and the reason.
    Polymine reads, a selector other than `:root`, a property that isn't a
    variable, a declaration of `--system-accent`, unbalanced parentheses, an
    unclosed string or comment, more than 300 variables, or text that isn't
-   UTF-8. An SVG with no `<svg` element and a `preview.png` that isn't a real
-   PNG are refused too.
+   UTF-8. An SVG with no `<svg` element or with broken markup, such as an
+   attribute without quotes, and a `preview.png` that isn't a real PNG are
+   refused too.
 5. **A folder name a built-in theme uses or used,** such as `frost`, or
    `velvet`, an old id of Dracula. Rename the folder.
 

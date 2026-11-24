@@ -707,17 +707,21 @@ cells in the accent itself.
 3. 256 KiB and 1024 by 1024 pixels for the preview.
 4. 1 MiB per theme, and at most 64 themes.
 
-SVG files load only as images. A built-in id wins over a player folder with the
-same name. The UI reads the folder at startup, when Settings opens, and when the
+SVG files load only as images, and every `href` and `url()` in one must name an
+`id` in the same file. A built-in id wins over a player folder with the same
+name. The UI reads the folder at startup, when Settings opens, and when the
 window comes to the front, and lists themes that didn't load with the reason.
 
 **Why:** Theme files are untrusted, and downloaded themes will land in the same
 folder. Checking the folder in a crate without Tauri lets a download use the
 same rules before it moves a theme into place. An SVG loaded as an image can't
 run scripts or fetch anything, which a sanitizer would have to prove for every
-SVG feature. Reading the folder on focus lets a player edit a theme and see it
-by switching back. A hard link passes every check a plain file does but can
-share its contents with a file anywhere on the volume.
+SVG feature. A reference outside the file loads nothing, but the webview can
+draw a broken-picture box in its place. A `data:` URL counts as outside: it
+embeds a second file, often base64, that no check reads. Reading the folder on
+focus lets a player edit a theme and see it by switching back. A hard link
+passes every check a plain file does but can share its contents with a file
+anywhere on the volume.
 
 ## 39. Themes never carry shader code
 

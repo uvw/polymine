@@ -153,6 +153,17 @@ use it too.
    `<foreignObject`, `<!DOCTYPE`, `<!ENTITY`, or `javascript:`. These rules
    repeat the UI's where they matter most, so nothing that could fetch reaches
    the webview.
+6. `themes/svg.rs` then reads each SVG's markup as XML: tags, quoted attributes,
+   comments, CDATA, processing instructions, and the predefined and numeric
+   entities. Every `href` and `src`, with or without a namespace prefix, must
+   start with `#` after leading spaces, and so must every `url()` in the file's
+   text and attribute values, once entities and CSS escapes are decoded. Text
+   nodes are joined before the `url()` check, as a `<style>` joins them. `data:`
+   URLs are refused, since each holds a second file no check reads. `@import`,
+   `image-set()`, `xml:base`, an animated `href`, and any processing instruction
+   but the XML declaration are refused, and markup that isn't well-formed counts
+   as no SVG. An image that points outside its file loads nothing, but the
+   webview can draw a broken-picture box for it.
 
 ### The CSS, in the UI
 
