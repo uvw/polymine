@@ -221,8 +221,7 @@
   });
 
   // The window title carries the result, so it shows in the taskbar too. macOS
-  // hides the title, and setting it makes AppKit lay out the title bar again,
-  // which knocks the traffic lights out of the toolbar.
+  // hides the title.
   $effect(() => {
     if (platform() === "macos") return;
     const outcome = game.gameOver?.record.outcome;

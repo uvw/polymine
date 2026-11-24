@@ -276,12 +276,12 @@
 
   /*
    * Room for the traffic lights inside the first column, so the side columns
-   * stay equal and the center sits on the window's center. `LEFT` in
-   * `src-tauri/src/traffic_lights.rs` places the buttons; this clears the zoom
-   * button with a small gap.
+   * stay equal and the center sits on the window's center. AppKit's compact
+   * toolbar, from `src-tauri/src/traffic_lights.rs`, puts the close button
+   * 12 px from the left edge; this clears the zoom button with a small gap.
    */
   :global(.platform-macos) .start {
-    padding-left: 80px;
+    padding-left: 74px;
   }
 
   .start,

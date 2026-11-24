@@ -1,14 +1,54 @@
+<script lang="ts" module>
+  /** How long the dots drift after the pause shows, or after the window comes back. */
+  export const DRIFT_MS = 4000;
+</script>
+
 <script lang="ts">
   import { fade } from "svelte/transition";
   import { game } from "../lib/game.svelte";
   import { t } from "../lib/i18n";
   import Icon from "./Icon.svelte";
+
+  /**
+   * Whether the dots hold still. A running CSS animation makes the compositor
+   * draw every frame, even in a window behind others or out of sight.
+   */
+  let settled = $state(false);
+
+  $effect(() => {
+    if (!game.paused) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const settle = () => {
+      clearTimeout(timer);
+      settled = true;
+    };
+    const drift = () => {
+      clearTimeout(timer);
+      if (document.hidden || !document.hasFocus()) {
+        settled = true;
+        return;
+      }
+      settled = false;
+      timer = setTimeout(settle, DRIFT_MS);
+    };
+    drift();
+    window.addEventListener("focus", drift);
+    window.addEventListener("blur", settle);
+    document.addEventListener("visibilitychange", drift);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("focus", drift);
+      window.removeEventListener("blur", settle);
+      document.removeEventListener("visibilitychange", drift);
+    };
+  });
 </script>
 
 {#if game.paused}
   <!-- Right click resumes, as on the board itself. -->
   <div
     class="pause"
+    class:settled
     role="presentation"
     oncontextmenu={(e) => {
       e.preventDefault();
@@ -39,7 +79,7 @@
     overflow: hidden;
   }
 
-  /* Dots in the accent color drift slowly behind the card while paused. */
+  /* Dots in the accent color drift slowly behind the card for a few seconds. */
   .pause::before {
     content: "";
     position: absolute;
@@ -63,6 +103,10 @@
       12px 12px;
     animation: drift 24s linear infinite;
     pointer-events: none;
+  }
+
+  .pause.settled::before {
+    animation-play-state: paused;
   }
 
   @keyframes drift {

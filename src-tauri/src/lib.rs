@@ -100,17 +100,6 @@ pub fn run() {
         .on_window_event({
             let placement = placement.clone();
             move |window, event| {
-                #[cfg(target_os = "macos")]
-                match event {
-                    tauri::WindowEvent::Resized(_)
-                    | tauri::WindowEvent::ScaleFactorChanged { .. } => {
-                        traffic_lights::center(window);
-                    }
-                    tauri::WindowEvent::Focused(_) | tauri::WindowEvent::ThemeChanged(_) => {
-                        traffic_lights::center_after_layout(window);
-                    }
-                    _ => {}
-                }
                 let Some(placement) = placement.as_deref().filter(|_| window.label() == "main")
                 else {
                     return;
@@ -265,10 +254,12 @@ fn serialized_names(bindings: &str) -> String {
     out
 }
 
-/// Readies the hidden main window and shows it: the material and, for the
-/// player's own profile, the saved size and position. Returns whether
-/// the material took.
+/// Readies the hidden main window and shows it: the macOS toolbar, the
+/// material, and, for the player's own profile, the saved size and position.
+/// Returns whether the material took.
 fn prepare_window(window: &tauri::WebviewWindow, window_dir: Option<&std::path::Path>) -> bool {
+    #[cfg(target_os = "macos")]
+    traffic_lights::install(&window.as_ref().window());
     let material = environment::apply_material(window);
     edge_fit::watch(window);
     if let Some(dir) = window_dir {
@@ -277,8 +268,6 @@ fn prepare_window(window: &tauri::WebviewWindow, window_dir: Option<&std::path::
     if let Err(e) = window.show() {
         log::error!("could not show the window: {e}");
     }
-    #[cfg(target_os = "macos")]
-    traffic_lights::center_after_layout(&window.as_ref().window());
     material
 }
 

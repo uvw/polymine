@@ -531,7 +531,9 @@ The "Hide the toolbar until the pointer reaches the top" setting slides the
 toolbar up and gives the board the window, leaving a 6 px strip. Hovering or
 focusing the strip brings the toolbar back, so the window still drags and the
 caption buttons stay in reach. While paused, dots in the accent color drift
-slowly behind the pause card, and stand still with Reduce Motion.
+slowly behind the pause card for a few seconds, then stop where they are. They
+drift again when the window comes back, stay still while it's behind another or
+hidden, and stand still with Reduce Motion.
 
 On macOS and Windows the toolbar is the title bar. The window drags from
 anywhere between the controls, and a double-click maximizes it. On Windows:
@@ -542,6 +544,13 @@ anywhere between the controls, and a double-click maximizes it. On Windows:
 3. The window still resizes from the invisible border outside its edges, as
    native windows do.
 4. The window loses only the maximize button's Snap Layouts flyout.
+
+On macOS, `src-tauri/src/traffic_lights.rs` gives the window an empty
+`NSToolbar` in the unified compact style. It makes AppKit's title bar 40 pt
+tall, as tall as the toolbar, and AppKit centers the traffic lights in it with
+the close button 12 pt from the left edge. The buttons stay put through
+resizing, focus changes, full screen, and minimizing, because nothing moves them
+after AppKit does.
 
 The macOS menu bar lists the single-key shortcuts beside their items: Pause or
 resume (P) in the Game menu, and Hint (H) and Let the bot play (B) in the Bot
