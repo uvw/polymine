@@ -159,8 +159,8 @@ each `unsafe` block carries a `SAFETY` comment:
    click on its edge, so the UI can fit the window to the board.
 5. `src-tauri/src/foreground.rs` reads the Windows foreground window, so focus
    loss pauses the game only when another window is in front.
-6. `src-tauri/src/traffic_lights.rs` reaches the macOS title bar container to
-   keep the traffic lights centered on the 40 pt toolbar.
+6. `src-tauri/src/traffic_lights.rs` gives the macOS window an empty compact
+   `NSToolbar`, so AppKit centers the traffic lights on the 40 pt toolbar.
 7. `message_box` in `src-tauri/src/fatal.rs` shows a startup failure on Windows,
    where a release build has no console for the error.
 8. `windows_icon` in `src-tauri/src/taskbar_icon.rs` gives the window its big
@@ -171,9 +171,10 @@ A new `allow(unsafe_code)` gets a line here in the same change.
 
 **Why:** No safe wrapper exposes these calls, and `forbid` can't be lifted for
 one module. `deny` still fails the build on any other unsafe block. Naming every
-module keeps a new `allow` from slipping in unrecorded. AppKit moves the traffic
-lights back into its own title bar whenever it lays the title bar out again. tao
-re-applies its inset only from a `drawRect:` that never runs under the webview.
+module keeps a new `allow` from slipping in unrecorded. Traffic lights moved by
+hand don't hold: AppKit lays the title bar out again on every frame of a live
+resize, so they jump between its place and ours. Tauri's `trafficLightPosition`
+moves them by hand too, so only a toolbar AppKit sizes itself keeps them still.
 
 ## 8. Third-party notices ship in the About window
 

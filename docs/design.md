@@ -545,6 +545,13 @@ anywhere between the controls, and a double-click maximizes it. On Windows:
    native windows do.
 4. The window loses only the maximize button's Snap Layouts flyout.
 
+On macOS, `src-tauri/src/traffic_lights.rs` gives the window an empty
+`NSToolbar` in the unified compact style. It makes AppKit's title bar 40 pt
+tall, as tall as the toolbar, and AppKit centers the traffic lights in it with
+the close button 12 pt from the left edge. The buttons stay put through
+resizing, focus changes, full screen, and minimizing, because nothing moves them
+after AppKit does.
+
 The macOS menu bar lists the single-key shortcuts beside their items: Pause or
 resume (P) in the Game menu, and Hint (H) and Let the bot play (B) in the Bot
 menu. One press can reach both the menu and the window's keydown handler, so
