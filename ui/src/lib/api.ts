@@ -19,6 +19,7 @@ export const api = {
   accent: commands.getAccent,
   windowInFront: commands.windowInFront,
   setTaskbarIcon: commands.setTaskbarIcon,
+  setDockIcon: commands.setDockIcon,
   setMaterial: commands.setMaterial,
   snapshot: commands.snapshot,
   tilingPreviews: commands.tilingPreviews,

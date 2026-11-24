@@ -195,6 +195,7 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             accent::get_accent,
             foreground::window_in_front,
             links::open_repository,
+            taskbar_icon::set_dock_icon,
             taskbar_icon::set_taskbar_icon,
             themes::list_themes,
             themes::read_theme,

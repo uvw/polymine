@@ -173,14 +173,16 @@
     });
   });
 
-  // The window's icon takes the theme's colors and follows light or dark mode.
+  // The window's icon, or the Dock's on macOS, takes the theme's colors and
+  // follows light or dark mode. It waits for the shell to name the platform.
   // Drawing it is async, so only the newest theme's icon is applied.
   let iconRequest = 0;
   $effect(() => {
     const theme = game.theme;
-    if (!hasShell()) return;
+    const os = platform();
+    if (!hasShell() || !os) return;
     const request = ++iconRequest;
-    void applyWindowIcon(theme, () => request === iconRequest).catch((e: unknown) =>
+    void applyWindowIcon(theme, os, () => request === iconRequest).catch((e: unknown) =>
       console.warn("no window icon", e),
     );
   });

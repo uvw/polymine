@@ -898,10 +898,12 @@ While Polymine runs, `ui/src/lib/themes/icon.ts` draws the same mine, without
 the lattice, in the active theme's colors. Tauri's `setIcon` gives it to the
 window as its small icon, and `set_taskbar_icon` in
 `src-tauri/src/taskbar_icon.rs` as its big one, which the taskbar and Alt+Tab
-draw on Windows. The plate follows the mode: a dark board's plate turns light in
-light mode, and a light one turns dark in dark mode. A theme can set the
-`--icon-*` variables to choose the colors. macOS has no window icon, so its Dock
-keeps the static one. [docs/icons](icons/README.md) holds the concept sheets.
+draw on Windows. macOS has no window icon, so there the UI draws the mine as a
+1024 pixel PNG, and `set_dock_icon` in the same file makes it the application's
+icon image, which the Dock and the app switcher draw until Polymine quits. The
+plate follows the mode: a dark board's plate turns light in light mode, and a
+light one turns dark in dark mode. A theme can set the `--icon-*` variables to
+choose the colors. [docs/icons](icons/README.md) holds the concept sheets.
 
 ### Loading and checks
 
