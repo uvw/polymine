@@ -222,6 +222,8 @@ export class BoardView {
   private idleFrames = 0;
   private resizeTimer: ReturnType<typeof setTimeout> | undefined;
   private laidOutSize = { width: 0, height: 0 };
+  /** The size and density last asked of the renderer, which may round its own. */
+  private fitted = { width: 0, height: 0, resolution: 0 };
   private locked = false;
   /** The board's width and height in board units, from the last layout. */
   private extent: { width: number; height: number } | null = null;
@@ -268,7 +270,10 @@ export class BoardView {
     app.ticker.add(() => Ticker.system.update());
     this.motionQuery.addEventListener("change", this.onMotionChange);
     this.watchResolution();
-    this.resizeObserver = new ResizeObserver(() => this.scheduleRelayout());
+    this.resizeObserver = new ResizeObserver(() => {
+      this.stretchCanvas();
+      this.scheduleRelayout();
+    });
     this.resizeObserver.observe(host);
   }
 
@@ -280,17 +285,25 @@ export class BoardView {
     Ticker.system.autoStart = false;
     Ticker.system.stop();
     const app = new Application();
+    const fitted = {
+      width: host.clientWidth,
+      height: host.clientHeight,
+      resolution: window.devicePixelRatio || 1,
+    };
     await app.init({
       // Global move events hit-test every cell on each pointer move.
       eventFeatures: { globalMove: false },
-      resizeTo: host,
+      // Not `resizeTo`, which reallocates the canvas on every resize event of
+      // a drag. The board sizes it once a resize settles, in `fitRenderer`.
+      ...fitted,
       antialias: true,
       backgroundAlpha: 0,
-      resolution: window.devicePixelRatio || 1,
       autoDensity: true,
     });
     host.appendChild(app.canvas);
-    return new BoardView(app, host, theme, handlers);
+    const view = new BoardView(app, host, theme, handlers);
+    view.fitted = fitted;
+    return view;
   }
 
   destroy(): void {
@@ -322,9 +335,39 @@ export class BoardView {
   private readonly onResolutionChange = () => {
     this.watchResolution();
     const { clientWidth: width, clientHeight: height } = this.host;
-    this.app.renderer.resize(width, height, window.devicePixelRatio || 1);
+    this.fitRenderer(width, height);
     this.rebuild();
   };
+
+  /**
+   * Sizes the canvas to the host at the display's pixel density. Pixi's
+   * `autoDensity` then sets the canvas's CSS size to match, which undoes
+   * `stretchCanvas`.
+   */
+  private fitRenderer(width: number, height: number): void {
+    const resolution = window.devicePixelRatio || 1;
+    const { fitted } = this;
+    if (fitted.width !== width || fitted.height !== height || fitted.resolution !== resolution) {
+      this.fitted = { width, height, resolution };
+      this.app.renderer.resize(width, height, resolution);
+      // A resized canvas starts blank.
+      this.wake();
+    } else {
+      const { style } = this.app.canvas;
+      style.width = `${width}px`;
+      style.height = `${height}px`;
+    }
+  }
+
+  /**
+   * Scales the last frame to fit the host while a resize goes on, so the
+   * board stays whole and centered until `fitRenderer` draws it sharp again.
+   */
+  private stretchCanvas(): void {
+    const { style } = this.app.canvas;
+    style.width = "100%";
+    style.height = "100%";
+  }
 
   setTheme(theme: BoardTheme): void {
     this.theme = theme;
@@ -584,6 +627,7 @@ export class BoardView {
       const { clientWidth: width, clientHeight: height } = this.host;
       const same = width === this.laidOutSize.width && height === this.laidOutSize.height;
       if (this.snapshot && !same) this.rebuild();
+      else this.fitRenderer(width, height);
     }, 60);
   }
 
@@ -628,6 +672,7 @@ export class BoardView {
     for (const group of groups) group.destroy({ children: true });
 
     const { clientWidth: width, clientHeight: height } = this.host;
+    this.fitRenderer(width, height);
     this.laidOutSize = { width, height };
     const scale = this.layout(snapshot, width, height);
     const gap = this.theme.gap;
